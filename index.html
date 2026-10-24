@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>منصة امتحانات الأحياء</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--ink:#17302c;--muted:#5f7a75;--brand:#0f766e;--brand-d:#0b5a54;--line:#dbe6e3;--bad:#b42318;--ok:#067647;--warn:#b54708}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',Tahoma,sans-serif;line-height:1.7}
+a{color:var(--brand)}
+.wrap{max-width:820px;margin:0 auto;padding:16px}
+.narrow{max-width:460px;padding-top:36px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+h1{font-size:1.5rem;margin:.3em 0}
+h2{font-size:1.2rem;margin:.3em 0}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input[type=text],input[type=password],input[type=email],input[type=number],textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:inherit}
+input:focus,textarea:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(--brand);flex:none;margin:0}
+.btn{display:inline-block;background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
+.btn:hover{background:var(--brand-d)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.ghost{background:#fff;color:var(--brand)}
+.btn.danger{background:#fff;color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:5px 12px;font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}
+.foot{text-align:center;margin-top:20px;font-size:.9rem}
+.msg{padding:10px 12px;border-radius:10px;margin:10px 0}
+.msg.bad{background:#fef3f2;color:var(--bad)}
+.msg.ok{background:#ecfdf3;color:var(--ok)}
+.bar{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bar a{color:#fff}
+.bar .btn.ghost{background:transparent;color:#fff;border-color:#fff}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:1.25rem;direction:ltr}
+.timer.low{color:#fecdca}
+.qh{font-weight:700;margin-bottom:8px}
+.qn{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;border-radius:13px;background:#d7f0ec;color:var(--brand-d);margin-inline-end:8px;font-size:.9rem}
+.q img{max-width:100%;border-radius:10px;border:1px solid var(--line);margin:6px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;font-weight:400}
+.opt:has(input:checked){border-color:var(--brand);background:#ecfdf9}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+.code{font-family:monospace;font-size:1.3rem;letter-spacing:2px;direction:ltr;display:inline-block;background:#eef6f4;padding:2px 10px;border-radius:8px}
+.banner{background:#fffaeb;color:var(--warn);padding:6px 12px;text-align:center;font-size:.85rem}
+.stat{display:flex;gap:10px;flex-wrap:wrap}
+.stat div{flex:1;min-width:90px;background:#eef6f4;border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.4rem;color:var(--brand-d)}
+.big{font-size:3rem;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* ========= إعداد Firebase =========
+   سيبها null للتجربة المحلية (البيانات بتتحفظ في نفس المتصفح بس).
+   للتشغيل الحقيقي: الصق إعدادات مشروعك مكان null، مثال:
+   const FIREBASE_CONFIG = { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." };
+*/
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAc3rf1l1pi-a2WCr6UPIg-SGh_38sUuzs",
+  authDomain: "biology-a9e07.firebaseapp.com",
+  projectId: "biology-a9e07",
+  storageBucket: "biology-a9e07.firebasestorage.app",
+  messagingSenderId: "944680956494",
+  appId: "1:944680956494:web:258706f6d7408aec4d491f"
+};
+const DEMO = !FIREBASE_CONFIG;
+
+/* ========= أدوات =========*/
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/-/g, '').slice(0, 16);
+const genCode = () => { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 5; i++) s += a[Math.floor(Math.random() * a.length)]; return s; };
+const pad = n => String(n).padStart(2, '0');
+const fmtDate = ms => new Date(ms).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+
+const mem = {};
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { delete mem[k]; } }
+};
+
+function hashStr(s) { let h = 1779033703 ^ s.length; for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; } return h >>> 0; }
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffled(arr, r) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function compress(file, maxW = 720, quality = 0.65) {
+  return new Promise((res, rej) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, maxW / img.width), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      res(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => rej(new Error('الصورة غير صالحة'));
+    img.src = u;
+  });
+}
+
+/* ========= التخزين: وضع تجريبي محلي =========*/
+const DemoStore = {
+  db() { const v = ls.get('examdemo'); return v ? JSON.parse(v) : { exams: {}, keys: {}, attempts: {}, results: {} }; },
+  save(d) { ls.set('examdemo', JSON.stringify(d)); },
+  isTeacher() { return !!ls.get('demoTeacher'); },
+  async login(_e, pw) { if (pw === '1234') { ls.set('demoTeacher', '1'); return true; } return false; },
+  async logout() { ls.del('demoTeacher'); },
+  async listExams() { return Object.values(this.db().exams).sort((a, b) => b.createdAt - a.createdAt); },
+  async examByCode(code) { return Object.values(this.db().exams).find(e => e.code === code && e.active) || null; },
+  async saveExam(exam, key) { const d = this.db(); d.exams[exam.id] = exam; d.keys[exam.id] = key; this.save(d); },
+  async setActive(id, a) { const d = this.db(); if (d.exams[id]) d.exams[id].active = a; this.save(d); },
+  async getKey(id) { return this.db().keys[id] || null; },
+  async deleteExam(id) { const d = this.db(); delete d.exams[id]; delete d.keys[id]; this.save(d); },
+  async getAttempt(id) { return this.db().attempts[id] || null; },
+  async createAttempt(id, data) { const d = this.db(); d.attempts[id] = { ...data, submitted: false, startedAt: Date.now() }; this.save(d); return d.attempts[id]; },
+  async markSubmitted(id) { const d = this.db(); if (d.attempts[id]) d.attempts[id].submitted = true; this.save(d); },
+  async saveResult(r) { const d = this.db(); d.results[r.id] = r; this.save(d); },
+  async listResults(examId) { return Object.values(this.db().results).filter(r => r.examId === examId); },
+  async deleteResult(id) { const d = this.db(); delete d.results[id]; delete d.attempts[id]; this.save(d); }
+};
+
+/* ========= التخزين: Firebase (مجاني) =========*/
+const FB = {
+  async init() {
+    const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    for (const f of ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js']) {
+      await new Promise((res, rej) => { const s = document.createElement('script'); s.src = base + f; s.onload = res; s.onerror = () => rej(new Error('تعذر تحميل Firebase، اتأكد من النت')); document.head.appendChild(s); });
+    }
+    firebase.initializeApp(FIREBASE_CONFIG);
+    this.db = firebase.firestore(); this.auth = firebase.auth();
+    await new Promise(r => { const u = this.auth.onAuthStateChanged(() => { u(); r(); }); });
+  },
+  isTeacher() { return !!this.auth.currentUser; },
+  async login(email, pw) { try { await this.auth.signInWithEmailAndPassword(email, pw); return true; } catch (e) { return false; } },
+  async logout() { await this.auth.signOut(); },
+  async listExams() { const s = await this.db.collection('exams').orderBy('createdAt', 'desc').get(); return s.docs.map(d => d.data()); },
+  async examByCode(code) { const s = await this.db.collection('exams').where('code', '==', code).where('active', '==', true).limit(1).get(); return s.empty ? null : s.docs[0].data(); },
+  async saveExam(exam, key) { const b = this.db.batch(); b.set(this.db.collection('exams').doc(exam.id), exam); b.set(this.db.collection('keys').doc(exam.id), key); await b.commit(); },
+  setActive(id, a) { return this.db.collection('exams').doc(id).update({ active: a }); },
+  async getKey(id) { const d = await this.db.collection('keys').doc(id).get(); return d.exists ? d.data() : null; },
+  async deleteExam(id) { await this.db.collection('exams').doc(id).delete(); await this.db.collection('keys').doc(id).delete(); },
+  async getAttempt(id) {
+    const d = await this.db.collection('attempts').doc(id).get(); if (!d.exists) return null;
+    const x = d.data(); return { ...x, startedAt: x.startedAt && x.startedAt.toMillis ? x.startedAt.toMillis() : Date.now() };
+  },
+  async createAttempt(id, data) { await this.db.collection('attempts').doc(id).set({ ...data, submitted: false, startedAt: firebase.firestore.FieldValue.serverTimestamp() }); return this.getAttempt(id); },
+  async markSubmitted(id) { await this.db.collection('attempts').doc(id).update({ submitted: true }); },
+  async saveResult(r) { await this.db.collection('results').doc(r.id).set(r); },
+  async listResults(examId) { const s = await this.db.collection('results').where('examId', '==', examId).get(); return s.docs.map(d => d.data()); },
+  async deleteResult(id) { await this.db.collection('results').doc(id).delete(); await this.db.collection('attempts').doc(id).delete(); }
+};
+
+/* ========= الواجهة العامة =========*/
+const S = { store: DEMO ? DemoStore : FB, timer: null };
+const loadingHtml = '<div class="wrap"><p class="muted">جاري التحميل...</p></div>';
+const setMsg = (t, cls = 'bad') => { const m = $('#msg'); if (m) m.innerHTML = t ? `<div class="msg ${cls}">${esc(t)}</div>` : ''; };
+
+function view(html) {
+  $('#app').innerHTML = (DEMO ? '<div class="banner">وضع تجريبي: البيانات محفوظة في المتصفح ده بس</div>' : '') + html;
+  const o = $('#out');
+  if (o) o.onclick = async () => { await S.store.logout(); location.hash = '#teacher'; router(); };
+}
+const hdr = t => `<div class="bar"><b>🧬 ${esc(t)}</b><span class="row"><a href="#teacher">الرئيسية</a><button class="btn sm ghost" id="out">خروج</button></span></div>`;
+
+function router() {
+  clearInterval(S.timer);
+  const parts = location.hash.replace(/^#\/?/, '').split('/');
+  if (parts[0] === 'teacher') teacherRoute(parts); else studentHome();
+}
+
+/* ========= واجهة الطالب =========*/
+function studentHome() {
+  view(`<div class="wrap narrow"><div class="big">🧬</div><h1 style="text-align:center">امتحانات الأحياء</h1>
+  <p class="muted" style="text-align:center">اكتب اسمك ثلاثي وكود الامتحان اللي المدرس إداهولك.</p>
+  <div class="card"><label for="nm">الاسم</label><input type="text" id="nm" autocomplete="name">
+  <label for="cd">كود الامتحان</label><input type="text" id="cd" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase">
+  <div id="msg"></div><button class="btn" id="go" style="width:100%;margin-top:12px">ابدأ الامتحان</button></div>
+  <p class="foot"><a href="#teacher">دخول المدرس</a></p></div>`);
+  $('#go').onclick = startFlow;
+  $('#cd').onkeydown = e => { if (e.key === 'Enter') startFlow(); };
+}
+
+const draftKey = aid => 'draft_' + aid;
+function loadDraft(aid, n) { try { const a = JSON.parse(ls.get(draftKey(aid))); if (Array.isArray(a) && a.length === n) return a; } catch (e) {} return Array(n).fill(-1); }
+const saveDraft = (aid, a) => ls.set(draftKey(aid), JSON.stringify(a));
+
+async function startFlow() {
+  const name = $('#nm').value.trim().replace(/\s+/g, ' '), code = $('#cd').value.trim().toUpperCase();
+  if (name.length < 3 || !code) return setMsg('اكتب الاسم والكود');
+  const btn = $('#go'); btn.disabled = true; btn.textContent = 'جاري التحميل...'; setMsg('');
+  try {
+    const exam = await S.store.examByCode(code);
+    if (!exam) throw new Error('الكود غلط أو الامتحان مقفول دلوقتي');
+    const aid = exam.id + '_' + encodeURIComponent(name.toLowerCase());
+    let att = await S.store.getAttempt(aid);
+    if (att && att.submitted) throw new Error('انت سلّمت الامتحان ده قبل كده.');
+    if (!att) att = await S.store.createAttempt(aid, { examId: exam.id, name });
+    const left = exam.durationMin * 60 - Math.floor((Date.now() - att.startedAt) / 1000);
+    if (left <= 0) { await submitAnswers(exam, aid, name, loadDraft(aid, exam.questions.length)); return doneScreen(true); }
+    runExam(exam, aid, name, att.startedAt);
+  } catch (e) { setMsg(e.message); btn.disabled = false; btn.textContent = 'ابدأ الامتحان'; }
+}
+
+async function submitAnswers(exam, aid, name, answers) {
+  try { await S.store.saveResult({ id: aid, examId: exam.id, examTitle: exam.title, name, answers, submittedAt: Date.now() }); }
+  catch (e) { if (!(e && e.code === 'permission-denied')) throw e; }
+  try { await S.store.markSubmitted(aid); } catch (e) {}
+  ls.del(draftKey(aid));
+}
+
+function runExam(exam, aid, name, startedAt) {
+  const r = rng(hashStr(aid)), idx = n => Array.from({ length: n }, (_, k) => k);
+  let qs = exam.questions.map((q, i) => ({ q, i }));
+  if (exam.shuffle) qs = shuffled(qs, r);
+  qs.forEach(o => { o.order = exam.shuffle ? shuffled(idx(o.q.options.length), r) : idx(o.q.options.length); });
+  const ans = loadDraft(aid, exam.questions.length);
+  view(`<div class="bar"><b>${esc(exam.title)}</b><span class="timer" id="tm">--:--</span></div>
+  <div class="wrap" id="ex"><p class="muted">${esc(name)} · <span id="cnt"></span></p>
+  ${qs.map((o, p) => `<div class="card q"><div class="qh"><span class="qn">${p + 1}</span>${esc(o.q.text)}</div>
+    ${o.q.image ? `<img src="${esc(o.q.image)}" alt="">` : ''}
+    ${o.order.map(k => `<label class="opt"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(o.q.options[k])}</span></label>`).join('')}</div>`).join('')}
+  <div id="msg"></div><button class="btn" id="fin" style="width:100%;margin:12px 0 40px">تسليم الإجابات</button></div>`);
+  const count = () => { $('#cnt').textContent = `اتجاوب ${ans.filter(a => a >= 0).length} من ${ans.length}`; };
+  count();
+  $('#ex').onchange = e => { const t = e.target; if (t.type === 'radio') { ans[+t.dataset.i] = +t.value; saveDraft(aid, ans); count(); } };
+  let busy = false;
+  const finish = async auto => {
+    busy = true; const b = $('#fin'); b.disabled = true; setMsg('');
+    try { await submitAnswers(exam, aid, name, ans); clearInterval(S.timer); doneScreen(auto); }
+    catch (e) { busy = false; b.disabled = false; setMsg('تعذر الإرسال، اتأكد من النت وإضغط تسليم تاني. إجاباتك محفوظة.'); }
+  };
+  const tick = () => {
+    const left = exam.durationMin * 60 - Math.floor((Date.now() - startedAt) / 1000), l = Math.max(0, left), tm = $('#tm');
+    if (!tm) return;
+    tm.textContent = pad(Math.floor(l / 60)) + ':' + pad(l % 60); tm.classList.toggle('low', l <= 60);
+    if (left <= 0 && !busy) finish(true);
+  };
+  S.timer = setInterval(tick, 1000); tick();
+  $('#fin').onclick = () => {
+    const un = ans.filter(a => a < 0).length;
+    if (!confirm(un ? `لسه ${un} سؤال من غير إجابة. تسلّم برضه؟` : 'تسليم الإجابات؟')) return;
+    finish(false);
+  };
+}
+
+function doneScreen(timeUp) {
+  view(`<div class="wrap narrow"><div class="big">✅</div><h1 style="text-align:center">${timeUp ? 'الوقت خلص وإجاباتك اتسلمت' : 'تم تسليم إجاباتك'}</h1>
+  <p class="muted" style="text-align:center">المدرس هيعلن النتيجة. تقدر تقفل الصفحة.</p><p class="foot"><a href="#">رجوع</a></p></div>`);
+}
+
+/* ========= واجهة المدرس =========*/
+async function teacherRoute(p) {
+  if (!S.store.isTeacher()) return teacherLogin();
+  try {
+    if (!p[1]) return await dashboard();
+    if (p[1] === 'new') return await editor(null);
+    if (p[1] === 'edit') return await editor(p[2]);
+    if (p[1] === 'results') return await results(p[2]);
+    await dashboard();
+  } catch (e) { view(hdr('خطأ') + `<div class="wrap"><div class="msg bad">${esc(e.message)}</div></div>`); }
+}
+
+function teacherLogin() {
+  view(`<div class="wrap narrow"><h1>دخول المدرس</h1><div class="card">
+  ${DEMO ? '' : '<label for="em">الإيميل</label><input type="email" id="em" dir="ltr">'}
+  <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><input type="password" id="pw" dir="ltr">
+  <div id="msg"></div><button class="btn" id="lg" style="width:100%;margin-top:12px">دخول</button></div>
+  <p class="foot"><a href="#">صفحة الطلاب</a></p></div>`);
+  const go = async () => {
+    const ok = await S.store.login(DEMO ? '' : $('#em').value.trim(), $('#pw').value);
+    if (!ok) return setMsg('بيانات الدخول غلط');
+    router();
+  };
+  $('#lg').onclick = go; $('#pw').onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+
+async function dashboard() {
+  view(hdr('لوحة المدرس') + loadingHtml);
+  const exams = await S.store.listExams(), link = location.href.split('#')[0];
+  view(`${hdr('لوحة المدرس')}<div class="wrap" id="dash">
+  <div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
+  <div class="card"><b>رابط الطلاب:</b> <span class="code" style="font-size:.85rem;letter-spacing:0;word-break:break-all">${esc(link)}</span> <button class="btn sm ghost" id="cp">نسخ</button></div>
+  ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${e.questions.length} سؤال · ${e.durationMin} دقيقة</div></div><span class="code">${esc(e.code)}</span></div>
+  <div class="row" style="margin-top:10px"><label class="row" style="margin:0"><input type="checkbox" data-act="active" data-id="${e.id}" ${e.active ? 'checked' : ''}> مفتوح للطلاب</label><span class="grow"></span>
+  <a class="btn sm" href="#teacher/results/${e.id}">النتائج</a><a class="btn sm ghost" href="#teacher/edit/${e.id}">تعديل</a><button class="btn sm danger" data-act="del" data-id="${e.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش امتحانات. اضغط "امتحان جديد".</div>'}</div>`);
+  $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = 'تم'; } catch (e) { prompt('انسخ الرابط:', link); } };
+  const root = $('#dash');
+  root.onchange = async e => { const t = e.target; if (t.dataset.act === 'active') { try { await S.store.setActive(t.dataset.id, t.checked); } catch (er) { t.checked = !t.checked; alert(er.message); } } };
+  root.onclick = async e => {
+    const b = e.target.closest('button[data-act="del"]'); if (!b) return;
+    if (!confirm('حذف الامتحان نهائيًا؟ (النتائج القديمة هتفضل في قاعدة البيانات)')) return;
+    await S.store.deleteExam(b.dataset.id); dashboard();
+  };
+}
+
+const newQ = () => ({ text: '', image: '', options: ['', '', '', ''], correct: 0 });
+
+async function editor(id) {
+  view(hdr('امتحان') + loadingHtml);
+  let ex;
+  if (id) {
+    const all = await S.store.listExams(), key = await S.store.getKey(id);
+    ex = all.find(e => e.id === id);
+    if (!ex || !key) throw new Error('مش لاقي الامتحان');
+    ex = JSON.parse(JSON.stringify(ex)); ex.questions.forEach((q, i) => { q.correct = key.answers[i] ?? 0; });
+  } else ex = { id: uid(), title: '', code: genCode(), durationMin: 30, shuffle: true, active: true, createdAt: Date.now(), questions: [newQ()] };
+  drawEditor(ex, !!id);
+}
+
+function qEditor(q, i) {
+  return `<div class="card"><div class="row"><b class="grow">سؤال ${i + 1}</b><button class="btn sm danger" data-act="delq" data-q="${i}">حذف السؤال</button></div>
+  <textarea rows="2" data-q="${i}" data-f="text" placeholder="نص السؤال">${esc(q.text)}</textarea>
+  ${q.image ? `<img src="${esc(q.image)}" alt="" style="max-width:240px;display:block;margin:8px 0"><button class="btn sm danger" data-act="rmimg" data-q="${i}">شيل الصورة</button>`
+    : `<label style="font-weight:400" class="muted">صورة (اختياري): <input type="file" accept="image/*" data-q="${i}" data-f="img"></label>`}
+  <div class="muted" style="margin-top:8px">حدد الإجابة الصحيحة بالدايرة</div>
+  ${q.options.map((o, k) => `<div class="row" style="margin:6px 0"><input type="radio" name="c${i}" data-q="${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}>
+    <input class="grow" type="text" data-q="${i}" data-o="${k}" value="${esc(o)}" placeholder="اختيار ${k + 1}">
+    ${q.options.length > 2 ? `<button class="btn sm danger" data-act="delo" data-q="${i}" data-o="${k}">×</button>` : ''}</div>`).join('')}
+  <button class="btn sm ghost" data-act="addo" data-q="${i}">+ اختيار</button></div>`;
+}
+
+function drawEditor(ex, isEdit) {
+  const y = window.scrollY;
+  view(`${hdr(isEdit ? 'تعديل الامتحان' : 'امتحان جديد')}<div class="wrap" id="ed">
+  <div class="card"><label>عنوان الامتحان</label><input type="text" data-k="title" value="${esc(ex.title)}">
+  <div class="row"><div class="grow"><label>كود الدخول</label><input type="text" dir="ltr" data-k="code" value="${esc(ex.code)}"></div>
+  <div class="grow"><label>المدة (بالدقايق)</label><input type="number" min="1" data-k="durationMin" value="${ex.durationMin}"></div></div>
+  <label class="row" style="font-weight:400"><input type="checkbox" data-k="shuffle" ${ex.shuffle ? 'checked' : ''}> ترتيب الأسئلة والاختيارات عشوائي لكل طالب</label>
+  <label class="row" style="font-weight:400"><input type="checkbox" data-k="active" ${ex.active ? 'checked' : ''}> مفتوح للطلاب</label></div>
+  ${ex.questions.map(qEditor).join('')}
+  <div class="row"><button class="btn ghost" data-act="addq">+ سؤال</button><span class="grow"></span><button class="btn" data-act="save">حفظ الامتحان</button></div><div id="msg"></div></div>`);
+  window.scrollTo(0, y);
+  const root = $('#ed'), redraw = () => drawEditor(ex, isEdit);
+  root.oninput = e => {
+    const t = e.target, d = t.dataset;
+    if (d.k) { if (t.type !== 'checkbox') ex[d.k] = t.type === 'number' ? Number(t.value) : t.value; }
+    else if (d.q !== undefined) { const q = ex.questions[+d.q]; if (d.o !== undefined) q.options[+d.o] = t.value; else if (d.f === 'text') q.text = t.value; }
+  };
+  root.onchange = async e => {
+    const t = e.target, d = t.dataset;
+    if (d.k && t.type === 'checkbox') ex[d.k] = t.checked;
+    else if (d.f === 'correct') ex.questions[+d.q].correct = +t.value;
+    else if (d.f === 'img' && t.files[0]) { try { ex.questions[+d.q].image = await compress(t.files[0]); redraw(); } catch (er) { setMsg(er.message); } }
+  };
+  root.onclick = async e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const d = b.dataset, a = d.act, q = ex.questions[+d.q];
+    if (a === 'addq') { ex.questions.push(newQ()); redraw(); window.scrollTo(0, document.body.scrollHeight); }
+    else if (a === 'delq') { if (ex.questions.length > 1 && confirm('حذف السؤال؟')) { ex.questions.splice(+d.q, 1); redraw(); } }
+    else if (a === 'addo') { q.options.push(''); redraw(); }
+    else if (a === 'delo') { q.options.splice(+d.o, 1); if (q.correct === +d.o) q.correct = 0; else if (q.correct > +d.o) q.correct--; redraw(); }
+    else if (a === 'rmimg') { q.image = ''; redraw(); }
+    else if (a === 'save') await saveEditor(ex, b);
+  };
+}
+
+async function saveEditor(ex, btn) {
+  const err = m => { setMsg(m); };
+  if (!ex.title.trim()) return err('اكتب عنوان الامتحان');
+  const code = ex.code.trim().toUpperCase().replace(/\s+/g, '');
+  if (code.length < 3) return err('الكود لازم يكون 3 حروف أو أرقام على الأقل');
+  if (!(ex.durationMin >= 1)) return err('المدة لازم تكون دقيقة على الأقل');
+  for (const [i, q] of ex.questions.entries()) {
+    if (!q.text.trim()) return err(`سؤال ${i + 1}: اكتب نص السؤال`);
+    if (q.options.some(o => !o.trim())) return err(`سؤال ${i + 1}: فيه اختيار فاضي (املاه أو احذفه)`);
+  }
+  const exam = { id: ex.id, title: ex.title.trim(), code, durationMin: Math.round(ex.durationMin), shuffle: !!ex.shuffle, active: !!ex.active, createdAt: ex.createdAt,
+    questions: ex.questions.map(q => ({ text: q.text.trim(), image: q.image || '', options: q.options.map(o => o.trim()) })) };
+  const key = { answers: ex.questions.map(q => q.correct) };
+  if (new Blob([JSON.stringify(exam)]).size > 800000) return err('حجم الامتحان كبير (غالبًا من الصور). قلل الصور أو الأسئلة.');
+  btn.disabled = true; setMsg('');
+  try {
+    const all = await S.store.listExams();
+    if (all.some(e => e.code === code && e.id !== exam.id)) throw new Error('الكود ده مستخدم في امتحان تاني');
+    await S.store.saveExam(exam, key); location.hash = '#teacher'; router();
+  } catch (e) { btn.disabled = false; setMsg(e.message); }
+}
+
+async function results(id) {
+  view(hdr('النتائج') + loadingHtml);
+  const [exams, key, rs] = await Promise.all([S.store.listExams(), S.store.getKey(id), S.store.listResults(id)]);
+  const ex = exams.find(e => e.id === id);
+  if (!ex || !key) throw new Error('مش لاقي الامتحان');
+  const total = ex.questions.length, pct = s => total ? Math.round(s / total * 100) : 0;
+  const rows = rs.map(r => ({ ...r, score: r.answers.reduce((s, a, i) => s + (a === key.answers[i] ? 1 : 0), 0) }))
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ar'));
+  const avg = rows.length ? Math.round(rows.reduce((s, r) => s + pct(r.score), 0) / rows.length) : 0;
+  view(`${hdr('النتائج')}<div class="wrap" id="rs"><h2>${esc(ex.title)}</h2>
+  <div class="stat"><div><b>${rows.length}</b>سلّموا</div><div><b>${avg}%</b>المتوسط</div><div><b>${rows.length ? pct(rows[0].score) + '%' : '-'}</b>الأعلى</div><div><b>${rows.length ? pct(rows[rows.length - 1].score) + '%' : '-'}</b>الأقل</div></div>
+  <div class="card"><div class="row"><b class="grow">الدرجات</b><button class="btn sm" id="csv" ${rows.length ? '' : 'disabled'}>تصدير Excel/CSV</button></div>
+  ${rows.length ? `<div class="tbl"><table><tr><th>#</th><th>الاسم</th><th>الدرجة</th><th>%</th><th>وقت التسليم</th><th></th></tr>
+  ${rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td>${r.score}/${total}</td><td>${pct(r.score)}%</td><td>${fmtDate(r.submittedAt)}</td><td><button class="btn sm danger" data-id="${esc(r.id)}" data-n="${esc(r.name)}">إعادة</button></td></tr>`).join('')}</table></div>
+  <p class="muted" style="font-size:.85rem">زر "إعادة" بيمسح نتيجة الطالب وبيسمحله يمتحن تاني.</p>` : '<p class="muted">لسه محدش سلّم.</p>'}</div>
+  ${rows.length ? `<div class="card"><b>نسبة الإجابة الصحيحة لكل سؤال</b>${ex.questions.map((q, i) => { const ok = rows.filter(r => r.answers[i] === key.answers[i]).length; return `<div class="row" style="margin-top:6px"><span class="muted grow">${i + 1}. ${esc(q.text.slice(0, 70))}</span><b>${Math.round(ok / rows.length * 100)}%</b></div>`; }).join('')}</div>` : ''}</div>`);
+  const csv = $('#csv');
+  if (csv) csv.onclick = () => {
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [['الاسم', 'الدرجة', 'من', 'النسبة', 'وقت التسليم'].map(q).join(',')]
+      .concat(rows.map(r => [r.name, r.score, total, pct(r.score) + '%', fmtDate(r.submittedAt)].map(q).join(',')));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'results.csv'; a.click();
+  };
+  $('#rs').onclick = async e => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    if (!confirm(`مسح نتيجة "${b.dataset.n}" والسماح له يمتحن تاني؟`)) return;
+    await S.store.deleteResult(b.dataset.id); results(id);
+  };
+}
+
+/* ========= تشغيل =========*/
+(async function boot() {
+  try { if (!DEMO) await FB.init(); }
+  catch (e) { view(`<div class="wrap narrow"><div class="msg bad">${esc(e.message)}</div></div>`); return; }
+  if (DEMO && !(await DemoStore.listExams()).length) {
+    await DemoStore.saveExam({ id: 'demo1', title: 'امتحان تجريبي - أحياء', code: 'BIO1', durationMin: 5, shuffle: true, active: true, createdAt: Date.now(), questions: [
+      { text: 'أي عضية مسؤولة عن إنتاج الطاقة (ATP) في الخلية؟', image: '', options: ['الميتوكوندريا', 'الريبوسوم', 'جهاز جولجي', 'الليسوسوم'] },
+      { text: 'الشريط المكمل للشريط AATGC في جزيء DNA هو:', image: '', options: ['TTACG', 'UUACG', 'CCGTA', 'AATGC'] },
+      { text: 'في أي طور من الانقسام الميتوزي تصطف الكروموسومات على خط الاستواء؟', image: '', options: ['الطور التمهيدي', 'الطور الاستوائي', 'الطور الانفصالي', 'الطور النهائي'] }
+    ] }, { answers: [0, 0, 1] });
+  }
+  window.addEventListener('hashchange', router);
+  router();
+})();
+</script>
+</body>
+</html>
