@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%230f766e'/%3E%3Cpath d='M24 11 7 20l17 9 17-9z' fill='%23fff'/%3E%3Cpath d='M14 26v6c0 2.5 4.5 5.5 10 5.5S34 34.5 34 32v-6l-10 5z' fill='%23fff' opacity='.8'/%3E%3C/svg%3E">
 <title>منصة د. أحمد الشرقاوي</title>
 <script>try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}</script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -108,6 +109,21 @@ pre{background:var(--soft);border-radius:12px;padding:8px;margin:6px 0;white-spa
 .zoomov{position:fixed;inset:0;z-index:900;background:#000d;overflow:auto;padding:48px 8px 16px}
 .zoomov img{width:300%;max-width:none;background:#fff;display:block}
 .zoomov button{position:fixed;top:10px;inset-inline-start:10px;z-index:901}
+/* تحميل هادئ (من غير نص) */
+.ldh{min-height:60vh}
+.ldh::before{content:'';position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:ldm 1s linear infinite}
+@keyframes ldm{from{background-position:-40% 0}to{background-position:140% 0}}
+.logo svg{display:block;color:var(--accent)}
+.biglogo svg{width:60px;height:60px;color:#fff;display:inline-block}
+.pwrap{position:relative}.pwrap input{padding-inline-end:48px}
+.eye{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:1.25rem;cursor:pointer;color:var(--muted);padding:6px}
+.hint{margin:6px 0}.hint summary{cursor:pointer;color:var(--muted);font-size:.85rem;list-style:none}
+.hint summary::-webkit-details-marker{display:none}.hint[open] summary{margin-bottom:2px}.hint p{margin:2px 0 0!important}
+.dot{display:inline-block;min-width:9px;height:9px;border-radius:50%;background:#e03131;vertical-align:middle}
+.nav a{position:relative}.nav a .dot{position:absolute;top:6px;inset-inline-end:calc(50% - 22px);border:2px solid var(--card);box-sizing:content-box}
+.newb{background:#e03131;color:#fff;border-radius:999px;font-size:.72rem;padding:1px 8px;font-weight:700}
+.part{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
+label.row{flex-wrap:nowrap;align-items:flex-start}label.row>input[type=checkbox],label.row>input[type=radio]{flex:none;margin-top:5px}
 /* الترتيب */
 .rk{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;margin:8px 0;background:var(--card)}
 .rk .medal{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;border:2px solid var(--c);flex:none}
@@ -122,19 +138,19 @@ pre{background:var(--soft);border-radius:12px;padding:8px;margin:6px 0;white-spa
 /* أمان الامتحان */
 .noselect,.noselect *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .noselect img{-webkit-user-drag:none}
-#wm{position:fixed;inset:0;z-index:1000;pointer-events:none;background-repeat:repeat}
 #cover{position:fixed;inset:0;z-index:950;background:var(--bg);display:none;place-items:center;text-align:center;padding:24px}
 #cover.on{display:grid}
 @media print{#app,.ov{display:none!important}body::before{content:'الطباعة غير متاحة';display:block;padding:40px;font-size:2rem}}
 /* ورقة الإجابة (بابل شيت) */
 .pgs img{width:100%;display:block;margin:0 auto 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
 .sheetbtn{position:fixed;bottom:16px;inset-inline-start:16px;z-index:36;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:12px 20px}
-.sheet{position:fixed;left:0;right:0;bottom:0;height:52vh;z-index:35;background:var(--card);border-top:2px solid var(--line);overflow:auto;padding:8px 14px 20px;box-shadow:0 -8px 30px rgba(0,0,0,.25);transform:translateY(105%);transition:transform .2s}
+.sheet{position:fixed;left:0;right:0;bottom:0;height:52vh;z-index:35;background:var(--card);border-top:2px solid var(--line);overflow:auto;padding:8px 14px 100px;box-shadow:0 -8px 30px rgba(0,0,0,.25);transform:translateY(105%);transition:transform .2s}
 .sheet.open{transform:none}
 .sheet .sh{position:sticky;top:-8px;background:var(--card);padding:6px 0;margin-top:-8px;z-index:1}
 .brow{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line)}
 .brow>b{min-width:34px;text-align:center;color:var(--muted)}
 .brow.done>b{color:var(--ok)}
+.brow.bw{flex-wrap:wrap}.brow.bw>b{min-width:52px}
 body.sheet-open .pb2{padding-bottom:56vh}
 .imgchoice{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}
 .thumb{max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block;margin:6px 0}
@@ -167,9 +183,16 @@ const pad = n => String(n).padStart(2, '0');
 const fmtDate = ms => new Date(ms).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
 const fmtSec = s => s >= 60 ? Math.floor(s / 60) + ' د ' + (s % 60 ? (s % 60) + ' ث' : '') : s + ' ث';
 const STU_ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const genStuCode = () => { let s = ''; for (let i = 0; i < 6; i++) s += STU_ALPHA[Math.floor(Math.random() * STU_ALPHA.length)]; return s; };
+/* توليد كود الطالب: type = mix | num | alpha ، case = upper | lower */
+function genStuCode(o = {}) {
+  const lo = o.case === 'lower', L = lo ? 'abcdefghjkmnpqrstuvwxyz' : 'ABCDEFGHJKMNPQRSTUVWXYZ', D = o.type === 'num' ? '0123456789' : '23456789';
+  const pool = o.type === 'num' ? D : o.type === 'alpha' ? L : L + D, n = Math.min(12, Math.max(4, +o.len || 6));
+  const buf = new Uint32Array(n); (crypto.getRandomValues ? crypto.getRandomValues(buf) : buf.forEach((_, i) => { buf[i] = Math.floor(Math.random() * 4e9); }));
+  return Array.from(buf, v => pool[v % pool.length]).join('');
+}
 const readDataUrl = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error('تعذر قراءة الملف')); r.readAsDataURL(f); });
-const loadingInner = '<p class="muted">جاري التحميل...</p>';
+const loadingInner = '<div class="ldh"></div>';
+const LOGO = '<svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path d="M24 8 3 19l21 11 21-11z" fill="currentColor"/><path d="M11 25v8c0 3 6 7 13 7s13-4 13-7v-8l-13 7z" fill="currentColor" opacity=".75"/><path d="M43 20v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
 const setMsg = (t, cls = 'bad') => { const m = $('#msg'); if (m) m.innerHTML = t ? `<div class="msg ${cls}">${esc(t)}</div>` : ''; };
 const go = h => { if (location.hash === h) router(); else location.hash = h; };
 const toAscii = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
@@ -202,11 +225,11 @@ function compress(file, maxW = 900, quality = 0.75) {
 }
 
 /* نافذة تأكيد داخل الصفحة (بدل confirm اللي بتخلي الصفحة تفقد التركيز أثناء الامتحان) */
-const modal = ({ title = '', text = '', html = '', ok = 'تأكيد', cancel = 'إلغاء' }) => new Promise(res => {
+const modal = ({ title = '', text = '', html = '', ok = 'تأكيد', cancel = 'إلغاء', read = null }) => new Promise(res => {
   const o = document.createElement('div'); o.className = 'ov';
   o.innerHTML = `<div class="dlg" role="dialog" aria-modal="true">${title ? `<h2 style="margin-top:0">${esc(title)}</h2>` : ''}<div>${html || esc(text)}</div>
   <div class="row" style="margin-top:14px;justify-content:flex-end">${cancel ? `<button class="btn ghost" data-r="0">${esc(cancel)}</button>` : ''}<button class="btn" data-r="1">${esc(ok)}</button></div></div>`;
-  o.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; o.remove(); res(b.dataset.r === '1'); };
+  o.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; const yes = b.dataset.r === '1', v = yes && read ? read(o) : yes; o.remove(); res(v); };
   document.body.appendChild(o); o.querySelector('[data-r="1"]').focus();
 });
 function zoomImg(src) {
@@ -247,6 +270,14 @@ const topicBars = list => list.map(x => {
   const p = Math.round(x.c / x.t * 100), col = p < 50 ? 'var(--bad)' : p < 75 ? 'var(--warn)' : 'var(--ok)';
   return `<div style="margin:10px 0"><div class="row"><span class="grow">${esc(x.topic)}</span><b style="color:${col}">${p}%</b><span class="muted" style="font-size:.8rem">(${x.c}/${x.t})</span></div><div class="meter"><i style="width:${p}%;background:${col}"></i></div></div>`;
 }).join('');
+/* ترقيم الأسئلة: السؤال اللي له أجزاء (cont) بيتحسب رقم واحد وأجزاؤه (١) (٢) ... */
+function qNums(qs) {
+  let n = 0, p = 0;
+  const out = qs.map(q => { if (q.cont && n && !isEssay(q)) { p++; return { n, p }; } n++; p = 1; return { n, p }; });
+  out.forEach((o, i) => { o.multi = o.p > 1 || !!(out[i + 1] && out[i + 1].n === o.n); });
+  return out;
+}
+const partLbl = o => o.multi ? o.n + ' (' + o.p + ')' : String(o.n);
 /* ===== الدرجات: لكل سؤال درجة (الافتراضي 1)، والمقالي بيتصحح يدويًا ===== */
 const isEssay = q => !!q && q.type === 'essay';
 const qPts = q => (q && +q.pts > 0) ? +q.pts : 1;
@@ -260,15 +291,15 @@ function scoreOf(questions, answers, keyAns, grades) {
   });
   return { mcq, mcqT, es, esT, total: mcqT + esT, score: mcq + es, pending };
 }
-/* مستند النتيجة اللي الطالب بيشوفها (بيتكتب بواسطة المدرس أو بواسطة الطالب نفسه في النتيجة الفورية) */
+/* مستند النتيجة اللي الطالب بيشوفها (بيتكتب بواسطة الدكتور أو بواسطة الطالب نفسه في النتيجة الفورية) */
 function pubDoc(ex, r, keyAns, sc, show, now) {
   const qs = ex.questions;
   return { code: r.studentCode, examId: ex.id, examTitle: ex.title, subject: subjOf(ex), name: r.name,
     score: sc.pending ? sc.mcq : sc.score, total: sc.pending ? sc.mcqT : sc.total, pending: sc.pending, mcqScore: sc.mcq, mcqTotal: sc.mcqT, essayScore: sc.es, essayTotal: sc.esT,
     publishedAt: now, byTopic: byTopic(qs, r.answers, keyAns),
     items: show ? qs.map((q, i) => isEssay(q)
-      ? { essay: true, text: q.text, pts: qPts(q), got: (r.grades && typeof r.grades[i] === 'number') ? Math.min(qPts(q), r.grades[i]) : null }
-      : { text: q.text || '', options: q.options, chosen: r.answers[i] ?? -1, correct: keyAns[i], topic: q.topic || '', pts: qPts(q), ...(q.letters ? { letters: true } : {}) }) : null };
+      ? { essay: true, text: q.text || 'سؤال مقالي', pts: qPts(q), got: (r.grades && typeof r.grades[i] === 'number') ? Math.min(qPts(q), r.grades[i]) : null }
+      : { text: q.text || '', options: q.options, chosen: r.answers[i] ?? -1, correct: keyAns[i], topic: q.topic || '', pts: qPts(q), ...(q.letters ? { letters: true } : {}), ...(q.cont ? { cont: true } : {}) }) : null };
 }
 /* ملخص الأبواب مقسوم حسب المادة. rows: [{subject, topics:[{topic,c,t}]}] */
 function topicsBySubject(rows) {
@@ -302,7 +333,7 @@ const chunkStr = (s, n = BLOB_CHARS) => { const a = []; for (let i = 0; i < s.le
 function normContent(meta, c) {
   if (meta.type === 'bubble' || c.mode === 'bubble') {
     const n = c.n || 0, ch = c.choices || 4;
-    const qs = Array.from({ length: n }, (_, i) => ({ text: '', image: '', options: LETTERS.slice(0, ch), letters: true, topic: (c.topics || [])[i] || '', pts: (c.pts || [])[i] || 1 }));
+    const qs = Array.from({ length: n }, (_, i) => ({ text: '', image: '', options: LETTERS.slice(0, ch), letters: true, topic: (c.topics || [])[i] || '', pts: (c.pts || [])[i] || 1, ...((c.cont || [])[i] && i ? { cont: true } : {}) }));
     (c.essays || []).forEach((p, j) => qs.push({ type: 'essay', text: 'سؤال مقالي ' + (j + 1), image: '', options: [], topic: '', pts: p || 1 }));
     return { pages: c.pages || [], questions: qs };
   }
@@ -313,7 +344,7 @@ async function resolveImages(meta, nc) {
   [...nc.pages, ...nc.questions.map(q => q.image)].forEach(r => { const p = parseRef(r); if (p) need.add(p[0]); });
   if (!need.size) return nc;
   const packs = {};
-  await Promise.all([...need].map(async k => { const p = await S.store.getPack(meta.id + '_' + k); if (!p) throw new Error('صور الامتحان ناقصة. كلّم المدرس.'); packs[k] = p.imgs; }));
+  await Promise.all([...need].map(async k => { const p = await S.store.getPack(meta.id + '_' + k); if (!p) throw new Error('صور الامتحان ناقصة. كلّم الدكتور.'); packs[k] = p.imgs; }));
   const fix = r => { const p = parseRef(r); return p ? packs[p[0]][p[1]] : r; };
   nc.pages = nc.pages.map(fix); nc.questions.forEach(q => { q.image = fix(q.image); });
   return nc;
@@ -352,6 +383,8 @@ const DemoStore = {
   async listStudents() { return Object.values(this.db().students).sort((a, b) => a.createdAt - b.createdAt); },
   async addStudents(arr) { const d = this.db(); arr.forEach(s => { d.students[s.code] = s; }); this.save(d); },
   async deleteStudent(code) { const d = this.db(); delete d.students[code]; delete d.pub[code]; this.save(d); },
+  async renameStudent(old, st) { const d = this.db(); delete d.students[old]; d.students[st.code] = st; if (d.pub[old]) { d.pub[st.code] = d.pub[old]; delete d.pub[old]; } this.save(d); },
+  async updateMaterial(old, m, parts) { const d = this.db(); d.materials[m.id] = m; if (parts) d.blobs[m.id] = parts; this.save(d); },
   async getSettings() { return this.db().settings || {}; },
   async setRegistration(open) { const d = this.db(); d.settings = { ...(d.settings || {}), registrationOpen: !!open }; this.save(d); },
   async getPending(code) { return (this.db().pending || {})[code] || null; },
@@ -448,6 +481,17 @@ const FB = {
   async getStudent(code) { const d = await this.col('students').doc(code).get(); return d.exists ? d.data() : null; },
   async listStudents() { const s = await this.col('students').get(); return s.docs.map(d => d.data()).sort((a, b) => a.createdAt - b.createdAt); },
   async addStudents(arr) { for (let i = 0; i < arr.length; i += 400) { const b = this.db.batch(); arr.slice(i, i + 400).forEach(s => b.set(this.col('students').doc(s.code), s)); await b.commit(); } },
+  async renameStudent(old, st) {
+    if (old === st.code) { await this.col('students').doc(old).set(st); return; }
+    await this.col('students').doc(st.code).set(st); await this.deleteStudent(old);
+  },
+  async updateMaterial(old, m, parts) {
+    if (parts) {
+      for (let i = 0; i < parts.length; i += 4) { const b = this.db.batch(); parts.slice(i, i + 4).forEach((p, j) => b.set(this.col('blobParts').doc(m.id + '_' + (i + j)), { d: p })); await b.commit(); }
+      for (let i = parts.length; i < (old.parts || 0); i++) { try { await this.col('blobParts').doc(m.id + '_' + i).delete(); } catch (e) {} }
+    }
+    await this.col('materials').doc(m.id).set(m);
+  },
   async deleteStudent(code) {
     const sub = await this.col('students').doc(code).collection('results').get();
     if (!sub.empty) { const b = this.db.batch(); sub.docs.forEach(d => b.delete(d.ref)); await b.commit(); }
@@ -506,25 +550,78 @@ const FB = {
 };
 
 /* ========= الهيكل العام ========= */
-const S = { store: DEMO ? DemoStore : FB, timer: null };
+const S = { store: DEMO ? DemoStore : FB, timer: null, nav: 0, guard: null };
 const getSession = () => { try { return JSON.parse(ls.get('stu')); } catch (e) { return null; } };
 const setSession = s => { if (s) ls.set('stu', JSON.stringify(s)); else ls.del('stu'); };
 const themeBtn = '<button class="icon-btn" data-theme-toggle aria-label="تبديل الوضع الداكن"><span class="ic-moon">🌙</span><span class="ic-sun">☀️</span></button>';
 
 function view(html) { $('#app').onclick = null; $('#app').onchange = null; document.body.classList.remove('sheet-open'); $('#app').innerHTML = (DEMO ? '<div class="banner">وضع تجريبي: البيانات محفوظة في المتصفح ده بس</div>' : '') + html; }
-const topbar = (extra = '') => `<div class="top"><div class="logo"><i>🎓</i>د. أحمد الشرقاوي</div><span class="sp"></span>${extra}${themeBtn}</div>`;
+const topbar = (extra = '') => `<div class="top"><div class="logo"><i>${LOGO}</i>د. أحمد الشرقاوي</div><span class="sp"></span>${extra}${themeBtn}</div>`;
 
+const isRootHash = () => /^#?\/?(s(\/exams)?|teacher)?\/?$/.test(location.hash);
+const backBtn = html => (S.nav > 0 && !isRootHash() && html !== loadingInner && !/رجوع/.test(html)) ? '<div style="margin:4px 0 8px"><button class="btn sm ghost" data-back>→ رجوع</button></div>' : '';
+/* ===== علامات "جديد" (نقطة حمراء) للطالب: بتختفي لما يفتح الصفحة ===== */
+const seenKey = ses => 'seen_' + ses.code;
+const getSeen = ses => { try { return JSON.parse(ls.get(seenKey(ses))) || null; } catch (e) { return null; } };
+/* بيرجّع آخر وقت شافه الطالب في التبويب ده، وبيسجّل إنه شاف لحد stamp. أول مرة: كل القديم يعتبر متشاف */
+function takeSeen(ses, tab, stamp) {
+  const sn = getSeen(ses) || {}, prev = sn[tab] === undefined ? stamp : sn[tab];
+  sn[tab] = Math.max(prev, stamp); ls.set(seenKey(ses), JSON.stringify(sn)); S.stampCache = null;
+  return prev;
+}
+async function newStamps(ses) {
+  const c = S.stampCache;
+  if (c && c.code === ses.code && Date.now() - c.at < 45000) return c.v;
+  const v = { exams: 0, files: 0, results: 0, rank: 0 };
+  try {
+    const [ex, mats, pubs, r1, r2] = await Promise.all([S.store.listActiveExams(), S.store.listMaterials(), S.store.listPublished(ses.code), S.store.getRank('bio'), S.store.getRank('geo')]);
+    const grp = ses.group || '', now = Date.now();
+    v.exams = Math.max(0, ...ex.filter(e => visibleTo(e, grp) && !(e.closesAt && now > e.closesAt)).map(e => e.createdAt || 0));
+    v.files = Math.max(0, ...mats.map(m => m.updatedAt || m.createdAt || 0));
+    v.results = Math.max(0, ...pubs.map(p => p.publishedAt || 0));
+    v.rank = Math.max(0, (r1 && r1.updatedAt) || 0, (r2 && r2.updatedAt) || 0);
+  } catch (e) { return c ? c.v : v; }
+  S.stampCache = { code: ses.code, at: Date.now(), v }; return v;
+}
+async function refreshDots(tab) {
+  const ses = getSession(); if (!ses || !$('.nav')) return;
+  const v = await newStamps(ses), sn = getSeen(ses) || {};
+  let changed = false;
+  ['exams', 'files', 'results', 'rank'].forEach(t => { if (sn[t] === undefined) { sn[t] = v[t]; changed = true; } });
+  if (changed) ls.set(seenKey(ses), JSON.stringify(sn));
+  document.querySelectorAll('.nav a[data-t]').forEach(a => {
+    const t = a.dataset.t, has = a.querySelector('.dot');
+    if (t !== tab && v[t] > (sn[t] || 0)) { if (!has) a.insertAdjacentHTML('beforeend', '<span class="dot"></span>'); } else if (has) has.remove();
+  });
+}
 function studentShell(tab, inner) {
-  view(`${topbar('<button class="btn sm ghost" id="sout">خروج</button>')}<div class="wrap pb" id="main">${inner}</div>
-  <nav class="nav"><a href="#s/exams" class="${tab === 'exams' ? 'on' : ''}"><b>📝</b>الامتحانات</a><a href="#s/rank" class="${tab === 'rank' ? 'on' : ''}"><b>🏆</b>الترتيب</a><a href="#s/results" class="${tab === 'results' ? 'on' : ''}"><b>📊</b>نتايجي</a><a href="#s/files" class="${tab === 'files' ? 'on' : ''}"><b>📚</b>الملفات</a></nav>`);
-  $('#sout').onclick = () => { setSession(null); go('#'); };
+  view(`${topbar('<button class="btn sm ghost" id="sout">خروج</button>')}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
+  <nav class="nav"><a href="#s/exams" data-t="exams" class="${tab === 'exams' ? 'on' : ''}"><b>📝</b>الامتحانات</a><a href="#s/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}"><b>🏆</b>الترتيب</a><a href="#s/results" data-t="results" class="${tab === 'results' ? 'on' : ''}"><b>📊</b>نتايجي</a><a href="#s/files" data-t="files" class="${tab === 'files' ? 'on' : ''}"><b>📚</b>الملفات</a></nav>`);
+  setTimeout(() => refreshDots(tab), 0);
+  $('#sout').onclick = async () => { if (await modal({ title: 'تسجيل الخروج', text: 'هتخرج من الموقع وترجع لصفحة تسجيل الدخول، وهتحتاج كودك تدخل تاني. تكمل؟', ok: 'خروج' })) { setSession(null); go('#'); } };
 }
 function teacherShell(tab, inner) {
   view(`${topbar('<button class="btn sm ghost" id="out">خروج</button>')}<div class="wrap">
-  <div class="tabs"><a href="#teacher" class="${tab === 'exams' ? 'on' : ''}">الامتحانات</a><a href="#teacher/students" class="${tab === 'students' ? 'on' : ''}">الطلاب</a><a href="#teacher/files" class="${tab === 'files' ? 'on' : ''}">الملفات</a><a href="#teacher/settings" class="${tab === 'settings' ? 'on' : ''}">الإعدادات</a></div>${inner}</div>`);
-  $('#out').onclick = async () => { await S.store.logout(); go('#teacher'); };
+  <div class="tabs"><a href="#teacher" class="${tab === 'exams' ? 'on' : ''}">الامتحانات</a><a href="#teacher/students" class="${tab === 'students' ? 'on' : ''}">الطلاب</a><a href="#teacher/files" class="${tab === 'files' ? 'on' : ''}">الملفات</a><a href="#teacher/settings" class="${tab === 'settings' ? 'on' : ''}">الإعدادات</a></div>${backBtn(inner)}${inner}</div>`);
+  $('#out').onclick = async () => {
+    const warn = S.guard ? ' <b>وفيه تعديلات في الامتحان مش محفوظة وهتضيع.</b>' : '';
+    if (!(await modal({ title: 'تسجيل الخروج', html: '<p style="margin:0">هتخرج من الموقع وترجع لصفحة تسجيل الدخول.' + warn + '</p>', ok: 'خروج' }))) return;
+    S.guard = null; await S.store.logout(); go('#teacher');
+  };
 }
 
+/* حماية من فقدان التقدم: لو فيه S.guard وحاول يغادر الصفحة بيطلب تأكيد */
+const setGuard = (text) => { S.guard = { hash: location.hash, text: text || 'لو خرجت من الصفحة دلوقتي هتفقد التقدم اللي عملته في الامتحان ومش هيتحفظ. تخرج برضه؟' }; };
+function onHash() {
+  const h = location.hash;
+  if (S.guard && h !== S.guard.hash) {
+    const target = h;
+    try { history.replaceState(null, '', S.guard.hash || '#'); } catch (e) {}
+    modal({ title: 'تأكيد الخروج', text: S.guard.text, ok: 'اخرج وافقد التقدم', cancel: 'ابقَ هنا' }).then(ok => { if (ok) { S.guard = null; location.hash = target; } });
+    return;
+  }
+  S.nav = (S.nav || 0) + 1; router();
+}
 function router() {
   clearInterval(S.timer);
   if (S.cleanup) { S.cleanup(); S.cleanup = null; }
@@ -535,20 +632,22 @@ function router() {
 
 /* ========= واجهة الطالب ========= */
 function studentLogin(note) {
-  view(`${topbar()}<div class="wrap narrow"><div class="hero" style="margin-top:20px;text-align:center"><div style="font-size:2.4rem">🎓</div><h1>منصة د. أحمد الشرقاوي</h1><div>أحياء وجيولوجيا · الثانوية العامة · سجّل دخولك بالكود الشخصي</div></div>
-  <div class="card"><label for="cd">الكود الشخصي</label><input type="text" id="cd" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase;letter-spacing:3px;text-align:center;font-size:1.2rem">
+  view(`${topbar()}<div class="wrap narrow"><div class="hero" style="margin-top:20px;text-align:center"><div class="biglogo">${LOGO}</div><h1>منصة د. أحمد الشرقاوي</h1><div>أحياء وجيولوجيا · الثانوية العامة · سجّل دخولك بالكود الشخصي</div></div>
+  <div class="card"><label for="cd">الكود الشخصي</label><input type="text" id="cd" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" style="letter-spacing:3px;text-align:center;font-size:1.2rem">
   <div id="msg">${note ? `<div class="msg bad">${esc(note)}</div>` : ''}</div><button class="btn block" id="go">دخول</button>
   <p class="muted" style="margin-bottom:0">أول مرة؟ <a href="#s/register">سجّل حساب جديد</a>.${DEMO ? ' للتجربة: DEMO01' : ''}</p></div>
-  <p class="foot"><a href="#teacher">دخول المدرس</a></p></div>`);
+  <p class="foot"><a href="#teacher">دخول الدكتور</a></p></div>`);
   const login = async () => {
-    const code = $('#cd').value.trim().toUpperCase().replace(/\s+/g, '');
+    let code = $('#cd').value.trim().replace(/\s+/g, '');
     if (!code) return setMsg('اكتب الكود');
     const b = $('#go'); b.disabled = true; setMsg('');
     try {
-      const st = await S.store.getStudent(code);
+      let st = await S.store.getStudent(code);
+      if (!st && code !== code.toUpperCase()) { const c2 = code.toUpperCase(); st = await S.store.getStudent(c2); if (st) code = c2; }
+      if (!st && code !== code.toLowerCase()) { const c3 = code.toLowerCase(); st = await S.store.getStudent(c3); if (st) code = c3; }
       if (!st) {
         const pd = await S.store.getPending(code);
-        throw new Error(pd ? 'طلب التسجيل بتاعك لسه مستني موافقة المدرس. حاول تاني بعدين.' : 'الكود غلط');
+        throw new Error(pd ? 'طلب التسجيل بتاعك لسه مستني موافقة الدكتور. حاول تاني بعدين.' : 'الكود غلط');
       }
       setSession({ code, name: st.name }); go('#s/exams');
     } catch (e) { setMsg(e.message); b.disabled = false; }
@@ -561,7 +660,7 @@ function studentRegister() {
   <div class="card"><label for="rn">الاسم ثلاثي</label><input type="text" id="rn" autocomplete="name">
   <div id="grpBox"></div>
   <label for="rc">اختار كود الدخول بتاعك</label><input type="text" id="rc" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px">
-  <p class="muted" style="margin:4px 0">من 8 لـ 20 حرف إنجليزي وأرقام، ولازم يكون فيه حروف وأرقام مع بعض. اختار كود صعب التخمين ومتقولوش لحد، لأن أي حد يعرفه يقدر يدخل بحسابك. المدرس بيشوف الكود ده.</p>
+  <p class="muted" style="margin:4px 0">من 8 لـ 20 حرف إنجليزي وأرقام، ولازم يكون فيه حروف وأرقام مع بعض. اختار كود صعب التخمين ومتقولوش لحد، لأن أي حد يعرفه يقدر يدخل بحسابك. الدكتور بيشوف الكود ده.</p>
   <div id="msg"></div><button class="btn block" id="rg">إرسال الطلب</button></div>
   <p class="foot"><a href="#s/exams">رجوع لتسجيل الدخول</a></p></div>`);
   let groups = [];
@@ -578,11 +677,11 @@ function studentRegister() {
     const b = $('#rg'); b.disabled = true; setMsg('');
     try {
       const cfg = await S.store.getSettings();
-      if (!cfg.registrationOpen) throw new Error('التسجيل مقفول دلوقتي. كلّم المدرس.');
+      if (!cfg.registrationOpen) throw new Error('التسجيل مقفول دلوقتي. كلّم الدكتور.');
       if ((await S.store.getStudent(code)) || (await S.store.getPending(code))) throw new Error('الكود ده مستخدم، اختار كود تاني.');
       await S.store.createPending({ code, name, group, createdAt: Date.now() });
       view(`${topbar()}<div class="wrap narrow"><div class="card" style="text-align:center"><div class="big">⏳</div><h2>تم إرسال طلبك</h2>
-      <p class="muted">استنى لحد ما المدرس يقبل الطلب، وبعدين ادخل بنفس الكود.</p><a class="btn" href="#s/exams">رجوع لتسجيل الدخول</a></div></div>`);
+      <p class="muted">استنى لحد ما الدكتور يقبل الطلب، وبعدين ادخل بنفس الكود.</p><a class="btn" href="#s/exams">رجوع لتسجيل الدخول</a></div></div>`);
     } catch (e) { b.disabled = false; setMsg(e.code === 'permission-denied' ? 'مقدرناش نبعت الطلب. التسجيل ممكن يكون اتقفل أو الكود مستخدم.' : e.message); }
   };
 }
@@ -603,19 +702,23 @@ async function studentRoute(p) {
 async function studentExams(ses) {
   studentShell('exams', loadingInner);
   const st = await S.store.getStudent(ses.code);
-  if (!st) { setSession(null); return studentLogin('الكود ده مش متسجل. كلّم المدرس.'); }
+  if (!st) { setSession(null); return studentLogin('الكود ده مش متسجل. كلّم الدكتور.'); }
   ses.name = st.name; ses.group = st.group || ''; setSession(ses);
   const all = (await S.store.listActiveExams()).filter(e => visibleTo(e, ses.group));
   const atts = await Promise.all(all.map(e => S.store.getAttempt(e.id + '_' + ses.code)));
   const subj = S.subjExams || '';
+  const prevSeen = takeSeen(ses, 'exams', Math.max(0, ...all.map(e => e.createdAt || 0)));
   let pending = 0;
   const cards = [];
   all.forEach((e, i) => {
     const a = atts[i];
-    let badge = '<span class="badge">جديد</span>', btn = `<button class="btn sm" data-start="${e.id}" data-new="1">ابدأ الامتحان</button>`;
+    const nowMs = Date.now(), tooLate = e.closesAt && nowMs > e.closesAt, tooEarly = e.opensAt && nowMs < e.opensAt;
+    let badge = '<span class="badge">لسه ما بدأتش</span>', btn = `<button class="btn sm" data-start="${e.id}" data-new="1">ابدأ الامتحان</button>`;
+    if (!a && tooLate) { badge = '<span class="badge bad">انتهى وقت الامتحان</span>'; btn = ''; }
+    else if (!a && tooEarly) { badge = '<span class="badge warn">لسه ما فتحش</span>'; btn = ''; }
     if (a && a.submitted) { badge = '<span class="badge ok">تم التسليم ✓</span>'; btn = ''; }
     else {
-      pending++;
+      if (a || (!tooLate && !tooEarly)) pending++;
       if (a) {
         const left = e.durationMin * 60 - Math.floor((Date.now() - a.startedAt) / 1000);
         if (left > 0) { badge = `<span class="badge warn">جاري · باقي ${Math.ceil(left / 60)} د</span>`; btn = `<button class="btn sm" data-start="${e.id}">كمّل الامتحان</button>`; }
@@ -623,7 +726,7 @@ async function studentExams(ses) {
       }
     }
     if (subj && subjOf(e) !== subj) return;
-    cards.push(`<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${subjLabel(subjOf(e))} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة</div></div>${badge}</div>${btn ? `<div style="margin-top:10px">${btn}</div>` : ''}</div>`);
+    cards.push(`<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${subjLabel(subjOf(e))} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة</div>${e.opensAt || e.closesAt ? `<div class="muted" style="color:var(--warn)">⏰ ${e.opensAt ? 'بيفتح ' + fmtDate(e.opensAt) + ' ' : ''}${e.closesAt ? 'ومتاح لحد ' + fmtDate(e.closesAt) : ''}</div>` : ''}</div>${!(a && a.submitted) && e.createdAt > prevSeen ? '<span class="newb">جديد</span>' : ''}${badge}</div>${btn ? `<div style="margin-top:10px">${btn}</div>` : ''}</div>`);
   });
   studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>
   <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}`);
@@ -632,7 +735,7 @@ async function studentExams(ses) {
     if (c) { S.subjExams = c.dataset.subj; return studentExams(ses); }
     const b = e.target.closest('[data-start]'); if (!b) return;
     const ex = all.find(x => x.id === b.dataset.start);
-    if (b.dataset.new && !(await modal({ title: 'بدء الامتحان', html: `<p style="margin:0">المؤقت هيبدأ فورًا ومدته <b>${ex.durationMin} دقيقة</b>.<br>أثناء الامتحان خروجك من الصفحة أو محاولة تصوير الشاشة بيتسجل وبيظهر للمدرس.</p>`, ok: 'ابدأ' }))) return;
+    if (b.dataset.new && !(await modal({ title: 'بدء الامتحان', html: `<p style="margin:0">المؤقت هيبدأ فورًا ومدته <b>${ex.durationMin} دقيقة</b>.<br>أثناء الامتحان خروجك من الصفحة أو محاولة تصوير الشاشة بيتسجل وبيظهر للدكتور.</p>`, ok: 'ابدأ' }))) return;
     go('#s/exam/' + b.dataset.start);
   };
 }
@@ -650,8 +753,10 @@ async function startExam(id, ses) {
   if (att && att.submitted) throw new Error('انت سلّمت الامتحان ده قبل كده.');
   if (!att) {
     if (!meta.active) throw new Error('الامتحان مقفول دلوقتي');
+    if (meta.opensAt && Date.now() < meta.opensAt) throw new Error('الامتحان لسه ما فتحش. بيفتح ' + fmtDate(meta.opensAt));
+    if (meta.closesAt && Date.now() > meta.closesAt) throw new Error('انتهى وقت الامتحان (اتقفل ' + fmtDate(meta.closesAt) + ')');
     const st = await S.store.getStudent(ses.code);
-    if (!st) { setSession(null); throw new Error('الكود ده مش متسجل. كلّم المدرس.'); }
+    if (!st) { setSession(null); throw new Error('الكود ده مش متسجل. كلّم الدكتور.'); }
     ses.group = st.group || ''; setSession(ses);
     if (!visibleTo(meta, ses.group)) throw new Error('الامتحان ده مش متاح لمجموعتك.');
     att = await S.store.createAttempt(aid, { examId: meta.id, studentCode: ses.code, name: ses.name });
@@ -694,15 +799,10 @@ async function finishInstant(exam, ses, answers) {
 
 
 /* علامة مائية: اسم الطالب وكوده مكررين على الشاشة كلها، عشان أي صورة تتسرب تتعرف */
-function watermarkCss(text) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='320' height='190'><text x='160' y='95' text-anchor='middle' transform='rotate(-24 160 95)' font-size='16' font-family='Tahoma,Arial,sans-serif' fill='rgba(128,128,128,0.26)'>${esc(text)}</text></svg>`;
-  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-}
-
 /* حماية أثناء الامتحان: تسجيل الخروج من الصفحة وفقدان التركيز، حجب المحتوى، ومحاولات التصوير والنسخ.
    مهم: المتصفح مش بيقدر يمنع لقطة الشاشة فعليًا (خصوصًا من الموبايل)، ده ردع وتسجيل بس. */
 function armSecurity(aid, a0) {
-  let leaves = a0.leaves || 0, shots = a0.shots || 0, awaySec = a0.awaySec || 0, away = false, t0 = 0, tmr = null;
+  let leaves = a0.leaves || 0, shots = a0.shots || 0, shorts = a0.short || 0, awaySec = a0.awaySec || 0, away = false, t0 = 0, tmr = null;
   const patch = o => S.store.patchAttempt(aid, o).catch(() => {});
   const cover = on => { const c = $('#cover'); if (c) c.classList.toggle('on', on); };
   const showLv = () => {
@@ -710,10 +810,10 @@ function armSecurity(aid, a0) {
     const parts = [];
     if (leaves) parts.push(`خروجك من الصفحة اتسجل ${leaves} مرة`);
     if (shots) parts.push(`محاولات التصوير: ${shots}`);
-    el.textContent = parts.length ? '⚠ ' + parts.join(' · ') + ' وبيظهر للمدرس.' : 'ملحوظة: الخروج من صفحة الامتحان ومحاولة تصوير الشاشة بيتسجلوا وبيظهروا للمدرس.';
+    el.textContent = parts.length ? '⚠ ' + parts.join(' · ') + ' وبيظهر للدكتور.' : 'ملحوظة: الخروج من صفحة الامتحان ومحاولة تصوير الشاشة بيتسجلوا وبيظهروا للدكتور.';
   };
   const goAway = () => { if (away) return; away = true; t0 = Date.now(); leaves++; patch({ leaves, lastLeave: Date.now(), away: true }); showLv(); };
-  const back = () => { if (!away) return; away = false; awaySec += Math.max(0, Math.round((Date.now() - t0) / 1000)); patch({ away: false, awaySec }); showLv(); };
+  const back = () => { if (!away) return; away = false; const dur = Date.now() - t0; awaySec += Math.max(0, Math.round(dur / 1000)); if (dur < 3000) { shorts++; patch({ away: false, awaySec, short: shorts }); } else patch({ away: false, awaySec }); showLv(); };
   const check = () => {
     const out = document.hidden || !document.hasFocus();
     if (out) {
@@ -730,7 +830,7 @@ function armSecurity(aid, a0) {
   const stop = e => { if (!inTA(e)) e.preventDefault(); };
   const onKeyDown = e => {
     const k = (e.key || '').toLowerCase();
-    if (e.metaKey && e.shiftKey && ['3', '4', '5'].includes(k)) { shot(); e.preventDefault(); }
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && ['3', '4', '5', 's'].includes(k)) { shot(); e.preventDefault(); }
     else if (inTA(e)) return;
     else if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'p', 's', 'u', 'a'].includes(k)) e.preventDefault();
     else if (k === 'f12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(k))) e.preventDefault();
@@ -750,33 +850,34 @@ function runExam(exam, aid, ses, startedAt, att) {
   const r = rng(hashStr(aid)), idx = n => Array.from({ length: n }, (_, k) => k);
   const all = exam.questions.map((q, i) => ({ q, i }));
   const mcq = all.filter(o => !isEssay(o.q)), ess = all.filter(o => isEssay(o.q));
-  const shown = exam.shuffle && !bubble ? shuffled(mcq, r) : mcq;
+  const units = []; mcq.forEach(o => { if (o.q.cont && units.length) units[units.length - 1].push(o); else units.push([o]); });
+  const shownU = exam.shuffle && !bubble ? shuffled(units, r) : units, shown = shownU.flat(), nums = qNums(mcq.map(o => o.q));
   shown.forEach(o => { o.order = exam.shuffle && !o.q.letters ? shuffled(idx(o.q.options.length), r) : idx(o.q.options.length); });
   const ans = loadDraft(aid, exam.questions.length), essay = loadEssay(aid), thumbs = {};
   ess.forEach(o => { if (!essay[o.i]) essay[o.i] = { t: '', imgs: [], k: 0 }; });
-  const ptsTag = q => `<span class="muted" style="font-size:.8rem;font-weight:400"> (${fmtN(qPts(q))} د)</span>`;
-  const qCard = (o, p) => `<div class="card q"><div class="qh"><span class="qn">${p + 1}</span>${esc(o.q.text)}${ptsTag(o.q)}</div>
-    ${o.q.image ? `<img class="zoomable" src="${esc(o.q.image)}" alt=""><div class="muted" style="font-size:.8rem">اضغط على الصورة للتكبير</div>` : ''}
-    ${o.q.letters
-      ? `<div class="pills">${o.order.map(k => `<label class="pill"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(o.q.options[k])}</span></label>`).join('')}</div>`
-      : o.order.map(k => `<label class="opt"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(o.q.options[k])}</span></label>`).join('')}</div>`;
+  const ptsTag = q => exam.showPts === false ? '' : `<span class="muted" style="font-size:.8rem;font-weight:400"> (${fmtN(qPts(q))} د)</span>`;
+  const optsOf = o => o.q.letters
+    ? `<div class="pills">${o.order.map(k => `<label class="pill"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(o.q.options[k])}</span></label>`).join('')}</div>`
+    : o.order.map(k => `<label class="opt"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(o.q.options[k])}</span></label>`).join('');
+  const qCard = (u, p) => { const o0 = u[0], multi = u.length > 1;
+    return `<div class="card q"><div class="qh"><span class="qn">${p + 1}</span>${esc(o0.q.text)}${multi ? '' : ptsTag(o0.q)}</div>
+    ${o0.q.image ? `<img class="zoomable" src="${esc(o0.q.image)}" alt=""><div class="muted" style="font-size:.8rem">اضغط على الصورة للتكبير</div>` : ''}
+    ${u.map((o, j) => (multi ? `<div class="part"><b>الجزء (${j + 1})</b>${ptsTag(o.q)}</div>` : '') + optsOf(o)).join('')}</div>`; };
   const chips = i => essay[i].imgs.map((k, n) => { const id = aid + '_' + i + '_' + k; return `<span class="chipimg">${thumbs[id] ? `<img src="${thumbs[id]}" alt="">` : '📎'} صورة ${n + 1} ✓<button class="btn sm danger" data-esrm="${i}:${k}">×</button></span>`; }).join('');
-  const essayCard = (o, p) => `<div class="card q essay"><div class="qh"><span class="qn">${p + 1}</span>${esc(o.q.text)} <span class="badge">مقالي · ${fmtN(qPts(o.q))} درجة</span></div>
+  const essayCard = (o, p) => `<div class="card q essay"><div class="qh"><span class="qn">${p + 1}</span>${esc(o.q.text)} <span class="badge">${exam.showPts === false ? 'مقالي' : 'مقالي · ' + fmtN(qPts(o.q)) + ' درجة'}</span></div>
     ${o.q.image ? `<img class="zoomable" src="${esc(o.q.image)}" alt="">` : ''}
     <textarea data-es="${o.i}" placeholder="اكتب إجابتك هنا، أو ارفع صورة الحل المكتوب بخط اليد (أو الاتنين)">${esc(essay[o.i].t)}</textarea>
     <div class="row" style="margin-top:8px"><label class="btn sm ghost" style="margin:0">📷 رفع صورة الحل (حتى 3)<input type="file" accept="image/*" data-esimg="${o.i}" hidden></label><span class="muted" id="esst${o.i}"></span></div>
     <div class="row" id="esth${o.i}" style="margin-top:6px">${chips(o.i)}</div></div>`;
-  const sheetRows = mcq.map(o => `<div class="brow ${ans[o.i] >= 0 ? 'done' : ''}" id="br${o.i}"><b>${mcq.indexOf(o) + 1}</b><div class="pills" style="margin:0;gap:6px">${o.q.options.map((l, k) => `<label class="pill sm"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div></div>`).join('');
+  const sheetRows = mcq.map(o => `<div class="brow ${ans[o.i] >= 0 ? 'done' : ''}" id="br${o.i}"><b>${partLbl(nums[mcq.indexOf(o)])}</b><div class="pills" style="margin:0;gap:6px">${o.q.options.map((l, k) => `<label class="pill sm"><input type="radio" name="q${o.i}" data-i="${o.i}" value="${k}" ${ans[o.i] === k ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div></div>`).join('');
   view(`<div class="xbar"><div class="xrow"><b>${esc(exam.title)}</b><span class="timer" id="tm">--:--</span></div><div class="prog"><i id="pg"></i></div></div>
-  <div id="cover"><div><div class="big">🔒</div><h2>الأسئلة مخفية</h2><p class="muted">رجّع لصفحة الامتحان وكمّل. الخروج بيتسجل وبيظهر للمدرس.</p></div></div>
-  <div id="wm"></div>
+  <div id="cover"><div><div class="big">🔒</div><h2>الأسئلة مخفية</h2><p class="muted">رجّع لصفحة الامتحان وكمّل. الخروج بيتسجل وبيظهر للدكتور.</p></div></div>
   <div class="wrap noselect pb2" id="ex"><p class="muted">${esc(ses.name)} · <span id="cnt"></span></p>
   <div class="msg warn" id="lv"></div>
-  ${bubble ? `<div class="pgs">${exam.pages.map(p => `<img class="zoomable" src="${esc(p)}" alt="">`).join('')}</div>` : shown.map(qCard).join('')}
-  ${ess.map((o, k) => essayCard(o, mcq.length + k)).join('')}
+  ${bubble ? `<div class="pgs">${exam.pages.map(p => `<img class="zoomable" src="${esc(p)}" alt="">`).join('')}</div>` : shownU.map(qCard).join('')}
+  ${ess.map((o, k) => essayCard(o, units.length + k)).join('')}
   <div id="msg"></div><button class="btn block" id="fin" style="margin-bottom:${bubble ? 80 : 40}px">تسليم الإجابات</button></div>
   ${bubble ? `<button class="btn sheetbtn" id="shb">📝 ورقة الإجابة</button><div class="sheet noselect" id="sheet"><div class="sh row"><b class="grow">ورقة الإجابة</b><span class="muted" id="cnt2"></span></div>${sheetRows}</div>` : ''}`);
-  $('#wm').style.backgroundImage = watermarkCss(ses.name + ' · ' + ses.code);
   const count = () => {
     const n = mcq.filter(o => ans[o.i] >= 0).length;
     $('#cnt').textContent = `اتجاوب ${n} من ${mcq.length}` + (ess.length ? ` · ${ess.length} مقالي` : ''); $('#pg').style.width = (mcq.length ? n / mcq.length * 100 : 0) + '%';
@@ -840,9 +941,9 @@ function doneScreen(timeUp, doc, ses) {
   const pct = doc && doc.total ? Math.round(doc.score / doc.total * 100) : 0;
   studentShell('exams', `<div class="card" style="text-align:center"><div class="big">✅</div><h2>${timeUp ? 'الوقت خلص وإجاباتك اتسلمت' : 'تم تسليم إجاباتك'}</h2>
   ${doc ? `<div class="ring lg" style="--p:${pct};margin:8px auto"><span>${pct}%</span></div><b>${doc.pending ? 'درجة الاختيارات: ' : ''}${fmtN(doc.score)} من ${fmtN(doc.total)}</b>
-    ${doc.pending ? `<p class="muted" style="margin:6px 0">المقالي (${fmtN(doc.essayTotal)} درجة) لسه هيتصحح، وهتظهر درجته النهائية في "نتايجي" لما المدرس يعلنها.</p>` : ''}
+    ${doc.pending ? `<p class="muted" style="margin:6px 0">المقالي (${fmtN(doc.essayTotal)} درجة) لسه هيتصحح، وهتظهر درجته النهائية في "نتايجي" لما الدكتور يعلنها.</p>` : ''}
     ${doc.items ? '<p><button class="btn ghost" id="seeDet">عرض التفاصيل</button></p>' : ''}`
-    : '<p class="muted">المدرس هينشر النتيجة، وهتلاقيها في تبويب "نتايجي".</p>'}
+    : '<p class="muted">الدكتور هينشر النتيجة، وهتلاقيها في تبويب "نتايجي".</p>'}
   <a class="btn" href="#s/exams">رجوع للرئيسية</a></div>`);
   const b = $('#seeDet'); if (b) b.onclick = () => resultDetail(doc, ses);
 }
@@ -853,6 +954,7 @@ async function studentResults(ses) {
   const all = (await S.store.listPublished(ses.code)).sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
   const subj = S.subjRes || '';
   const list = subj ? all.filter(d => subjOf(d) === subj) : all;
+  const prevSeen = takeSeen(ses, 'results', Math.max(0, ...all.map(d => d.publishedAt || 0)));
   const pct = d => d.total ? Math.round(d.score / d.total * 100) : 0;
   const fin = list.filter(d => !d.pending);
   const avg = fin.length ? Math.round(fin.reduce((s, d) => s + pct(d), 0) / fin.length) : 0;
@@ -860,8 +962,8 @@ async function studentResults(ses) {
   ${list.length ? `<div class="stat"><div><b>${list.length}</b>امتحانات</div><div><b>${fin.length ? avg + '%' : '-'}</b>متوسطك</div></div>` : ''}
   ${topicsBySubject(list.map(d => ({ subject: d.subject, topics: d.byTopic || [] })))}
   ${list.length ? list.map((d, i) => `<div class="card click" data-i="${i}"><div class="row"><div class="ring" style="--p:${pct(d)}"><span>${pct(d)}%</span></div>
-    <div class="grow"><b>${esc(d.examTitle)}</b><div class="muted">${subjLabel(subjOf(d))} · ${fmtN(d.score)} من ${fmtN(d.total)}${d.publishedAt ? ' · ' + fmtDate(d.publishedAt) : ''}</div>${d.pending ? '<span class="badge warn">المقالي لسه بيتصحح (الدرجة للاختيارات بس)</span>' : ''}</div><span class="muted">‹</span></div></div>`).join('')
-    : '<div class="card muted">لسه مفيش نتايج منشورة. هتظهر هنا لما المدرس ينشرها.</div>'}`);
+    <div class="grow"><b>${esc(d.examTitle)}</b> ${(d.publishedAt || 0) > prevSeen ? '<span class="newb">جديد</span>' : ''}<div class="muted">${subjLabel(subjOf(d))} · ${fmtN(d.score)} من ${fmtN(d.total)}${d.publishedAt ? ' · ' + fmtDate(d.publishedAt) : ''}</div>${d.pending ? '<span class="badge warn">المقالي لسه بيتصحح (الدرجة للاختيارات بس)</span>' : ''}</div><span class="muted">‹</span></div></div>`).join('')
+    : '<div class="card muted">لسه مفيش نتايج منشورة. هتظهر هنا لما الدكتور ينشرها.</div>'}`);
   $('#main').onclick = e => {
     const c = e.target.closest('[data-subj]'); if (c) { S.subjRes = c.dataset.subj; return studentResults(ses); }
     const k = e.target.closest('[data-i]'); if (k) resultDetail(list[+k.dataset.i], ses);
@@ -870,17 +972,17 @@ async function studentResults(ses) {
 
 
 function resultDetail(d, ses) {
-  const pct = d.total ? Math.round(d.score / d.total * 100) : 0;
+  const pct = d.total ? Math.round(d.score / d.total * 100) : 0, nums = d.items ? qNums(d.items.map(q => ({ cont: q.cont, type: q.essay ? 'essay' : '' }))) : [];
   studentShell('results', `<button class="btn sm ghost" id="back">→ رجوع</button>
   <div class="card" style="text-align:center"><div class="muted">${esc(d.examTitle)}</div><div class="ring lg" style="--p:${pct};margin:8px auto"><span>${pct}%</span></div><b>${d.pending ? 'درجة الاختيارات: ' : ''}${fmtN(d.score)} من ${fmtN(d.total)}</b>
   ${d.pending ? `<div class="muted">المقالي (${fmtN(d.essayTotal)} درجة) لسه بيتصحح</div>` : (d.essayTotal ? `<div class="muted">اختيارات ${fmtN(d.mcqScore)}/${fmtN(d.mcqTotal)} · مقالي ${fmtN(d.essayScore)}/${fmtN(d.essayTotal)}</div>` : '')}</div>
   ${d.items ? d.items.map((q, i) => q.essay
-    ? `<div class="card q rv"><div class="qh"><span class="qn">${i + 1}</span>${esc(q.text)} <span class="badge">مقالي</span></div><div>${q.got === null ? '<span class="badge warn">لسه بيتصحح</span>' : `درجتك: <b>${fmtN(q.got)}</b> من ${fmtN(q.pts)}`}</div></div>`
-    : `<div class="card q rv"><div class="qh"><span class="qn">${i + 1}</span>${esc(q.text || 'سؤال ' + (i + 1))}${q.pts && q.pts !== 1 ? `<span class="muted" style="font-size:.8rem;font-weight:400"> (${fmtN(q.pts)} د)</span>` : ''}</div>
+    ? `<div class="card q rv"><div class="qh"><span class="qn">${partLbl(nums[i])}</span>${esc(q.text)} <span class="badge">مقالي</span></div><div>${q.got === null ? '<span class="badge warn">لسه بيتصحح</span>' : `درجتك: <b>${fmtN(q.got)}</b> من ${fmtN(q.pts)}`}</div></div>`
+    : `<div class="card q rv"><div class="qh"><span class="qn">${partLbl(nums[i])}</span>${esc(q.text || 'سؤال ' + (i + 1))}${q.pts && q.pts !== 1 ? `<span class="muted" style="font-size:.8rem;font-weight:400"> (${fmtN(q.pts)} د)</span>` : ''}</div>
     ${q.letters ? `<div class="pills">${q.options.map((o, k) => `<span class="pill sm ${k === q.correct ? 'good' : (k === q.chosen ? 'wrong' : '')}"><span>${esc(o)}</span></span>`).join('')}</div>
       <div class="muted">${q.chosen < 0 ? 'ما جاوبتش على السؤال ده' : `إجابتك: ${esc(q.options[q.chosen])} · الصحيحة: ${esc(q.options[q.correct])}`}</div>`
       : q.options.map((o, k) => `<div class="opt ${k === q.correct ? 'good' : (k === q.chosen ? 'wrong' : '')}"><span>${k === q.correct ? '✓' : (k === q.chosen ? '✗' : '•')}</span><span>${esc(o)}${k === q.chosen ? ' (إجابتك)' : ''}</span></div>`).join('') + (q.chosen < 0 ? '<div class="muted">ما جاوبتش على السؤال ده</div>' : '')}</div>`).join('')
-    : '<p class="muted" style="text-align:center">المدرس عرض الدرجة بس من غير تفاصيل الأسئلة.</p>'}`);
+    : '<p class="muted" style="text-align:center">الدكتور عرض الدرجة بس من غير تفاصيل الأسئلة.</p>'}`);
   $('#back').onclick = () => studentResults(ses);
 }
 
@@ -890,8 +992,9 @@ async function studentFiles() {
   studentShell('files', loadingInner);
   const all = await S.store.listMaterials(), subj = S.subjFiles || '';
   const list = subj ? all.filter(m => subjOf(m) === subj) : all;
+  const prevSeen = takeSeen(getSession(), 'files', Math.max(0, ...all.map(m => m.updatedAt || m.createdAt || 0)));
   studentShell('files', `<h2>الملفات والمراجع</h2>${subjChips(subj)}${list.length ? list.map(m => `<div class="card"><div class="row"><span style="font-size:1.6rem">${m.kind === 'link' ? '🔗' : '📄'}</span>
-    <div class="grow"><b>${esc(m.title)}</b>${m.desc ? `<div class="muted">${esc(m.desc)}</div>` : ''}<div class="muted" style="font-size:.8rem">${subjLabel(subjOf(m))} · ${fmtDate(m.createdAt)}${m.size ? ' · ' + (m.size / 1024 / 1024 >= 1 ? (m.size / 1024 / 1024).toFixed(1) + ' MB' : Math.round(m.size / 1024) + ' KB') : ''}</div></div>
+    <div class="grow"><b>${esc(m.title)}</b> ${(m.updatedAt || m.createdAt) > prevSeen ? '<span class="newb">جديد</span>' : ''}${m.desc ? `<div class="muted">${esc(m.desc)}</div>` : ''}<div class="muted" style="font-size:.8rem">${subjLabel(subjOf(m))} · ${fmtDate(m.createdAt)}${m.size ? ' · ' + (m.size / 1024 / 1024 >= 1 ? (m.size / 1024 / 1024).toFixed(1) + ' MB' : Math.round(m.size / 1024) + ' KB') : ''}</div></div>
     ${m.kind === 'link' ? (isHttp(m.url) ? `<a class="btn sm" href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">فتح</a>` : '') : `<button class="btn sm" data-dl="${m.id}">تحميل</button>`}</div></div>`).join('')
     : '<div class="card muted">لسه مفيش ملفات.</div>'}`);
   $('#main').onclick = async e => {
@@ -912,12 +1015,13 @@ async function studentRank(ses) {
   studentShell('rank', loadingInner);
   const ranks = await Promise.all(Object.keys(SUBJECTS).map(async k => [k, await S.store.getRank(k)]));
   const medal = ['🥇', '🥈', '🥉'];
-  studentShell('rank', `<h2>🏆 لوحة الشرف</h2><p class="muted" style="margin:0">مجموع درجات كل الامتحانات اللي اتعلنت نتيجتها في كل مادة. بتتحدث مع كل امتحان.</p>
+  const prevSeen = takeSeen(ses, 'rank', Math.max(0, ...ranks.map(([k, r]) => (r && r.updatedAt) || 0))), isNew = ranks.some(([k, r]) => r && r.updatedAt > prevSeen);
+  studentShell('rank', `<h2>🏆 لوحة الشرف ${isNew ? '<span class="newb">تحديث جديد</span>' : ''}</h2><p class="muted" style="margin:0">مجموع درجات كل الامتحانات اللي اتعلنت نتيجتها في كل مادة. بتتحدث مع كل امتحان.</p>
   ${ranks.map(([k, r]) => `<div class="card"><b>${subjLabel(k)}</b>${r && r.list && r.list.length ? r.list.map(x => `<div class="rk r${x.rank} ${x.code === ses.code ? 'me' : ''}"><span class="medal">${medal[x.rank - 1]}</span><div class="grow"><b>${esc(x.name)}</b>${x.code === ses.code ? ' <span class="badge">انت</span>' : ''}<div class="muted" style="font-size:.8rem">${x.exams} امتحان</div></div><b class="pts">${fmtN(x.pts)}</b></div>`).join('')
-    : '<p class="muted" style="margin:8px 0 0">لسه مفيش ترتيب. هيظهر بعد ما المدرس يعلن نتيجة أول امتحان.</p>'}</div>`).join('')}`);
+    : '<p class="muted" style="margin:8px 0 0">لسه مفيش ترتيب. هيظهر بعد ما الدكتور يعلن نتيجة أول امتحان.</p>'}</div>`).join('')}`);
 }
 
-/* ========= واجهة المدرس ========= */
+/* ========= واجهة الدكتور ========= */
 async function teacherRoute(p) {
   if (!S.store.isTeacher()) return teacherLogin();
   try {
@@ -935,9 +1039,9 @@ async function teacherRoute(p) {
 }
 
 function teacherLogin() {
-  view(`${topbar()}<div class="wrap narrow"><h1>دخول المدرس</h1><div class="card">
+  view(`${topbar()}<div class="wrap narrow"><h1>دخول الدكتور</h1><div class="card">
   ${DEMO ? '' : '<label for="em">الإيميل</label><input type="email" id="em" dir="ltr">'}
-  <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><input type="password" id="pw" dir="ltr">
+  <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><div class="pwrap"><input type="password" id="pw" dir="ltr"><button type="button" class="eye" id="eye" aria-label="إظهار كلمة السر">👁</button></div>
   <div id="msg"></div><button class="btn block" id="lg">دخول</button></div>
   <p class="foot"><a href="#">صفحة الطلاب</a></p></div>`);
   const login = async () => {
@@ -945,6 +1049,7 @@ function teacherLogin() {
     if (!ok) return setMsg('بيانات الدخول غلط');
     router();
   };
+  $('#eye').onclick = () => { const i = $('#pw'), show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('#eye').textContent = show ? '🙈' : '👁'; i.focus(); };
   $('#lg').onclick = login; $('#pw').onkeydown = e => { if (e.key === 'Enter') login(); };
 }
 
@@ -955,7 +1060,7 @@ async function dashboard() {
   teacherShell('exams', `<div id="dash"><div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
   <div class="card"><b>رابط الطلاب</b><div class="row" style="margin-top:6px"><span class="code grow" style="font-size:.8rem;letter-spacing:0;word-break:break-all">${esc(link)}</span><button class="btn sm ghost" id="cp">نسخ</button></div></div>
   ${subjChips(subj)}
-  ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${subjLabel(subjOf(e))} · ${e.type === 'bubble' ? 'ورقة PDF + بابل شيت' : 'أسئلة'} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة${e.groups && e.groups.length ? ' · ' + esc(e.groups.join('، ')) : ' · كل الطلاب'}</div></div>${e.release === 'instant' ? '<span class="badge">نتيجة فورية</span>' : ''}${e.hasEssay ? '<span class="badge">مقالي</span>' : ''}${e.published ? '<span class="badge ok">النتايج منشورة</span>' : ''}</div>
+  ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${subjLabel(subjOf(e))} · ${e.type === 'bubble' ? 'ورقة PDF + بابل شيت' : 'أسئلة'} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة${e.groups && e.groups.length ? ' · ' + esc(e.groups.join('، ')) : ' · كل الطلاب'}</div></div>${e.closesAt ? `<span class="badge">يقفل ${fmtDate(e.closesAt)}</span>` : ''}${e.release === 'instant' ? '<span class="badge">نتيجة فورية</span>' : ''}${e.hasEssay ? '<span class="badge">مقالي</span>' : ''}${e.published ? '<span class="badge ok">النتايج منشورة</span>' : ''}</div>
   <div class="row" style="margin-top:10px"><label class="row" style="margin:0;font-weight:400"><input type="checkbox" data-act="active" data-id="${e.id}" ${e.active ? 'checked' : ''}> مفتوح للطلاب</label><span class="grow"></span>
   <a class="btn sm" href="#teacher/results/${e.id}">النتائج</a><a class="btn sm ghost" href="#teacher/edit/${e.id}">تعديل</a><button class="btn sm danger" data-act="del" data-id="${e.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش امتحانات. اضغط "امتحان جديد".</div>'}</div>`);
   $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = 'تم'; } catch (e) { prompt('انسخ الرابط:', link); } };
@@ -984,21 +1089,24 @@ async function teacherStudents() {
   ${pend.map(p => `<div class="row" style="margin-top:8px"><div class="grow"><b>${esc(p.name)}</b> <span class="code" style="font-size:.9rem">${esc(p.code)}</span><div class="muted" style="font-size:.8rem">${p.group ? esc(p.group) + ' · ' : ''}${fmtDate(p.createdAt)}</div></div>
   <button class="btn sm" data-ok="${esc(p.code)}">قبول</button><button class="btn sm danger" data-no="${esc(p.code)}">رفض</button></div>`).join('')}
   <p class="muted" style="font-size:.85rem;margin:8px 0 0">راجع الأسماء قبل القبول: اسم مش معروف أو مكرر يبقى ارفضه.</p></div>` : ''}
-  <div class="card"><b>إضافة طلاب</b><p class="muted" style="margin:4px 0">اكتب اسم كل طالب في سطر، وهيتعمل لكل واحد كود شخصي يدخل بيه.</p>
-  <textarea id="names" rows="5" placeholder="أحمد محمد&#10;سارة علي"></textarea>
-  ${groups.length ? `<label for="newGrp">المجموعة</label><select id="newGrp">${grpOptions(groups, '')}</select>` : ''}<div id="msg"></div><button class="btn block" id="addst">إضافة</button></div>
   <div class="card"><div class="row"><b class="grow">الطلاب (${list.length}${list.length !== all.length ? ' من ' + all.length : ''})</b><button class="btn sm ghost" id="cpl" ${list.length ? '' : 'disabled'}>نسخ القايمة</button></div>
   ${groups.length ? `<select id="fgrp" style="margin-top:8px"><option value="__all" ${fg === '__all' ? 'selected' : ''}>كل المجموعات</option><option value="__none" ${fg === '__none' ? 'selected' : ''}>بدون مجموعة</option>${groups.map(g => `<option value="${esc(g)}" ${g === fg ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select>` : ''}
-  ${list.length ? `<div class="tbl"><table><tr><th>الاسم</th>${groups.length ? '<th>المجموعة</th>' : ''}<th>الكود</th><th></th></tr>${list.map(s => `<tr><td><a href="#teacher/student/${esc(s.code)}">${esc(s.name)}</a></td>${groups.length ? `<td><select data-grp="${esc(s.code)}">${grpOptions(groups, s.group || '')}</select></td>` : ''}<td><span class="code">${esc(s.code)}</span>${s.self ? ' <span class="muted" style="font-size:.8rem">(اختاره الطالب)</span>' : ''}</td><td><button class="btn sm danger" data-del="${esc(s.code)}">حذف</button></td></tr>`).join('')}</table></div>
-  <p class="muted" style="font-size:.85rem;margin:8px 0 0">الأكواد سرية: ابعت لكل طالب كوده بس. الطلاب اللي سجلوا بنفسهم كودهم ظاهر لك هنا برضه.</p>` : '<p class="muted">لسه مفيش طلاب.</p>'}</div>`);
+  ${list.length ? `<div class="tbl"><table><tr><th>الاسم</th>${groups.length ? '<th>المجموعة</th>' : ''}<th>الكود</th><th></th></tr>${list.map(s => `<tr><td><a href="#teacher/student/${esc(s.code)}">${esc(s.name)}</a></td>${groups.length ? `<td><select data-grp="${esc(s.code)}">${grpOptions(groups, s.group || '')}</select></td>` : ''}<td><span class="code">${esc(s.code)}</span>${s.self ? ' <span class="muted" style="font-size:.8rem">(اختاره الطالب)</span>' : ''}</td><td style="white-space:nowrap"><button class="btn sm ghost" data-edit="${esc(s.code)}">تعديل</button> <button class="btn sm danger" data-del="${esc(s.code)}">حذف</button></td></tr>`).join('')}</table></div>
+  <details class="hint"><summary>ℹ️ الأكواد سرية: ابعت لكل طالب…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الأكواد سرية: ابعت لكل طالب كوده بس. الطلاب اللي سجلوا بنفسهم كودهم ظاهر لك هنا برضه.</p></details>` : '<p class="muted">لسه مفيش طلاب.</p>'}
+  <div class="card"><b>إضافة طلاب</b><p class="muted" style="margin:4px 0">اكتب اسم كل طالب في سطر، وهيتعمل لكل واحد كود شخصي يدخل بيه.</p>
+  <textarea id="names" rows="5" placeholder="أحمد محمد&#10;سارة علي"></textarea>
+  <div class="row" style="margin-top:8px"><label class="grow" style="margin:0">شكل الكود<select id="cType"><option value="mix">حروف وأرقام</option><option value="num">أرقام فقط</option><option value="alpha">حروف فقط</option></select></label><label class="grow" style="margin:0">الحروف<select id="cCase"><option value="upper">كبيرة (ABC)</option><option value="lower">صغيرة (abc)</option></select></label><label style="margin:0">الطول<select id="cLen">${[4, 5, 6, 7, 8, 9, 10].map(n => `<option ${n === 6 ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+  ${groups.length ? `<label for="newGrp">المجموعة</label><select id="newGrp">${grpOptions(groups, '')}</select>` : ''}<div id="msg"></div><button class="btn block" id="addst">إضافة</button></div></div>`);
   $('#addst').onclick = async () => {
+    const copt = { type: $('#cType').value, case: $('#cCase').value, len: +$('#cLen').value }; ls.set('codeopt', JSON.stringify(copt));
     const names = splitLines($('#names').value), grp = $('#newGrp') ? $('#newGrp').value : '';
     if (!names.length) return setMsg('اكتب اسم واحد على الأقل');
     const used = new Set([...all.map(s => s.code), ...pend.map(p => p.code)]), now = Date.now(), arr = [];
-    names.forEach((n, i) => { let c; do { c = genStuCode(); } while (used.has(c)); used.add(c); arr.push({ code: c, name: n, group: grp, createdAt: now + i }); });
+    names.forEach((n, i) => { let c; do { c = genStuCode(copt); } while (used.has(c)); used.add(c); arr.push({ code: c, name: n, group: grp, createdAt: now + i }); });
     $('#addst').disabled = true;
     try { await S.store.addStudents(arr); teacherStudents(); } catch (e) { $('#addst').disabled = false; setMsg(e.message); }
   };
+  try { const o = JSON.parse(ls.get('codeopt')) || {}; if (o.type) $('#cType').value = o.type; if (o.case) $('#cCase').value = o.case; if (o.len) $('#cLen').value = o.len; } catch (e) {}
   const cpl = $('#cpl');
   if (cpl) cpl.onclick = async () => {
     const txt = `رابط المنصة: ${link}\n\n` + list.filter(s => !s.self).map(s => `${s.name}: ${s.code}`).join('\n');
@@ -1012,16 +1120,18 @@ async function teacherStudents() {
     try { await S.store.setStudentGroup(t.dataset.grp, t.value); } catch (er) { alert(er.message); }
   };
   $('#app').onclick = async e => {
-    const ok = e.target.closest('[data-ok]'), no = e.target.closest('[data-no]'), all = e.target.closest('#okall');
-    if (ok || no || all) {
+    const ok = e.target.closest('[data-ok]'), no = e.target.closest('[data-no]'), okAll = e.target.closest('#okall');
+    if (ok || no || okAll) {
       try {
-        if (all) { if (!confirm(`قبول ${pend.length} طلب؟`)) return; for (const p of pend) await S.store.approvePending(p); }
+        if (okAll) { if (!confirm(`قبول ${pend.length} طلب؟`)) return; for (const p of pend) await S.store.approvePending(p); }
         else if (ok) await S.store.approvePending(pend.find(x => x.code === ok.dataset.ok));
         else { if (!confirm('رفض الطلب؟')) return; await S.store.rejectPending(no.dataset.no); }
         teacherStudents();
       } catch (er) { alert(er.message); }
       return;
     }
+    const eb = e.target.closest('button[data-edit]');
+    if (eb) { const st0 = list.find(x => x.code === eb.dataset.edit); if (await editStudent(st0, groups, all, pend)) teacherStudents(); return; }
     const b = e.target.closest('button[data-del]'); if (!b) return;
     const s = list.find(x => x.code === b.dataset.del);
     if (!confirm(`حذف الطالب "${s.name}" ونتايجه المنشورة؟`)) return;
@@ -1029,15 +1139,37 @@ async function teacherStudents() {
   };
 }
 
+/* تعديل بيانات طالب (الاسم والكود والمجموعة). تغيير الكود مسموح بس لو الطالب لسه معندوش نتايج */
+async function editStudent(s, groups, all, pend, preset) {
+  const v = preset || { name: s.name, code: s.code, group: s.group || '' };
+  const r = await modal({ title: 'تعديل الطالب', ok: 'حفظ', html: `<label>الاسم</label><input type="text" id="esn" value="${esc(v.name)}">
+    <label>الكود</label><input type="text" id="esc" dir="ltr" value="${esc(v.code)}" autocapitalize="none" autocomplete="off" style="letter-spacing:2px">
+    <div class="muted" style="font-size:.85rem">حروف إنجليزي وأرقام (3 لـ 20)، والكبير والصغير بيفرقوا.</div>
+    ${groups.length ? `<label>المجموعة</label><select id="esg">${grpOptions(groups, v.group)}</select>` : ''}`,
+    read: o => ({ name: o.querySelector('#esn').value.trim().replace(/\s+/g, ' '), code: o.querySelector('#esc').value.trim(), group: o.querySelector('#esg') ? o.querySelector('#esg').value : (s.group || '') }) });
+  if (!r) return false;
+  const bad = m => modal({ title: 'تعذر الحفظ', text: m, ok: 'حاضر', cancel: '' }).then(() => editStudent(s, groups, all, pend, r));
+  if (r.name.length < 2) return bad('اكتب اسم الطالب');
+  if (!/^[A-Za-z0-9]{3,20}$/.test(r.code)) return bad('الكود لازم 3 لـ 20 حرف إنجليزي أو أرقام بس');
+  try {
+    if (r.code !== s.code) {
+      if ([...all, ...pend].some(x => x.code === r.code) || (await S.store.getStudent(r.code))) return bad('الكود ده مستخدم عند طالب تاني');
+      if ((await S.store.listResultsByStudent(s.code)).length) return bad('الطالب ده سلّم امتحانات قبل كده وتغيير كوده هيفصل نتايجه عنه. لو لازم تغيّره امسح نتايجه من صفحة نتائج الامتحان الأول.');
+    }
+    await S.store.renameStudent(s.code, { ...s, name: r.name, code: r.code, group: r.group });
+    return true;
+  } catch (er) { return bad(er.message); }
+}
+
 /* ----- الإعدادات: المجموعات وأبواب المنهج لكل مادة ----- */
 async function teacherSettings() {
   teacherShell('settings', loadingInner);
   const cfg = await S.store.getSettings();
   teacherShell('settings', `<div class="card"><b>المجموعات</b>
-  <p class="muted" style="margin:4px 0">اكتب اسم كل مجموعة في سطر، مثلًا: مجموعة السبت. بعد الحفظ تحدد مجموعة كل طالب من تبويب الطلاب، وتخصص الامتحان لمجموعة أو أكتر. الطالب اللي بيسجل بنفسه بيختار مجموعته.</p>
+  <details class="hint"><summary>ℹ️ اكتب اسم كل مجموعة في…</summary><p class="muted" style="margin:4px 0">اكتب اسم كل مجموعة في سطر، مثلًا: مجموعة السبت. بعد الحفظ تحدد مجموعة كل طالب من تبويب الطلاب، وتخصص الامتحان لمجموعة أو أكتر. الطالب اللي بيسجل بنفسه بيختار مجموعته.</p></details>
   <textarea id="grps" rows="4" placeholder="مجموعة السبت&#10;مجموعة الاتنين">${esc((cfg.groups || []).join('\n'))}</textarea></div>
   ${Object.keys(SUBJECTS).map(k => `<div class="card"><b>أبواب ${subjLabel(k)}</b>
-  <p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والمدرس مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p>
+  <details class="hint"><summary>ℹ️ كل باب أو درس في…</summary><p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والدكتور مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p></details>
   <textarea id="tp_${k}" rows="7" placeholder="الباب الأول: ...&#10;الباب الثاني: ...">${esc(topicsOf(cfg, k).join('\n'))}</textarea></div>`).join('')}
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
   $('#svs').onclick = async () => {
@@ -1051,7 +1183,7 @@ async function teacherSettings() {
   };
 }
 
-/* ----- صفحة الطالب عند المدرس: ملخص الأداء ----- */
+/* ----- صفحة الطالب عند الدكتور: ملخص الأداء ----- */
 async function teacherStudent(code) {
   teacherShell('students', loadingInner);
   const st = await S.store.getStudent(code);
@@ -1064,8 +1196,8 @@ async function teacherStudent(code) {
     info[id] = { m, qs: c.questions, k };
   }));
   const rows = rs.filter(r => info[r.examId] && info[r.examId].k).map(r => {
-    const x = info[r.examId], total = x.qs.length;
-    return { r, subject: subjOf(x.m), title: x.m.title, total, score: r.answers.reduce((s, a, i) => s + (a === x.k.answers[i] ? 1 : 0), 0), topics: byTopic(x.qs, r.answers, x.k.answers) };
+    const x = info[r.examId], sc = scoreOf(x.qs, r.answers, x.k.answers, r.grades);
+    return { r, subject: subjOf(x.m), title: x.m.title, total: sc.total, score: sc.score, pending: sc.pending, topics: byTopic(x.qs, r.answers, x.k.answers) };
   });
   const pct = x => x.total ? Math.round(x.score / x.total * 100) : 0;
   const avg = rows.length ? Math.round(rows.reduce((s, x) => s + pct(x), 0) / rows.length) : 0;
@@ -1074,7 +1206,7 @@ async function teacherStudent(code) {
   <div class="card"><h2 style="margin:0">${esc(st.name)}</h2><div class="muted">${st.group ? esc(st.group) : 'بدون مجموعة'} · الكود: <span class="code" style="font-size:.9rem">${esc(st.code)}</span></div></div>
   <div class="stat"><div><b>${rows.length}</b>امتحانات</div><div><b>${rows.length ? avg + '%' : '-'}</b>المتوسط</div></div>
   ${tp || (rows.length ? '<div class="card muted">مفيش أبواب مربوطة بالأسئلة. حدد الأبواب من الإعدادات وربطها بالأسئلة في محرر الامتحان.</div>' : '')}
-  <div class="card"><b>الامتحانات</b>${rows.length ? `<div class="tbl"><table><tr><th>الامتحان</th><th>المادة</th><th>الدرجة</th><th>%</th><th>التاريخ</th></tr>${rows.map(x => `<tr><td>${esc(x.title)}</td><td>${subjLabel(x.subject)}</td><td>${x.score}/${x.total}</td><td>${pct(x)}%</td><td>${fmtDate(x.r.submittedAt)}</td></tr>`).join('')}</table></div>` : '<p class="muted">لسه ما سلّمش أي امتحان.</p>'}</div>`);
+  <div class="card"><b>الامتحانات</b>${rows.length ? `<div class="tbl"><table><tr><th>الامتحان</th><th>المادة</th><th>الدرجة</th><th>%</th><th>التاريخ</th></tr>${rows.map(x => `<tr><td>${esc(x.title)}</td><td>${subjLabel(x.subject)}</td><td>${fmtN(x.score)}/${fmtN(x.total)}${x.pending ? ' <span class="badge warn">مقالي لم يُصحح</span>' : ''}</td><td>${pct(x)}%</td><td>${fmtDate(x.r.submittedAt)}</td></tr>`).join('')}</table></div>` : '<p class="muted">لسه ما سلّمش أي امتحان.</p>'}</div>`);
 }
 
 /* ----- الملفات (حتى 5 ميجا، بتتقسم لأجزاء) ----- */
@@ -1089,10 +1221,10 @@ async function teacherFiles() {
   <div id="bl"><label for="mu">الرابط</label><input type="url" id="mu" dir="ltr" placeholder="https://..."></div>
   <div id="bf" style="display:none"><label for="mf">الملف</label><input type="file" id="mf"></div>
   <div id="msg"></div><button class="btn block" id="addm">نشر للطلاب</button>
-  <p class="muted" style="font-size:.85rem;margin:8px 0 0">الملفات الأكبر من 5 ميجا (أو الفيديو) ارفعها على Google Drive أو يوتيوب وحط الرابط. افتح الرابط للجميع (Anyone with the link).</p></div>
+  <details class="hint"><summary>ℹ️ الملفات الأكبر من 5 ميجا…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الملفات الأكبر من 5 ميجا (أو الفيديو) ارفعها على Google Drive أو يوتيوب وحط الرابط. افتح الرابط للجميع (Anyone with the link).</p></details></div>
   <h2>الملفات المنشورة</h2>
   ${list.length ? list.map(m => `<div class="card"><div class="row"><span style="font-size:1.4rem">${m.kind === 'link' ? '🔗' : '📄'}</span><div class="grow"><b>${esc(m.title)}</b>${m.desc ? `<div class="muted">${esc(m.desc)}</div>` : ''}<div class="muted" style="font-size:.8rem">${subjLabel(subjOf(m))} · ${fmtDate(m.createdAt)}</div></div>
-  <button class="btn sm danger" data-del="${m.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش ملفات.</div>'}`);
+  <button class="btn sm ghost" data-edit="${m.id}">تعديل</button><button class="btn sm danger" data-del="${m.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش ملفات.</div>'}`);
   $('#mk').onchange = () => { const f = $('#mk').value === 'file'; $('#bl').style.display = f ? 'none' : ''; $('#bf').style.display = f ? '' : 'none'; };
   $('#addm').onclick = async () => {
     const title = $('#mt').value.trim(), desc = $('#md').value.trim(), kind = $('#mk').value;
@@ -1112,10 +1244,37 @@ async function teacherFiles() {
     } catch (e) { $('#addm').disabled = false; $('#addm').textContent = 'نشر للطلاب'; setMsg(e.message); }
   };
   $('#app').onclick = async e => {
+    const eb = e.target.closest('button[data-edit]');
+    if (eb) { if (await editMaterial(list.find(x => x.id === eb.dataset.edit))) teacherFiles(); return; }
     const b = e.target.closest('button[data-del]'); if (!b) return;
     if (!confirm('حذف الملف؟')) return;
     try { await S.store.deleteMaterial(list.find(x => x.id === b.dataset.del)); teacherFiles(); } catch (er) { alert(er.message); }
   };
+}
+
+/* تعديل ملف أو رابط منشور: العنوان والوصف والمادة، والرابط، أو استبدال الملف نفسه */
+async function editMaterial(m, preset) {
+  const v = preset || { title: m.title, desc: m.desc || '', subject: subjOf(m), url: m.url || '' };
+  const r = await modal({ title: 'تعديل ' + (m.kind === 'link' ? 'الرابط' : 'الملف'), ok: 'حفظ', html: `<label>العنوان</label><input type="text" id="emt" value="${esc(v.title)}">
+    <label>وصف (اختياري)</label><input type="text" id="emd" value="${esc(v.desc)}">
+    <label>المادة</label><select id="ems">${subjOptions(v.subject)}</select>
+    ${m.kind === 'link' ? `<label>الرابط</label><input type="url" id="emu" dir="ltr" value="${esc(v.url)}">`
+      : `<label>استبدال الملف (اختياري)</label><input type="file" id="emf"><div class="muted" style="font-size:.85rem">الملف الحالي: ${esc(m.fileName || '')}. سيب الخانة فاضية لو مش عايز تغيّره.</div>`}`,
+    read: o => ({ title: o.querySelector('#emt').value.trim(), desc: o.querySelector('#emd').value.trim(), subject: o.querySelector('#ems').value, url: o.querySelector('#emu') ? o.querySelector('#emu').value.trim() : '', file: o.querySelector('#emf') ? o.querySelector('#emf').files[0] : null }) });
+  if (!r) return false;
+  const bad = t => modal({ title: 'تعذر الحفظ', text: t, ok: 'حاضر', cancel: '' }).then(() => editMaterial(m, r));
+  if (!r.title) return bad('اكتب عنوان');
+  const m2 = { ...m, title: r.title, desc: r.desc, subject: r.subject };
+  let parts = null;
+  try {
+    if (m.kind === 'link') { if (!isHttp(r.url)) return bad('اكتب رابط صحيح يبدأ بـ https://'); if (r.url !== m.url) m2.updatedAt = Date.now(); m2.url = r.url; }
+    else if (r.file) {
+      if (r.file.size > MAX_FILE) return bad('الملف أكبر من 5 ميجا. ارفعه على Google Drive وحط الرابط.');
+      const url = await readDataUrl(r.file); parts = chunkStr(url.slice(url.indexOf(',') + 1));
+      Object.assign(m2, { parts: parts.length, fileName: r.file.name, mime: r.file.type || 'application/octet-stream', size: r.file.size, updatedAt: Date.now() });
+    }
+    await S.store.updateMaterial(m, m2, parts); return true;
+  } catch (er) { return bad(er.message); }
 }
 
 /* ----- محرر الامتحان ----- */
@@ -1386,7 +1545,7 @@ function parseCardText(items) {
     return clean(rs.map(r => joinRow(r.items)).join(' '));
   };
   const all = rows.flatMap(r => r.items);
-  if (!chain || chain.length < 2) return { text: textOf(all), options: [], nOpt: 0, flag: 'مفيش اختيارات (سؤال مقالي أو فيه شكل)' };
+  if (!chain || chain.length < 2) return { text: textOf(all), options: [], nOpt: 0, partN: [], flag: 'مفيش اختيارات (اتعرف كسؤال مقالي)' };
   const mk = chain.map(m => ({ y: m.y, r: m.r }));
   const stem = [], opts = chain.map(() => []);
   all.filter(it => it.keep !== '').forEach(it => {
@@ -1396,10 +1555,12 @@ function parseCardText(items) {
     if (bi < 0) stem.push(it); else opts[bi].push(it);
   });
   const options = opts.map(textOf);
+  const starts = cand.map((m, k) => k).filter(k => cand[k].idx === 0), partN = [];
+  starts.forEach((k, si) => { const end = si + 1 < starts.length ? starts[si + 1] : cand.length; let len = 1; for (let j = k + 1; j < end; j++) if (cand[j].idx === len) len++; if (len >= 2) partN.push(len); });
   const flags = [];
-  if (cand.filter(c => !chain.includes(c) && c.idx === 0).length) flags.push('فيه أكتر من مجموعة اختيارات (سؤال بأجزاء)، الأفضل تستخدم صورة الكارت');
+  if (partN.length > 1) flags.push(`اتعرف إنه سؤال بأجزاء (${partN.length} أجزاء) وكل جزء له اختياراته، حدد إجابة كل جزء`);
   if (options.some(o => !o)) flags.push('فيه اختيار فاضي');
-  return { text: textOf(stem), options, nOpt: chain.length, flag: flags.join(' · ') };
+  return { text: textOf(stem), options, nOpt: chain.length, partN: partN.length > 1 ? partN : [], flag: flags.join(' · ') };
 }
 function figureOf(g, r, S_, cv) {
   const inside = g.imgs.filter(m => { const cx = (m.x0 + m.x1) / 2 * S_, cy = (m.y0 + m.y1) / 2 * S_; return cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h && (m.x1 - m.x0) * (m.y1 - m.y0) > 400; });
@@ -1418,8 +1579,8 @@ async function scanPdf(pdf, say) {
     const hasText = g.items.some(it => it.s.trim());
     found.forEach(f => {
       const pt = parseCardText(itemsIn(g, f.rect, S_));
-      const essay = hasText && !pt.nOpt;
-      cards.push({ id: uid(), page: n, num: f.num, img: cropCanvas(cv, f.rect, 1000), fig: pt.nOpt ? figureOf(g, f.rect, S_, cv) : '', text: pt.text, options: pt.options, nOpt: pt.nOpt, flag: pt.flag, mode: 'img', ignore: essay, correct: -1, topic: '' });
+      const essay = hasText && !pt.nOpt, pn = pt.partN.length > 1 ? pt.partN : [pt.nOpt || 0];
+      cards.push({ id: uid(), page: n, num: f.num, img: cropCanvas(cv, f.rect, 1000), fig: (pt.nOpt || essay) ? figureOf(g, f.rect, S_, cv) : '', text: pt.text, options: pt.options, nOpt: pt.nOpt, partN: pn, cp: pn.map(() => -1), essay, flag: pt.flag, mode: 'img', ignore: false, topic: '' });
     });
     cv.width = cv.height = 0;
   }
@@ -1435,7 +1596,7 @@ async function pdfPagesToImages(pdf, say) {
   }
   return out;
 }
-/* قص يدوي: المدرس يرسم مستطيل على الصفحة فيتضاف كسؤال */
+/* قص يدوي: الدكتور يرسم مستطيل على الصفحة فيتضاف كسؤال */
 async function manualCrop(pdf, onAdd) {
   const ov = document.createElement('div'); ov.className = 'cropov';
   ov.innerHTML = `<div class="row"><b class="grow">اسحب على السؤال (بالماوس أو بصباعك) عشان تقصه</b><button class="btn sm ghost" data-a="prev">‹ السابقة</button><span id="cpn"></span><button class="btn sm ghost" data-a="next">التالية ›</button><button class="btn sm" data-a="close">تم</button></div><div id="cnote" class="muted" style="margin:4px 0"></div><div id="cbx"></div>`;
@@ -1443,7 +1604,7 @@ async function manualCrop(pdf, onAdd) {
   let pn = 1, cv = null, added = 0;
   const show = async () => {
     ov.querySelector('#cpn').textContent = pn + ' / ' + pdf.numPages;
-    const box = ov.querySelector('#cbx'); box.innerHTML = '<p class="muted">جاري التحميل...</p>';
+    const box = ov.querySelector('#cbx'); box.innerHTML = '';
     cv = await renderPage(await pdf.getPage(pn), 3);
     box.innerHTML = '<div class="cropbox"></div>'; const cb = box.firstChild; cb.appendChild(cv);
     const sel = document.createElement('div'); sel.className = 'sel'; sel.style.display = 'none'; cb.appendChild(sel);
@@ -1475,32 +1636,39 @@ function openImport(ex, redraw) {
   const tps = topicsOf(S.cfg, ex.subject);
   const METHODS = [['img', '🖼 PDF كصور (كل سؤال صورة)'], ['pdf', '🔤 PDF نص + صور'], ['txt', '📋 لصق نص'], ['bub', '📄 PDF + بابل شيت']];
   const topicSel = c => tps.length ? `<select data-f="topic" style="margin-top:6px"><option value="">بدون باب</option>${tps.map(t => `<option value="${esc(t)}" ${t === c.topic ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : '';
+  const isEss = c => c.mode === 'essimg' || c.mode === 'esstext';
+  const pnOf = (c, j) => c.partN[j] || c.nOpt || imp.defN;
+  const modeOf = c => c.essay ? ((imp.method === 'pdf' && c.text.trim().length > 15) ? 'esstext' : 'essimg') : (imp.method === 'pdf' && c.options.length >= 2 && c.partN.length <= 1 && !c.flag ? 'text' : 'img');
+  const partRow = (c, j) => { const n = pnOf(c, j), np = c.partN.length; return `<div class="row part">${np > 1 ? `<b>(${j + 1})</b><select data-f="pn" data-j="${j}" style="width:auto">${[2, 3, 4, 5].map(k => `<option value="${k}" ${k === n ? 'selected' : ''}>${k} اختيارات</option>`).join('')}</select>` : '<span class="muted">الإجابة الصحيحة:</span>'}<div class="pills" style="margin:0">${Array.from({ length: n }, (_, k) => `<label class="pill sm"><input type="radio" name="cc${c.id}_${j}" data-f="correct" data-j="${j}" value="${k}" ${c.cp[j] === k ? 'checked' : ''}><span>${LETTERS[k]}</span></label>`).join('')}</div></div>`; };
   const cardHtml = c => {
-    const textOk = c.options.length >= 2, n = c.mode === 'text' && textOk ? c.options.length : (c.nOpt || imp.defN);
+    const textOk = c.options.length >= 2 && c.partN.length <= 1, ess = isEss(c);
     return `<div class="card" data-c="${c.id}" style="${c.ignore ? 'opacity:.55' : ''}">
     <div class="row"><b class="grow">سؤال ${c.num || '؟'} · صفحة ${c.page}</b>
-    <select data-f="mode" style="width:auto"><option value="img" ${c.mode === 'img' ? 'selected' : ''}>صورة الكارت</option><option value="text" ${c.mode === 'text' ? 'selected' : ''} ${textOk ? '' : 'disabled'}>نص + اختيارات</option></select>
+    <select data-f="mode" style="width:auto"><option value="img" ${c.mode === 'img' ? 'selected' : ''}>صورة الكارت</option><option value="text" ${c.mode === 'text' ? 'selected' : ''} ${textOk ? '' : 'disabled'}>نص + اختيارات</option><option value="essimg" ${c.mode === 'essimg' ? 'selected' : ''}>مقالي (صورة الكارت)</option><option value="esstext" ${c.mode === 'esstext' ? 'selected' : ''} ${c.text.trim() ? '' : 'disabled'}>مقالي (نص)</option></select>
     <label class="row" style="margin:0;font-weight:400"><input type="checkbox" data-f="ignore" ${c.ignore ? 'checked' : ''}> تجاهل</label></div>
-    ${c.flag ? `<div class="msg warn" style="padding:4px 10px;margin:6px 0">${esc(c.flag)}</div>` : ''}
-    ${c.mode === 'text' && textOk ? `<div class="imgchoice"><div>${esc(c.text) || '<span class="muted">(من غير نص)</span>'}</div>${c.options.map((o, k) => `<div class="muted">${LETTERS[k]}) ${esc(o)}</div>`).join('')}${c.fig ? `<img class="thumb" src="${c.fig}" alt="">` : ''}</div>`
-      : `<img class="thumb" src="${c.img}" alt="">`}
-    <div class="pills"><span class="muted">الإجابة الصحيحة:</span>${Array.from({ length: n }, (_, k) => `<label class="pill sm"><input type="radio" name="cc${c.id}" data-f="correct" value="${k}" ${c.correct === k ? 'checked' : ''}><span>${LETTERS[k]}</span></label>`).join('')}</div>${topicSel(c)}</div>`;
+    ${c.flag ? `<div class="msg ${c.essay ? 'ok' : 'warn'}" style="padding:4px 10px;margin:6px 0">${esc(c.flag)}</div>` : ''}
+    ${c.mode === 'esstext' ? `<div class="imgchoice"><div>${esc(c.text)}</div>${c.fig ? `<img class="thumb" src="${c.fig}" alt="">` : ''}</div>`
+      : (c.mode === 'text' && textOk ? `<div class="imgchoice"><div>${esc(c.text) || '<span class="muted">(من غير نص)</span>'}</div>${c.options.map((o, k) => `<div class="muted">${LETTERS[k]}) ${esc(o)}</div>`).join('')}${c.fig ? `<img class="thumb" src="${c.fig}" alt="">` : ''}</div>`
+        : `<img class="thumb" src="${c.img}" alt="">`)}
+    ${ess ? '<div class="muted" style="margin-top:6px">هيتضاف كسؤال مقالي: الطالب يكتب أو يرفع صورة، وانت بتصححه وتحط الدرجة.</div>'
+      : `${c.mode === 'img' ? `<div class="row" style="margin-top:6px"><span class="muted">عدد الأجزاء (كل جزء له اختياراته):</span><select data-f="nparts" style="width:auto">${[1, 2, 3, 4].map(k => `<option ${k === c.partN.length ? 'selected' : ''}>${k}</option>`).join('')}</select></div>` : ''}
+      ${(c.mode === 'img' ? c.partN : [0]).map((_, j) => partRow(c, j)).join('')}`}${topicSel(c)}</div>`;
   };
   const render = () => {
     const m = imp.method, tabs = `<div class="chips">${METHODS.map(([k, l]) => `<button class="chip ${m === k ? 'on' : ''}" data-a="m" data-m="${k}">${l}</button>`).join('')}</div>`;
     let body = '';
     if (m === 'img' || m === 'pdf') {
-      body = `<p class="muted" style="margin:4px 0">${m === 'img'
+      body = `<details class="hint"><summary>ℹ️ توضيح</summary><p class="muted" style="margin:4px 0">${m === 'img'
         ? 'بيقسّم الـ PDF لصور، كل سؤال (بنصه واختياراته) صورة، وانت بتحدد الإجابة الصحيحة. الطالب بيشوف الصورة وتحتها أ ب ج د. شغال مع أي PDF حتى المصور.'
-        : 'بيستخرج النص (نص السؤال والاختيارات) والصور اللي جنب كل سؤال. لو سؤال طلع غلط (جدول أو سؤال بأجزاء) غيّر طريقته لـ "صورة الكارت".'}</p>
-      <p class="muted" style="margin:4px 0;font-size:.85rem">بيتعرف على الأسئلة من علامة "س 1" و"س 2" ... على كل كارت. لو الملف شكله مختلف استخدم زر "قص يدوي".</p>
+        : 'بيستخرج النص (نص السؤال والاختيارات) والصور اللي جنب كل سؤال. لو سؤال طلع غلط (جدول أو سؤال بأجزاء) غيّر طريقته لـ "صورة الكارت".'}</p></details>
+      <details class="hint"><summary>ℹ️ بيتعرف على الأسئلة من علامة…</summary><p class="muted" style="margin:4px 0;font-size:.85rem">بيتعرف على الأسئلة من علامة "س 1" و"س 2" ... على كل كارت. لو الملف شكله مختلف استخدم زر "قص يدوي".</p></details>
       <input type="file" id="pdf" accept="application/pdf">
       ${imp.cards.length || imp.pdf ? `<div class="row" style="margin-top:8px"><label class="row" style="margin:0;font-weight:400">عدد الاختيارات لو مش متعرف عليه: <select data-a="defn" style="width:auto">${[2, 3, 4, 5].map(n => `<option ${n === imp.defN ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
       ${imp.pdf ? '<button class="btn sm ghost" data-a="manual">✂ قص يدوي لسؤال</button>' : ''}</div>` : ''}
       <div id="impSt" class="${imp.busy ? 'muted' : ''}" style="margin:6px 0">${esc(imp.busy)}</div>
-      ${imp.cards.length ? `<div class="card"><b>مفتاح الإجابات (اختياري)</b><p class="muted" style="margin:2px 0">الصق الإجابات بشكل 1-أ 2-ب 3-ج أو أ ب ج د بالترتيب، وبيتطبق على الأسئلة غير المتجاهلة.</p>
+      ${imp.cards.length ? `<div class="card"><b>مفتاح الإجابات (اختياري)</b><details class="hint"><summary>ℹ️ الصق الإجابات بشكل 1-أ 2-ب…</summary><p class="muted" style="margin:2px 0">الصق الإجابات بشكل 1-أ 2-ب 3-ج أو أ ب ج د بالترتيب، وبيتطبق على الأسئلة غير المتجاهلة.</p></details>
       <textarea id="keyTx" rows="2" dir="auto"></textarea><button class="btn sm ghost" data-a="key" style="margin-top:6px">تطبيق المفتاح</button></div>
-      <div class="row"><b class="grow">${imp.cards.filter(c => !c.ignore).length} سؤال هيتضاف من ${imp.cards.length}</b></div>
+      <div class="row"><b class="grow">${imp.cards.filter(c => !c.ignore).length} سؤال هيتضاف من ${imp.cards.length}${imp.cards.some(c => !c.ignore && isEss(c)) ? ` (منها ${imp.cards.filter(c => !c.ignore && isEss(c)).length} مقالي)` : ''}</b>${tps.length ? `<select data-a="btopic" style="width:auto"><option value="">الباب لكل الأسئلة...</option>${tps.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>` : ''}</div>
       <div id="cards">${imp.cards.map(cardHtml).join('')}</div>
       <button class="btn block" data-a="add">إضافة الأسئلة للامتحان</button>` : ''}`;
     } else if (m === 'txt') {
@@ -1509,12 +1677,12 @@ function openImport(ex, redraw) {
 أ) اختيار   ب) اختيار
 ج) اختيار   د) اختيار
 الإجابة: ب</pre>
-      <p class="muted" style="margin:4px 0">الاختيارات ممكن تبقى في سطر واحد أو كل واحد في سطر. وممكن تحط الإجابات في الآخر (1-ب 2-ج ...) أو في خانة المفتاح تحت.</p>
+      <details class="hint"><summary>ℹ️ الاختيارات ممكن تبقى في سطر…</summary><p class="muted" style="margin:4px 0">الاختيارات ممكن تبقى في سطر واحد أو كل واحد في سطر. وممكن تحط الإجابات في الآخر (1-ب 2-ج ...) أو في خانة المفتاح تحت.</p></details>
       <textarea id="impTx" rows="10" placeholder="الصق الأسئلة هنا"></textarea>
       <label for="keyTx2">مفتاح الإجابات (اختياري)</label><textarea id="keyTx2" rows="2" dir="auto" placeholder="1-أ 2-ب 3-ج"></textarea>
       <div id="impSt" style="margin:6px 0"></div><button class="btn" data-a="parse">تحليل وإضافة الأسئلة</button>`;
     } else {
-      body = `<p class="muted" style="margin:4px 0">بتعرض ملف الـ PDF للطالب زي ما هو (صفحات)، ومعاه "ورقة إجابة" (بابل شيت) يقدر يظهرها ويخفيها ويجاوب فيها، وبتتصحح لوحدها. انت بتحدد عدد الأسئلة والإجابات الصحيحة.</p>
+      body = `<details class="hint"><summary>ℹ️ بتعرض ملف الـ PDF للطالب…</summary><p class="muted" style="margin:4px 0">بتعرض ملف الـ PDF للطالب زي ما هو (صفحات)، ومعاه "ورقة إجابة" (بابل شيت) يقدر يظهرها ويخفيها ويجاوب فيها، وبتتصحح لوحدها. انت بتحدد عدد الأسئلة والإجابات الصحيحة.</p></details>
       <button class="btn" data-a="bub">تحويل الامتحان لنوع "PDF + بابل شيت"</button>`;
     }
     host.innerHTML = `<div class="card"><div class="row"><b class="grow">استيراد أسئلة</b><button class="btn sm ghost" data-a="x">إغلاق</button></div>${tabs}${body}</div>`;
@@ -1528,7 +1696,7 @@ function openImport(ex, redraw) {
     try {
       imp.pdf = await openPdf(f);
       const { cards, noCards } = await scanPdf(imp.pdf, say);
-      cards.forEach(c => { c.mode = imp.method === 'pdf' && c.options.length >= 2 && !c.flag ? 'text' : 'img'; });
+      cards.forEach(c => { c.mode = modeOf(c); });
       imp.cards = cards; imp.busy = '';
       render();
       if (!cards.length) sayX('ما لقيتش كروت أسئلة عليها علامة "س 1". استخدم زر "قص يدوي" وحدد كل سؤال بنفسك.', 'bad');
@@ -1541,11 +1709,14 @@ function openImport(ex, redraw) {
   host.onchange = e => {
     const t = e.target, d = t.dataset;
     if (d.a === 'defn') { imp.defN = +t.value; render(); return; }
+    if (d.a === 'btopic') { if (t.value) imp.cards.forEach(c => { c.topic = t.value; }); render(); return; }
     const cd = t.closest('[data-c]'); if (!cd) return;
     const c = imp.cards.find(x => x.id === cd.dataset.c); if (!c) return;
     if (d.f === 'mode') { c.mode = t.value; render(); }
     else if (d.f === 'ignore') { c.ignore = t.checked; render(); }
-    else if (d.f === 'correct') c.correct = +t.value;
+    else if (d.f === 'correct') c.cp[+d.j || 0] = +t.value;
+    else if (d.f === 'pn') { c.partN[+d.j] = +t.value; if (c.cp[+d.j] >= +t.value) c.cp[+d.j] = -1; render(); }
+    else if (d.f === 'nparts') { const k = +t.value, last = c.partN[c.partN.length - 1] || c.nOpt || 0; c.partN = Array.from({ length: k }, (_, j) => c.partN[j] ?? last); c.cp = Array.from({ length: k }, (_, j) => c.cp[j] ?? -1); render(); }
     else if (d.f === 'topic') c.topic = t.value;
   };
   host.onclick = e => {
@@ -1554,17 +1725,17 @@ function openImport(ex, redraw) {
     if (a === 'x') { host.innerHTML = ''; return; }
     if (a === 'm') {
       imp.method = S.impMethod = b.dataset.m;
-      if (imp.method === 'img' || imp.method === 'pdf') imp.cards.forEach(c => { c.mode = imp.method === 'pdf' && c.options.length >= 2 && !c.flag ? 'text' : 'img'; });
+      if (imp.method === 'img' || imp.method === 'pdf') imp.cards.forEach(c => { c.mode = modeOf(c); });
       render(); return;
     }
     if (a === 'manual') {
-      manualCrop(imp.pdf, r => { imp.cards.push({ id: uid(), page: r.page, num: '', img: r.img, fig: '', text: '', options: [], nOpt: 0, flag: '', mode: 'img', ignore: false, correct: -1, topic: '' }); render(); });
+      manualCrop(imp.pdf, r => { imp.cards.push({ id: uid(), page: r.page, num: '', img: r.img, fig: '', text: '', options: [], nOpt: 0, partN: [0], cp: [-1], essay: false, flag: '', mode: 'img', ignore: false, topic: '' }); render(); });
       return;
     }
     if (a === 'key') {
-      const k = parseKey($('#keyTx').value), use = imp.cards.filter(c => !c.ignore); let n = 0;
-      if (Object.keys(k.byNum).length) use.forEach(c => { if (c.num !== '' && k.byNum[c.num] !== undefined) { c.correct = k.byNum[c.num]; n++; } });
-      else k.seq.forEach((v, i) => { if (use[i]) { use[i].correct = v; n++; } });
+      const k = parseKey($('#keyTx').value), use = imp.cards.filter(c => !c.ignore && !isEss(c)); let n = 0;
+      if (Object.keys(k.byNum).length) use.forEach(c => { if (c.num !== '' && k.byNum[c.num] !== undefined) { c.cp[0] = k.byNum[c.num]; n++; } });
+      else { const slots = use.flatMap(c => (c.mode === 'img' ? c.partN : [0]).map((_, j) => [c, j])); k.seq.forEach((v, i) => { if (slots[i]) { slots[i][0].cp[slots[i][1]] = v; n++; } }); }
       render(); sayX(n ? `اتطبقت ${n} إجابة.` : 'مقدرتش أفهم المفتاح. اكتبه بشكل 1-أ 2-ب 3-ج.', n ? 'ok' : 'bad'); return;
     }
     if (a === 'add') {
@@ -1572,10 +1743,12 @@ function openImport(ex, redraw) {
       if (!use.length) return sayX('مفيش أسئلة مختارة للإضافة.', 'bad');
       clearBlank();
       use.forEach(c => {
-        if (c.mode === 'text' && c.options.length >= 2) ex.questions.push({ text: c.text, image: c.fig || '', options: c.options.slice(), correct: c.correct, topic: c.topic || '' });
-        else ex.questions.push({ text: '', image: c.img, options: LETTERS.slice(0, c.nOpt || imp.defN), letters: true, correct: c.correct, topic: c.topic || '' });
+        if (c.mode === 'essimg') ex.questions.push({ type: 'essay', text: '', image: c.img, options: [], correct: -1, topic: c.topic || '', pts: 5 });
+        else if (c.mode === 'esstext') ex.questions.push({ type: 'essay', text: c.text, image: c.fig || '', options: [], correct: -1, topic: c.topic || '', pts: 5 });
+        else if (c.mode === 'text' && c.options.length >= 2 && c.partN.length <= 1) ex.questions.push({ text: c.text, image: c.fig || '', options: c.options.slice(), correct: c.cp[0], topic: c.topic || '', pts: 1 });
+        else c.partN.forEach((_, j) => ex.questions.push({ text: '', image: j ? '' : c.img, options: LETTERS.slice(0, pnOf(c, j)), letters: true, correct: c.cp[j] ?? -1, topic: c.topic || '', pts: 1, ...(j ? { cont: true } : {}) }));
       });
-      const noAns = use.filter(c => c.correct < 0).length;
+      const noAns = use.filter(c => !isEss(c) && (c.mode === 'img' ? c.cp : [c.cp[0]]).some(x => x < 0)).length;
       addNote(`تمت إضافة ${use.length} سؤال.` + (noAns ? ` ${noAns} منهم من غير إجابة صحيحة، حددها قبل الحفظ.` : '') + ' راجع الأسئلة قبل الحفظ.', noAns ? 'warn' : 'ok');
       return;
     }
@@ -1584,7 +1757,7 @@ function openImport(ex, redraw) {
       if (!valid.length) return sayX('ما لقيتش أسئلة بالشكل المطلوب. اتأكد إن كل سؤال له رقم وإن الاختيارات بتبدأ بـ أ) ب) ج) د).', 'bad');
       valid.forEach((q, i) => { if (q.correct < 0) { const v = Object.keys(k.byNum).length ? k.byNum[q.num] : k.seq[i]; if (v !== undefined && v < q.options.length) q.correct = v; } });
       clearBlank();
-      valid.forEach(q => ex.questions.push({ text: q.text, image: '', options: q.options, correct: q.correct, topic: '' }));
+      valid.forEach(q => ex.questions.push({ text: q.text, image: '', options: q.options, correct: q.correct, topic: '', pts: 1 }));
       const noAns = valid.filter(q => q.correct < 0).length;
       addNote(`تمت إضافة ${valid.length} سؤال.` + (noAns ? ` ${noAns} منهم من غير إجابة صحيحة محددة، حددها بنفسك.` : '') + (skipped ? ` ${skipped} اتتخطوا لأن اختياراتهم مش واضحة.` : '') + ' راجع كل الأسئلة قبل الحفظ.', noAns || skipped ? 'warn' : 'ok');
       return;
@@ -1602,19 +1775,19 @@ async function editor(id) {
     const [m, key] = await Promise.all([S.store.getExam(id), S.store.getKey(id)]);
     if (!m || !key) throw new Error('مش لاقي الامتحان');
     const nc = await loadExamContent(m, true);
-    ex = { ...JSON.parse(JSON.stringify(m)), subject: subjOf(m), type: m.type === 'bubble' ? 'bubble' : 'mcq', groups: m.groups || [], questions: [], pages: [], n: 30, choices: 4, bAns: [], bTopics: [], oldPacks: m.packs || 0, bPts: [], bEssays: [], release: m.release === 'instant' ? 'instant' : 'manual' };
-    if (ex.type === 'bubble') { const mq = nc.questions.filter(q => !isEssay(q)); ex.pages = nc.pages; ex.n = mq.length; ex.choices = mq[0] ? mq[0].options.length : 4; ex.bAns = key.answers.slice(0, mq.length); ex.bTopics = mq.map(q => q.topic || ''); ex.bPts = mq.map(q => qPts(q)); ex.bEssays = nc.questions.filter(isEssay).map(q => qPts(q)); }
+    ex = { ...JSON.parse(JSON.stringify(m)), subject: subjOf(m), type: m.type === 'bubble' ? 'bubble' : 'mcq', groups: m.groups || [], questions: [], pages: [], n: 30, choices: 4, bAns: [], bTopics: [], oldPacks: m.packs || 0, bPts: [], bEssays: [], bCont: [], showPts: m.showPts !== false, opensAt: m.opensAt || 0, closesAt: m.closesAt || 0, release: m.release === 'instant' ? 'instant' : 'manual' };
+    if (ex.type === 'bubble') { const mq = nc.questions.filter(q => !isEssay(q)); ex.pages = nc.pages; ex.n = mq.length; ex.choices = mq[0] ? mq[0].options.length : 4; ex.bAns = key.answers.slice(0, mq.length); ex.bTopics = mq.map(q => q.topic || ''); ex.bPts = mq.map(q => qPts(q)); ex.bCont = mq.map(q => !!q.cont); ex.bEssays = nc.questions.filter(isEssay).map(q => qPts(q)); }
     else { ex.questions = nc.questions; ex.questions.forEach((q, i) => { q.correct = key.answers[i] ?? 0; q.topic = q.topic || ''; q.pts = qPts(q); }); }
     if (!ex.questions.length) ex.questions = [newQ()];
-  } else ex = { id: uid(), title: '', subject: S.subjDash || 'bio', type: 'mcq', durationMin: 30, shuffle: true, active: true, createdAt: Date.now(), groups: [], questions: [newQ()], pages: [], n: 30, choices: 4, bAns: [], bTopics: [], bPts: [], bEssays: [], oldPacks: 0, release: 'manual', showAnswers: true };
+  } else ex = { id: uid(), title: '', subject: S.subjDash || 'bio', type: 'mcq', durationMin: 30, shuffle: true, active: true, createdAt: Date.now(), groups: [], questions: [newQ()], pages: [], n: 30, choices: 4, bAns: [], bTopics: [], bPts: [], bEssays: [], bCont: [], oldPacks: 0, release: 'manual', showAnswers: true, showPts: true, opensAt: 0, closesAt: 0 };
   drawEditor(ex, !!id);
 }
 
 const topicList = (cur, subj) => { const t = topicsOf(S.cfg, subj); return cur && !t.includes(cur) ? [...t, cur] : t; };
 const topicSelect = (cur, subj, attrs) => { const l = topicList(cur, subj); return l.length ? `<select ${attrs}><option value="">بدون باب</option>${l.map(t => `<option value="${esc(t)}" ${t === cur ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''; };
-function qEditor(q, i, subj) {
+function qEditor(q, i, subj, num, multi) {
   const pt = `<label class="muted" style="font-weight:400;margin:0">الدرجة <input type="number" min="0.25" step="0.25" data-q="${i}" data-f="pts" value="${fmtN(qPts(q))}" style="width:76px;display:inline-block"></label>`;
-  const head = `<div class="row"><b class="grow">سؤال ${i + 1}${q.letters ? ' <span class="badge">صورة + أ ب ج د</span>' : ''}${isEssay(q) ? ' <span class="badge">مقالي</span>' : ''}</b>${pt}<button class="btn sm danger" data-act="delq" data-q="${i}">حذف السؤال</button></div>`;
+  const head = `<div class="row"><b class="grow">سؤال ${num.n}${multi ? ' · جزء ' + num.p : ''}${q.letters && !q.cont ? ' <span class="badge">صورة + أ ب ج د</span>' : ''}${isEssay(q) ? ' <span class="badge">مقالي</span>' : ''}</b>${pt}<button class="btn sm danger" data-act="delq" data-q="${i}">${q.cont ? 'حذف الجزء' : 'حذف السؤال'}</button></div>`;
   const topic = topicList(q.topic, subj).length ? `<label style="margin:8px 0 2px">الباب</label>${topicSelect(q.topic, subj, `data-q="${i}" data-f="topic"`)}` : '';
   if (isEssay(q)) {
     return `<div class="card">${head}
@@ -1623,13 +1796,20 @@ function qEditor(q, i, subj) {
       : `<label style="font-weight:400" class="muted">صورة (اختياري): <input type="file" accept="image/*" data-q="${i}" data-f="img"></label>`}
     <div class="muted" style="margin-top:6px">الطالب بيكتب الإجابة أو يرفع صورة ورقته، وانت بتصححها وتحط الدرجة من صفحة النتائج.</div>${topic}</div>`;
   }
+  if (q.letters && q.cont) {
+    return `<div class="card" style="margin-inline-start:16px;border-inline-start:3px solid var(--accent)">${head}
+    <label style="margin:8px 0 2px">عدد الاختيارات</label><select data-q="${i}" data-f="nopt" style="width:auto">${[2, 3, 4, 5].map(n => `<option ${n === q.options.length ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    ${q.correct < 0 ? '<div class="msg bad" style="padding:4px 10px;margin:8px 0 4px">حدد الإجابة الصحيحة للجزء ده</div>' : '<div class="muted" style="margin-top:8px">الإجابة الصحيحة</div>'}
+    <div class="pills">${q.options.map((l, k) => `<label class="pill sm"><input type="radio" name="c${i}" data-q="${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div>${topic}</div>`;
+  }
   if (q.letters) {
     return `<div class="card">${head}
     ${q.image ? `<img class="thumb" src="${esc(q.image)}" alt="">` : '<div class="msg bad">مفيش صورة للسؤال ده</div>'}
     <textarea rows="1" data-q="${i}" data-f="text" placeholder="نص إضافي (اختياري)">${esc(q.text)}</textarea>
     <label style="margin:8px 0 2px">عدد الاختيارات</label><select data-q="${i}" data-f="nopt" style="width:auto">${[2, 3, 4, 5].map(n => `<option ${n === q.options.length ? 'selected' : ''}>${n}</option>`).join('')}</select>
     ${q.correct < 0 ? '<div class="msg bad" style="padding:4px 10px;margin:8px 0 4px">حدد الإجابة الصحيحة</div>' : '<div class="muted" style="margin-top:8px">الإجابة الصحيحة</div>'}
-    <div class="pills">${q.options.map((l, k) => `<label class="pill sm"><input type="radio" name="c${i}" data-q="${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div>${topic}</div>`;
+    <div class="pills">${q.options.map((l, k) => `<label class="pill sm"><input type="radio" name="c${i}" data-q="${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div>${topic}
+    <button class="btn sm ghost" data-act="addpart" data-q="${i}" style="margin-top:8px">+ جزء تاني للسؤال (له اختياراته وإجابته)</button></div>`;
   }
   return `<div class="card">${head}
   <textarea rows="2" data-q="${i}" data-f="text" placeholder="نص السؤال">${esc(q.text)}</textarea>
@@ -1644,9 +1824,9 @@ function qEditor(q, i, subj) {
 }
 
 function bubbleEditor(ex) {
-  const n = ex.n, tl = topicList('', ex.subject);
+  const n = ex.n, tl = topicList('', ex.subject), lab = qNums(Array.from({ length: n }, (_, i) => ({ cont: !!ex.bCont[i] && i > 0 })));
   return `<div class="card"><b>ملف الأسئلة (PDF)</b>
-  <p class="muted" style="margin:4px 0">الطالب بيشوف صفحات الملف زي ما هي، وجنبها ورقة إجابة يظهرها ويخفيها. الصفحات بتتحول لصور عشان تظهر على أي موبايل.</p>
+  <details class="hint"><summary>ℹ️ الطالب بيشوف صفحات الملف زي…</summary><p class="muted" style="margin:4px 0">الطالب بيشوف صفحات الملف زي ما هي، وجنبها ورقة إجابة يظهرها ويخفيها. الصفحات بتتحول لصور عشان تظهر على أي موبايل.</p></details>
   <input type="file" id="bpdf" accept="application/pdf"><div id="bst" class="muted" style="margin:6px 0"></div>
   ${ex.pages.length ? `<div class="muted">${ex.pages.length} صفحة · حوالي ${Math.round(ex.pages.reduce((s, p) => s + p.length, 0) * 0.75 / 1024)} كيلوبايت</div><div class="row" style="margin-top:6px">${ex.pages.map(p => `<img src="${esc(p)}" alt="" style="height:90px;border:1px solid var(--line);border-radius:6px;background:#fff">`).join('')}</div>` : ''}
   <div class="row" style="margin-top:10px"><label class="grow" style="margin:0">عدد الأسئلة<input type="number" min="1" max="200" data-k="n" value="${n}"></label>
@@ -1655,15 +1835,17 @@ function bubbleEditor(ex) {
   <p class="muted" style="margin:2px 0">الصق المفتاح (1-أ 2-ب 3-ج أو أ ب ج د بالترتيب) أو اضغط على الحروف.</p>
   <textarea id="bkey" rows="2" dir="auto"></textarea><button class="btn sm ghost" data-act="bkey" style="margin-top:6px">تطبيق المفتاح</button>
   <div class="row" style="margin-top:10px"><span class="muted">درجة كل الأسئلة:</span><input type="number" id="bbulk" min="0.25" step="0.25" value="1" style="width:80px"><button class="btn sm ghost" data-act="bbulk">طبّق</button></div>
-  ${tl.length ? `<div class="row" style="margin-top:10px"><span class="muted">ربط بباب:</span>${topicSelect('', ex.subject, 'id="brT" style="width:auto"')}<input type="number" id="brA" min="1" max="${n}" placeholder="من" style="width:70px"><input type="number" id="brB" min="1" max="${n}" placeholder="إلى" style="width:70px"><button class="btn sm ghost" data-act="brange">طبّق</button></div>` : ''}
-  <div style="margin-top:8px">${Array.from({ length: n }, (_, i) => `<div class="brow ${ex.bAns[i] >= 0 ? 'done' : ''}"><b>${i + 1}</b><div class="pills" style="margin:0;gap:6px">${Array.from({ length: ex.choices }, (_, k) => `<label class="pill sm"><input type="radio" name="ba${i}" data-ba="${i}" value="${k}" ${ex.bAns[i] === k ? 'checked' : ''}><span>${LETTERS[k]}</span></label>`).join('')}</div>
+  ${tl.length ? `<div class="row" style="margin-top:10px"><span class="muted">ربط بباب:</span>${topicSelect('', ex.subject, 'id="brT" style="width:auto"')}<input type="number" id="brA" min="1" max="${n}" placeholder="من" style="width:70px"><input type="number" id="brB" min="1" max="${n}" placeholder="إلى" style="width:70px"><button class="btn sm ghost" data-act="brange">طبّق</button><button class="btn sm ghost" data-act="ball">طبّق على كل الأسئلة</button></div>` : ''}
+  <div style="margin-top:8px">${Array.from({ length: n }, (_, i) => `<div class="brow bw ${ex.bAns[i] >= 0 ? 'done' : ''}"><b>${partLbl(lab[i])}</b><div class="pills" style="margin:0;gap:6px">${Array.from({ length: ex.choices }, (_, k) => `<label class="pill sm"><input type="radio" name="ba${i}" data-ba="${i}" value="${k}" ${ex.bAns[i] === k ? 'checked' : ''}><span>${LETTERS[k]}</span></label>`).join('')}</div>
   <input type="number" data-bp="${i}" min="0.25" step="0.25" value="${fmtN(ex.bPts[i] > 0 ? ex.bPts[i] : 1)}" title="الدرجة" style="width:64px;margin-inline-start:auto">
-  ${tl.length ? topicSelect(ex.bTopics[i] || '', ex.subject, `data-bt="${i}" style="width:auto;max-width:40%"`) : ''}</div>`).join('')}</div></div>
-  <div class="card"><b>أسئلة مقالية (اختياري)</b><p class="muted" style="margin:2px 0">الطالب بيكتب إجابتها أو يرفع صورة ورقته، وانت بتصححها وتحط الدرجة من صفحة النتائج.</p>
+  ${tl.length ? topicSelect(ex.bTopics[i] || '', ex.subject, `data-bt="${i}" style="width:auto;max-width:40%"`) : ''}
+  <label class="muted" style="font-weight:400;font-size:.8rem;margin:0;flex-basis:100%"><input type="checkbox" data-bc="${i}" ${ex.bCont[i] && i > 0 ? 'checked' : ''} ${i === 0 ? 'disabled' : ''}> جزء تاني من السؤال اللي فوقه (له إجابته الخاصة)</label></div>`).join('')}</div></div>
+  <div class="card"><b>أسئلة مقالية (اختياري)</b><details class="hint"><summary>ℹ️ الطالب بيكتب إجابتها أو يرفع…</summary><p class="muted" style="margin:2px 0">الطالب بيكتب إجابتها أو يرفع صورة ورقته، وانت بتصححها وتحط الدرجة من صفحة النتائج.</p></details>
   ${ex.bEssays.map((p, j) => `<div class="row" style="margin:6px 0"><b class="grow">مقالي ${j + 1}</b><label class="muted" style="font-weight:400;margin:0">الدرجة <input type="number" data-be="${j}" min="0.25" step="0.25" value="${fmtN(p > 0 ? p : 1)}" style="width:76px;display:inline-block"></label><button class="btn sm danger" data-act="bedel" data-j="${j}">×</button></div>`).join('')}
   <button class="btn sm ghost" data-act="beadd">+ سؤال مقالي</button></div>`;
 }
 
+const dtv = ms => ms ? new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
 function relNote(ex, hasEs) {
   if (ex.release === 'instant') return hasEs ? 'الطالب هيشوف درجة الاختيارات أول ما يسلّم، ويتقاله إن درجة المقالي هتظهر بعد ما تصححها. بعد التصحيح اضغط "نشر النتائج" من صفحة النتائج عشان تظهر له الدرجة الكاملة (اختيارات + مقالي).' : 'الطالب هيشوف درجته والإجابات الصحيحة أول ما يسلّم. (محتاج تفعيل الدخول المجهول Anonymous في Firebase، موضح في الشرح)';
   return hasEs ? 'مفيش حاجة بتظهر للطالب لحد ما تصحح المقالي وتنشر النتائج، فتظهر له الدرجة الكاملة (اختيارات + مقالي) مع بعض. ولو نشرت قبل التصحيح هتظهر درجة الاختيارات بس.' : 'النتيجة بتظهر للطلاب لما تنشرها من صفحة النتائج.';
@@ -1676,35 +1858,44 @@ function drawEditor(ex, isEdit) {
   <div class="row"><label class="grow" style="margin:12px 0 0">المادة<select data-k="subject">${subjOptions(ex.subject)}</select></label>
   <label class="grow" style="margin:12px 0 0">نوع الامتحان<select data-k="type"><option value="mcq" ${bubble ? '' : 'selected'}>أسئلة (كتابة أو استيراد)</option><option value="bubble" ${bubble ? 'selected' : ''}>ملف PDF + بابل شيت</option></select></label></div>
   <label>المدة (بالدقايق)</label><input type="number" min="1" data-k="durationMin" value="${ex.durationMin}">
+  <label>يفتح في (اختياري)</label><input type="datetime-local" data-dt="opensAt" value="${dtv(ex.opensAt)}">
+  <label>يقفل في (اختياري)</label><input type="datetime-local" data-dt="closesAt" value="${dtv(ex.closesAt)}">
+  <details class="hint"><summary>ℹ️ لو حددت وقت قفل، الطالب…</summary><p class="muted">لو حددت وقت قفل، الطالب بيشوف في صفحة الامتحانات إن الامتحان متاح لحد الوقت ده بس، وبعده مش هيقدر يبدأه. اللي بدأ قبل القفل يكمّل مدته عادي.</p></details>
   ${bubble ? '' : `<label class="row" style="font-weight:400"><input type="checkbox" data-k="shuffle" ${ex.shuffle ? 'checked' : ''}> ترتيب الأسئلة والاختيارات عشوائي لكل طالب</label>`}
   <label class="row" style="font-weight:400"><input type="checkbox" data-k="active" ${ex.active ? 'checked' : ''}> مفتوح للطلاب</label>
   ${gl.length ? `<label>متاح لمجموعة</label><div class="muted" style="font-size:.85rem;margin-bottom:4px">من غير اختيار = كل الطلاب</div>${gl.map(g => `<label class="row" style="font-weight:400;margin:4px 0"><input type="checkbox" data-gk="${esc(g)}" ${ex.groups.includes(g) ? 'checked' : ''}> ${esc(g)}</label>`).join('')}` : ''}</div>
   <div class="card"><b>نتيجة الامتحان للطلاب</b>
-  <label class="row" style="font-weight:400;margin:6px 0"><input type="radio" name="rel" data-k="release" value="manual" ${ex.release === 'instant' ? '' : 'checked'}> المدرس هو اللي بيعلنها (مفيش حاجة بتظهر قبل ما تنشر)</label>
+  <label class="row" style="font-weight:400;margin:6px 0"><input type="radio" name="rel" data-k="release" value="manual" ${ex.release === 'instant' ? '' : 'checked'}> الدكتور هو اللي بيعلنها (مفيش حاجة بتظهر قبل ما تنشر)</label>
   <label class="row" style="font-weight:400;margin:6px 0"><input type="radio" name="rel" data-k="release" value="instant" ${ex.release === 'instant' ? 'checked' : ''}> تظهر مباشرة بعد ما الطالب يسلّم</label>
-  <p class="muted" style="margin:4px 0">${relNote(ex, bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay))}</p>
-  <label class="row" style="font-weight:400"><input type="checkbox" data-k="showAnswers" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب إجاباته والإجابات الصحيحة مع النتيجة</label></div>
+  <details class="hint"><summary>ℹ️ إيه اللي هيحصل؟</summary><p class="muted">${relNote(ex, bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay))}</p></details>
+  <label class="row" style="font-weight:400"><input type="checkbox" data-k="showAnswers" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب إجاباته والإجابات الصحيحة مع النتيجة</label>
+  <label class="row" style="font-weight:400"><input type="checkbox" data-k="showPts" ${ex.showPts !== false ? 'checked' : ''}> أظهر درجة كل سؤال للطالب أثناء الامتحان</label></div>
   ${bubble ? bubbleEditor(ex) : `<div class="row"><button class="btn ghost" data-act="import">📥 استيراد أسئلة (PDF أو نص)</button>
-  ${topicList('', ex.subject).length ? `<select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق على الأسئلة اللي من غير باب</button>` : ''}</div><div id="impHost"></div>
+  ${topicList('', ex.subject).length ? `<select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق على كل الأسئلة</button>` : ''}</div><div id="impHost"></div>
   <div class="card"><div class="row"><span class="muted">درجة كل أسئلة الاختيار:</span><input type="number" id="bulkP" min="0.25" step="0.25" value="1" style="width:80px"><button class="btn sm ghost" data-act="bulkp">طبّق على كل الأسئلة</button><span class="muted" style="font-size:.85rem">وتقدر تغيّر درجة أي سؤال لوحده</span></div></div>
-  ${ex.questions.map((q, i) => qEditor(q, i, ex.subject)).join('')}
+  ${(() => { const nums = qNums(ex.questions); return ex.questions.map((q, i) => qEditor(q, i, ex.subject, nums[i], nums[i].multi)).join(''); })()}
   <div class="row"><button class="btn ghost" data-act="addq">+ سؤال اختيارات</button><button class="btn ghost" data-act="adde">+ سؤال مقالي</button></div>`}
   <div class="row" style="margin-top:12px"><span class="grow"></span><button class="btn" data-act="save">حفظ الامتحان</button></div><div id="msg"></div></div>`);
   window.scrollTo(0, y);
+  if (!isEdit && (ex.title || ex.pages.length || ex.questions.some(q => q.text || q.image))) setGuard();
   const root = $('#ed'), redraw = () => drawEditor(ex, isEdit);
   root.oninput = e => {
-    const t = e.target, d = t.dataset;
+    const t = e.target, d = t.dataset; if (!S.guard) setGuard();
+    if (t.closest('#impHost')) return;
     if (d.k) { if (t.type !== 'checkbox' && t.tagName !== 'SELECT' && d.k !== 'n') ex[d.k] = t.type === 'number' ? Number(t.value) : t.value; }
     else if (d.bp !== undefined) ex.bPts[+d.bp] = +t.value > 0 ? +t.value : 1;
     else if (d.be !== undefined) ex.bEssays[+d.be] = +t.value > 0 ? +t.value : 1;
     else if (d.q !== undefined) { const q = ex.questions[+d.q]; if (d.o !== undefined) q.options[+d.o] = t.value; else if (d.f === 'text') q.text = t.value; else if (d.f === 'pts') q.pts = +t.value > 0 ? +t.value : 1; }
   };
   root.onchange = async e => {
-    const t = e.target, d = t.dataset;
+    const t = e.target, d = t.dataset; if (!S.guard) setGuard();
+    if (t.closest('#impHost')) return;
     if (d.k === 'subject') { ex.subject = t.value; redraw(); }
     else if (d.k === 'type') { ex.type = t.value; redraw(); }
-    else if (d.k === 'n') { const n = Math.max(1, Math.min(200, Math.round(+t.value) || 1)); ex.n = n; ex.bAns.length = n; ex.bTopics.length = n; for (let i = 0; i < n; i++) { if (ex.bAns[i] === undefined) ex.bAns[i] = -1; if (ex.bTopics[i] === undefined) ex.bTopics[i] = ''; } redraw(); }
+    else if (d.k === 'n') { const n = Math.max(1, Math.min(200, Math.round(+t.value) || 1)); ex.n = n; ex.bAns.length = n; ex.bTopics.length = n; ex.bCont.length = n; for (let i = 0; i < n; i++) ex.bCont[i] = !!ex.bCont[i]; for (let i = 0; i < n; i++) { if (ex.bAns[i] === undefined) ex.bAns[i] = -1; if (ex.bTopics[i] === undefined) ex.bTopics[i] = ''; } redraw(); }
     else if (d.k === 'choices') { ex.choices = +t.value; ex.bAns = ex.bAns.map(a => a >= ex.choices ? -1 : a); redraw(); }
+    else if (d.dt) { ex[d.dt] = t.value ? new Date(t.value).getTime() : 0; }
+    else if (d.bc !== undefined) { ex.bCont[+d.bc] = t.checked; redraw(); }
     else if (d.k === 'release') { ex.release = t.value; redraw(); }
     else if (d.k && t.type === 'checkbox') ex[d.k] = t.checked;
     else if (d.gk !== undefined) { ex.groups = ex.groups.filter(g => g !== d.gk); if (t.checked) ex.groups.push(d.gk); }
@@ -1729,6 +1920,7 @@ function drawEditor(ex, isEdit) {
   root.onclick = async e => {
     const th = e.target.closest('img.thumb'); if (th) return zoomImg(th.src);
     const b = e.target.closest('[data-act]'); if (!b) return;
+    if (!S.guard && b.dataset.act !== 'save') setGuard();
     const d = b.dataset, a = d.act, q = ex.questions[+d.q];
     if (a === 'adde') { ex.questions.push(newEssay()); redraw(); window.scrollTo(0, document.body.scrollHeight); }
     else if (a === 'bulkp') { const v = +$('#bulkP').value; if (!(v > 0)) return setMsg('اكتب درجة صحيحة'); ex.questions.forEach(x => { if (!isEssay(x)) x.pts = v; }); redraw(); }
@@ -1736,11 +1928,13 @@ function drawEditor(ex, isEdit) {
     else if (a === 'beadd') { ex.bEssays.push(5); redraw(); }
     else if (a === 'bedel') { ex.bEssays.splice(+d.j, 1); redraw(); }
     else if (a === 'addq') { ex.questions.push(newQ()); redraw(); window.scrollTo(0, document.body.scrollHeight); }
-    else if (a === 'delq') { if (ex.questions.length > 1 && confirm('حذف السؤال؟')) { ex.questions.splice(+d.q, 1); redraw(); } }
+    else if (a === 'delq') { if (ex.questions.length > 1 && confirm(q.cont ? 'حذف الجزء ده؟' : 'حذف السؤال (وكل أجزائه)؟')) { let k = +d.q + 1; if (!q.cont) while (ex.questions[k] && ex.questions[k].cont) k++; ex.questions.splice(+d.q, q.cont ? 1 : k - +d.q); if (ex.questions[0] && ex.questions[0].cont) delete ex.questions[0].cont; redraw(); } }
     else if (a === 'addo') { q.options.push(''); redraw(); }
     else if (a === 'delo') { q.options.splice(+d.o, 1); if (q.correct === +d.o) q.correct = 0; else if (q.correct > +d.o) q.correct--; redraw(); }
     else if (a === 'rmimg') { q.image = ''; redraw(); }
-    else if (a === 'bulkt') { const v = $('#bulkT').value; if (!v) return setMsg('اختار الباب الأول'); ex.questions.forEach(x => { if (!x.topic) x.topic = v; }); redraw(); }
+    else if (a === 'bulkt') { const v = $('#bulkT').value; if (!v) return setMsg('اختار الباب الأول'); ex.questions.forEach(x => { x.topic = v; }); redraw(); }
+    else if (a === 'ball') { const v = $('#brT').value; if (!v) return setMsg('اختار الباب الأول'); for (let i = 0; i < ex.n; i++) ex.bTopics[i] = v; redraw(); }
+    else if (a === 'addpart') { let k = +d.q + 1; while (ex.questions[k] && ex.questions[k].cont) k++; ex.questions.splice(k, 0, { text: '', image: '', options: LETTERS.slice(0, 4), letters: true, correct: -1, topic: q.topic || '', pts: 1, cont: true }); redraw(); }
     else if (a === 'bkey') {
       const k = parseKey($('#bkey').value); let n = 0;
       if (Object.keys(k.byNum).length) Object.entries(k.byNum).forEach(([num, v]) => { if (+num >= 1 && +num <= ex.n && v < ex.choices) { ex.bAns[+num - 1] = v; n++; } });
@@ -1762,6 +1956,7 @@ async function saveEditor(ex, btn) {
   if (!ex.title.trim()) return err('اكتب عنوان الامتحان');
   if (!(ex.durationMin >= 1)) return err('المدة لازم تكون دقيقة على الأقل');
   const bubble = ex.type === 'bubble';
+  if (ex.opensAt && ex.closesAt && ex.closesAt <= ex.opensAt) return err('وقت القفل لازم يكون بعد وقت الفتح');
   let content, key, imgs, count;
   if (bubble) {
     if (!ex.pages.length) return err('ارفع ملف الـ PDF بتاع الأسئلة الأول');
@@ -1769,14 +1964,14 @@ async function saveEditor(ex, btn) {
     if (!(n >= 1 && n <= 200)) return err('عدد الأسئلة من 1 لـ 200');
     for (let i = 0; i < n; i++) if (!(ex.bAns[i] >= 0 && ex.bAns[i] < ex.choices)) return err(`حدد الإجابة الصحيحة لسؤال ${i + 1}`);
     imgs = ex.pages.slice();
-    content = { mode: 'bubble', pages: [], n, choices: ex.choices, topics: Array.from({ length: n }, (_, i) => ex.bTopics[i] || ''), pts: Array.from({ length: n }, (_, i) => ex.bPts[i] > 0 ? ex.bPts[i] : 1), essays: ex.bEssays.map(p => p > 0 ? p : 1) };
+    content = { mode: 'bubble', pages: [], n, choices: ex.choices, topics: Array.from({ length: n }, (_, i) => ex.bTopics[i] || ''), pts: Array.from({ length: n }, (_, i) => ex.bPts[i] > 0 ? ex.bPts[i] : 1), essays: ex.bEssays.map(p => p > 0 ? p : 1), cont: Array.from({ length: n }, (_, i) => !!ex.bCont[i] && i > 0) };
     count = n + ex.bEssays.length;
     key = { answers: ex.bAns.slice(0, n) };
   } else {
     if (!ex.questions.length) return err('أضف سؤال واحد على الأقل');
     for (const [i, q] of ex.questions.entries()) {
       if (isEssay(q)) { if (!q.text.trim() && !q.image) return err(`سؤال ${i + 1}: اكتب نص السؤال المقالي`); continue; }
-      if (q.letters) { if (!q.image) return err(`سؤال ${i + 1}: مفيش صورة`); }
+      if (q.letters) { if (!q.image && !q.cont) return err(`سؤال ${i + 1}: مفيش صورة`); }
       else {
         if (!q.text.trim()) return err(`سؤال ${i + 1}: اكتب نص السؤال`);
         if (q.options.some(o => !o.trim())) return err(`سؤال ${i + 1}: فيه اختيار فاضي (املاه أو احذفه)`);
@@ -1784,7 +1979,7 @@ async function saveEditor(ex, btn) {
       if (!(q.correct >= 0 && q.correct < q.options.length)) return err(`سؤال ${i + 1}: حدد الإجابة الصحيحة`);
     }
     imgs = ex.questions.map(q => q.image || ''); count = ex.questions.length;
-    content = { questions: ex.questions.map(q => ({ text: q.text.trim(), image: '', options: q.options.map(o => o.trim()), topic: q.topic || '', pts: qPts(q), ...(q.letters ? { letters: true } : {}), ...(isEssay(q) ? { type: 'essay' } : {}) })) };
+    content = { questions: ex.questions.map(q => ({ text: q.text.trim(), image: '', options: q.options.map(o => o.trim()), topic: q.topic || '', pts: qPts(q), ...(q.letters ? { letters: true } : {}), ...(q.cont ? { cont: true } : {}), ...(isEssay(q) ? { type: 'essay' } : {}) })) };
     key = { answers: ex.questions.map(q => isEssay(q) ? -1 : q.correct) };
   }
   if (imgs.some(s => s && s.length > 900000)) return err('فيه صورة حجمها كبير جدًا. صغّرها.');
@@ -1793,16 +1988,16 @@ async function saveEditor(ex, btn) {
   if (bubble) content.pages = refs; else content.questions.forEach((q, i) => { q.image = refs[i]; });
   if (new Blob([JSON.stringify(content)]).size > 900000) return err('حجم الامتحان كبير. قلل الصور أو الأسئلة.');
   const exam = { id: ex.id, title: ex.title.trim(), subject: ex.subject || 'bio', type: bubble ? 'bubble' : 'mcq', durationMin: Math.round(ex.durationMin), shuffle: bubble ? false : !!ex.shuffle, active: !!ex.active, closedAt: ex.active ? 0 : (ex.closedAt || 0),
-    createdAt: ex.createdAt, published: !!ex.published, release: ex.release === 'instant' ? 'instant' : 'manual', hasEssay: bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay), showAnswers: ex.showAnswers !== false, groups: ex.groups || [], qCount: count, packs: packs.length };
+    createdAt: ex.createdAt, published: !!ex.published, opensAt: ex.opensAt || 0, closesAt: ex.closesAt || 0, showPts: ex.showPts !== false, release: ex.release === 'instant' ? 'instant' : 'manual', hasEssay: bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay), showAnswers: ex.showAnswers !== false, groups: ex.groups || [], qCount: count, packs: packs.length };
   btn.disabled = true; setMsg('جاري الحفظ...', 'ok');
-  try { await S.store.saveExam(exam, content, key, packs, ex.oldPacks || 0); go('#teacher'); }
+  try { await S.store.saveExam(exam, content, key, packs, ex.oldPacks || 0); S.guard = null; go('#teacher'); }
   catch (e) { btn.disabled = false; setMsg(e.message); }
 }
 
 /* ----- النتائج ----- */
-async function results(id) {
+async function results(id, silent) {
   if (S.cleanup) { S.cleanup(); S.cleanup = null; }
-  teacherShell('exams', loadingInner);
+  if (!silent) teacherShell('exams', loadingInner);
   const meta = await S.store.getExam(id);
   const [key, rs, atts, content] = await Promise.all([S.store.getKey(id), S.store.listResults(id), S.store.listAttempts(id), meta ? loadExamContent(meta, false) : null]);
   if (!meta || !key) throw new Error('مش لاقي الامتحان');
@@ -1810,7 +2005,7 @@ async function results(id) {
   const hasEs = ex.questions.some(isEssay), sc0 = scoreOf(ex.questions, [], key.answers, null), total = sc0.total, pct = s => total ? Math.round(s / total * 100) : 0;
   const counts = () => !!ex.published || (ex.release === 'instant' && !hasEs);
   const attMap = {}; atts.forEach(a => { if (a.studentCode) attMap[a.examId + '_' + a.studentCode] = a; });
-  const rows = rs.map(r => { const a = attMap[r.id] || {}; return { ...r, leaves: a.leaves || 0, awaySec: a.awaySec || 0, shots: a.shots || 0, ...(() => { const sc = scoreOf(ex.questions, r.answers, key.answers, r.grades); return { mcq: sc.mcq, es: sc.es, pending: sc.pending, score: sc.score }; })() }; })
+  const rows = rs.map(r => { const a = attMap[r.id] || {}; return { ...r, leaves: a.leaves || 0, awaySec: a.awaySec || 0, shots: a.shots || 0, short: a.short || 0, ...(() => { const sc = scoreOf(ex.questions, r.answers, key.answers, r.grades); return { mcq: sc.mcq, es: sc.es, pending: sc.pending, score: sc.score }; })() }; })
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ar'));
   const base = hasEs ? rows.filter(r => !r.pending) : rows, nPend = rows.filter(r => r.pending).length;
   const avg = base.length ? Math.round(base.reduce((s, r) => s + pct(r.score), 0) / base.length) : 0;
@@ -1821,14 +2016,14 @@ async function results(id) {
   ${hasEs && nPend ? `<div class="msg warn">${nPend} طالب لسه مقاليهم متصححش. اضغط "تصحيح" جنب اسم كل طالب.</div>` : ''}
   <div class="card" id="live"></div>
   <div class="card"><b>نشر النتائج للطلاب</b>
-  <p class="muted" style="margin:4px 0">${ex.release === 'instant' ? 'نتيجة فورية: الطالب بيشوف درجته أول ما يسلّم' + (hasEs ? ' (الاختيارات بس، والمقالي بيظهر لما تصحح وتنشر)' : '') + '.' : 'النتيجة بتظهر للطلاب لما تنشرها.'} ${ex.published ? 'النتائج منشورة حاليًا.' : 'لسه ما اتنشرتش.'}</p>
+  <details class="hint"><summary>ℹ️ توضيح</summary><p class="muted" style="margin:4px 0">${ex.release === 'instant' ? 'نتيجة فورية: الطالب بيشوف درجته أول ما يسلّم' + (hasEs ? ' (الاختيارات بس، والمقالي بيظهر لما تصحح وتنشر)' : '') + '.' : 'النتيجة بتظهر للطلاب لما تنشرها.'} ${ex.published ? 'النتائج منشورة حاليًا.' : 'لسه ما اتنشرتش.'}</p></details>
   <label class="row" style="font-weight:400"><input type="checkbox" id="showAns" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب الأسئلة والإجابات الصحيحة وإجاباته</label>
   <div class="row" style="margin-top:8px"><button class="btn" id="pub" ${rows.length ? '' : 'disabled'}>${ex.published ? 'تحديث النشر' : (hasEs ? 'نشر النتائج (بعد التصحيح)' : 'نشر النتائج')}</button>${ex.published ? '<button class="btn danger" id="unpub">إخفاء النتائج</button>' : ''}</div><div id="msg"></div>
   <p class="muted" style="font-size:.85rem;margin:6px 0 0">لو حد سلّم بعد النشر اضغط "تحديث النشر".</p></div>
   <div class="card"><div class="row"><b class="grow">الدرجات</b><button class="btn sm" id="csv" ${rows.length ? '' : 'disabled'}>تصدير Excel/CSV</button></div>
-  ${rows.length ? `<div class="tbl"><table><tr><th>#</th><th>الاسم</th><th>الكود</th>${hasEs ? '<th>الاختيارات</th><th>المقالي</th>' : ''}<th>الدرجة</th><th>%</th><th>وقت التسليم</th><th>الخروج من الصفحة</th><th>محاولات تصوير</th><th></th></tr>
-  ${rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td><span class="code" style="font-size:.85rem">${esc(r.studentCode || '')}</span></td>${hasEs ? `<td>${fmtN(r.mcq)}/${fmtN(sc0.mcqT)}</td><td>${r.pending ? '<span class="badge warn">لم يُصحح</span>' : fmtN(r.es) + '/' + fmtN(sc0.esT)}</td>` : ''}<td>${fmtN(r.score)}/${fmtN(total)}</td><td>${r.pending ? '—' : pct(r.score) + '%'}</td><td>${fmtDate(r.submittedAt)}</td><td>${r.leaves ? `<span class="badge warn">⚠ ${r.leaves} مرة${r.awaySec ? ' · ' + fmtSec(r.awaySec) : ''}</span>` : '<span class="muted">—</span>'}</td><td>${r.shots ? `<span class="badge bad">📷 ${r.shots}</span>` : '<span class="muted">—</span>'}</td><td>${hasEs && r.studentCode ? `<a class="btn sm" href="#teacher/grade/${esc(id)}/${esc(r.studentCode)}">تصحيح</a> ` : ''}<button class="btn sm danger" data-id="${esc(r.id)}">إعادة</button></td></tr>`).join('')}</table></div>
-  <p class="muted" style="font-size:.85rem">زر "إعادة" بيمسح نتيجة الطالب وبيسمحله يمتحن تاني. الخروج من الصفحة وتصوير الشاشة تنبيهات للمراجعة مش دليل قاطع.</p>` : '<p class="muted">لسه محدش سلّم.</p>'}</div>
+  ${rows.length ? `<div class="tbl"><table><tr><th>#</th><th>الاسم</th><th>الكود</th>${hasEs ? '<th>الاختيارات</th><th>المقالي</th>' : ''}<th>الدرجة</th><th>%</th><th>وقت التسليم</th><th>الخروج من الصفحة</th><th>محاولات تصوير</th><th>خروج قصير</th><th></th></tr>
+  ${rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td><span class="code" style="font-size:.85rem">${esc(r.studentCode || '')}</span></td>${hasEs ? `<td>${fmtN(r.mcq)}/${fmtN(sc0.mcqT)}</td><td>${r.pending ? '<span class="badge warn">لم يُصحح</span>' : fmtN(r.es) + '/' + fmtN(sc0.esT)}</td>` : ''}<td>${fmtN(r.score)}/${fmtN(total)}</td><td>${r.pending ? '—' : pct(r.score) + '%'}</td><td>${fmtDate(r.submittedAt)}</td><td>${r.leaves ? `<span class="badge warn">⚠ ${r.leaves} مرة${r.awaySec ? ' · ' + fmtSec(r.awaySec) : ''}</span>` : '<span class="muted">—</span>'}</td><td>${r.shots ? `<span class="badge bad">📷 ${r.shots}</span>` : '<span class="muted">—</span>'}</td><td>${r.short ? `<span class="badge warn">⚡ ${r.short}</span>` : '<span class="muted">—</span>'}</td><td>${hasEs && r.studentCode ? `<a class="btn sm" href="#teacher/grade/${esc(id)}/${esc(r.studentCode)}">تصحيح</a> ` : ''}<button class="btn sm danger" data-id="${esc(r.id)}">إعادة</button></td></tr>`).join('')}</table></div>
+  <details class="hint"><summary>ℹ️ ⚡ خروج قصير = خرج…</summary><p class="muted" style="font-size:.85rem">⚡ خروج قصير = خرج أقل من 3 ثواني، ودي علامة ممكن تدل على لقطة شاشة من الموبايل (المتصفح مش بيقدر يعرف لقطة الشاشة بشكل مؤكد). زر "إعادة" بيمسح نتيجة الطالب وبيسمحله يمتحن تاني. الخروج من الصفحة وتصوير الشاشة تنبيهات للمراجعة مش دليل قاطع.</p></details>` : '<p class="muted">لسه محدش سلّم.</p>'}</div>
   ${classTopics.length ? `<div class="card"><b>مستوى الفصل في كل باب</b><p class="muted" style="margin:2px 0 0;font-size:.85rem">الأضعف فوق.</p>${topicBars(classTopics)}</div>` : ''}
   ${rows.length ? `<div class="card"><b>نسبة الإجابة الصحيحة لكل سؤال</b>${ex.questions.map((q, i) => { if (isEssay(q)) return ''; const ok = rows.filter(r => r.answers[i] === key.answers[i]).length; return `<div class="row" style="margin-top:6px"><span class="muted grow">${qLabel(q, i)}</span><b>${Math.round(ok / rows.length * 100)}%</b></div>`; }).join('')}</div>` : ''}</div>`);
   let liveCount = 0;
@@ -1836,29 +2031,37 @@ async function results(id) {
     const el = $('#live'); if (!el) return false;
     const ing = list.filter(a => !a.submitted).sort((a, b) => (b.away ? 1 : 0) - (a.away ? 1 : 0) || String(a.name).localeCompare(b.name, 'ar'));
     liveCount = ing.length;
-    el.innerHTML = `<div class="row"><b class="grow">جاري الامتحان الآن (${ing.length})</b><span class="muted" style="font-size:.8rem">${ing.length > 80 ? 'عدد كبير: اضغط تحديث' : 'بيتحدث كل 30 ثانية'}</span><button class="btn sm ghost" data-live="1">تحديث</button></div>` +
+    el.innerHTML = `<div class="row"><b class="grow">جاري الامتحان الآن (${ing.length})</b><span class="muted" style="font-size:.8rem">بيتحدث لوحده كل 30 ثانية</span><button class="btn sm ghost" data-live="1">تحديث</button></div>` +
       (ing.length ? ing.map(a => {
         const over = a.startedAt && (Date.now() - a.startedAt) / 60000 > ex.durationMin + 2;
-        return `<div class="row" style="margin-top:6px"><span class="grow">${esc(a.name)} <span class="code" style="font-size:.8rem">${esc(a.studentCode || '')}</span></span>${a.away && !over ? '<span class="badge warn">🔴 خارج الصفحة الآن</span>' : ''}${a.leaves ? `<span class="badge warn">⚠ خرج ${a.leaves} مرة${a.awaySec ? ' · ' + fmtSec(a.awaySec) : ''}</span>` : ''}${a.shots ? `<span class="badge bad">📷 تصوير ${a.shots}</span>` : ''}${over ? '<span class="badge">انتهى وقته ولم يسلّم</span>' : ''}</div>`;
+        return `<div class="row" style="margin-top:6px"><span class="grow">${esc(a.name)} <span class="code" style="font-size:.8rem">${esc(a.studentCode || '')}</span></span>${a.away && !over ? '<span class="badge warn">🔴 خارج الصفحة الآن</span>' : ''}${a.leaves ? `<span class="badge warn">⚠ خرج ${a.leaves} مرة${a.awaySec ? ' · ' + fmtSec(a.awaySec) : ''}</span>` : ''}${a.shots ? `<span class="badge bad">📷 تصوير ${a.shots}</span>` : ''}${a.short ? `<span class="badge warn">⚡ ${a.short} خروج قصير</span>` : ''}${over ? '<span class="badge">انتهى وقته ولم يسلّم</span>' : ''}</div>`;
       }).join('') : '<p class="muted" style="margin:6px 0 0">مفيش حد بيمتحن دلوقتي.</p>');
     return true;
   };
   drawLive(atts);
   const refreshLive = async () => { try { drawLive(await S.store.listLive(id)); } catch (e) {} };
-  const liveIv = setInterval(() => {
-    if (!$('#live')) return clearInterval(liveIv);
-    if (document.hidden || liveCount > 80) return;
-    refreshLive();
-  }, 30000);
-  S.cleanup = () => clearInterval(liveIv);
+  const sigOf = (r2, a2) => r2.length + '|' + a2.map(a => [a.studentCode || '', a.leaves || 0, a.shots || 0, a.short || 0, a.submitted ? 1 : 0, a.away ? 1 : 0].join(':')).sort().join(',');
+  const lastSig = sigOf(rs, atts); let busyR = false;
+  const refreshAll = async () => {
+    if (busyR || !$('#live')) return; busyR = true;
+    try {
+      const [r2, a2] = await Promise.all([S.store.listResults(id), S.store.listAttempts(id)]);
+      if (sigOf(r2, a2) !== lastSig) { const y = window.scrollY; busyR = false; await results(id, true); window.scrollTo(0, y); return; }
+      drawLive(a2);
+    } catch (e) {} busyR = false;
+  };
+  const liveIv = setInterval(() => { if (!$('#live')) return clearInterval(liveIv); if (!document.hidden) refreshAll(); }, 30000);
+  const onVis = () => { if (!document.hidden) refreshAll(); };
+  document.addEventListener('visibilitychange', onVis); window.addEventListener('online', onVis);
+  S.cleanup = () => { clearInterval(liveIv); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', onVis); };
   $('#live').onclick = e => { if (e.target.closest('[data-live]')) refreshLive(); };
   const syncScores = async (e2, rs2) => { if (!counts()) { await S.store.deleteExamScore(id); await recomputeRanks(subjOf(e2)); return; } await saveScores(e2, rs2); };
   if (ex.release === 'instant' && !hasEs && rows.length) { saveScores(ex, rows, true).catch(() => {}); }
   const csv = $('#csv');
   if (csv) csv.onclick = () => {
     const q = v => '"' + String(v).replace(/"/g, '""') + '"';
-    const lines = [['الاسم', 'الكود', ...(hasEs ? ['درجة الاختيارات', 'درجة المقالي'] : []), 'الدرجة', 'من', 'النسبة', 'وقت التسليم', 'مرات الخروج', 'مدة الخروج (ثانية)', 'محاولات التصوير'].map(q).join(',')]
-      .concat(rows.map(r => [r.name, r.studentCode || '', ...(hasEs ? [r.mcq, r.pending ? 'لم يصحح' : r.es] : []), r.score, total, pct(r.score) + '%', fmtDate(r.submittedAt), r.leaves, r.awaySec, r.shots].map(q).join(',')));
+    const lines = [['الاسم', 'الكود', ...(hasEs ? ['درجة الاختيارات', 'درجة المقالي'] : []), 'الدرجة', 'من', 'النسبة', 'وقت التسليم', 'مرات الخروج', 'مدة الخروج (ثانية)', 'محاولات التصوير', 'خروج قصير'].map(q).join(',')]
+      .concat(rows.map(r => [r.name, r.studentCode || '', ...(hasEs ? [r.mcq, r.pending ? 'لم يصحح' : r.es] : []), r.score, total, pct(r.score) + '%', fmtDate(r.submittedAt), r.leaves, r.awaySec, r.shots, r.short].map(q).join(',')));
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
     a.download = 'results.csv'; a.click();
@@ -1891,7 +2094,7 @@ async function results(id) {
 }
 
 
-/* ----- الترتيب التراكمي: بيتحسب من جهاز المدرس بس ----- */
+/* ----- الترتيب التراكمي: بيتحسب من جهاز الدكتور بس ----- */
 async function saveScores(ex, rows, onlyIfChanged) {
   const scores = {};
   rows.forEach(r => { if (r.studentCode && !r.pending) scores[r.studentCode] = { name: r.name, pts: r.score }; });
@@ -1972,7 +2175,9 @@ async function gradePage(id, code) {
         { text: 'الصخور النارية الجوفية تتميز بـ:', image: '', options: ['بلورات كبيرة', 'بلورات دقيقة جدًا', 'حفريات', 'طبقات رسوبية'], topic: 'الصخور' }
       ] }, { answers: [0, 0] });
   }
-  window.addEventListener('hashchange', router);
+  document.addEventListener('click', e => { if (e.target.closest('[data-back]')) { if (history.length > 1) history.back(); else go(location.hash.startsWith('#teacher') ? '#teacher' : '#s/exams'); } });
+  window.addEventListener('beforeunload', e => { if (S.guard) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('hashchange', onHash);
   router();
 })();
 </script>
