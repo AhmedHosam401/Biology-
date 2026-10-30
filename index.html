@@ -734,7 +734,7 @@ async function refreshDots(tab) {
 if (!window.__sIv) { window.__sIv = setInterval(() => { if (!document.hidden && document.querySelector('.nav')) { S.stampCache = null; refreshDots(S.curTab); } }, 60000); }
 function studentShell(tab, inner) {
   S.curTab = tab;
-  view(`${topbar('<button class="btn sm ghost" id="sout">خروج</button>')}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
+  view(`${topbar('<button class="btn sm ghost" id="sout" aria-label="خروج" title="خروج">🚪</button>')}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
   <nav class="nav"><a href="#s/exams" data-t="exams" class="${tab === 'exams' ? 'on' : ''}"><b>📝</b>الامتحانات</a><a href="#s/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}"><b>🏆</b>الترتيب</a><a href="#s/results" data-t="results" class="${tab === 'results' ? 'on' : ''}"><b>📊</b>نتايجي</a><a href="#s/chat" data-t="chat" class="${tab === 'chat' ? 'on' : ''}"><b>💬</b>التواصل</a><a href="#s/files" data-t="files" class="${tab === 'files' ? 'on' : ''}"><b>📚</b>الملفات</a></nav>`);
   setTimeout(() => refreshDots(tab), 0);
   $('#sout').onclick = async () => { if (await modal({ title: 'تسجيل الخروج', text: 'هتخرج من الموقع وترجع لصفحة تسجيل الدخول، وهتحتاج كودك تدخل تاني. تكمل؟', ok: 'خروج' })) { setSession(null); go('#'); } };
@@ -764,7 +764,7 @@ async function refreshTDots() {
 }
 if (!window.__tIv) { window.__tIv = setInterval(() => { if (!document.hidden) { S.tCache = null; refreshTDots(); } }, 75000); document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTDots(); }); }
 function teacherShell(tab, inner) {
-  view(`${topbar('<button class="btn sm ghost" id="out">خروج</button>')}<div class="wrap">
+  view(`${topbar('<button class="btn sm ghost" id="out" aria-label="خروج" title="خروج">🚪</button>')}<div class="wrap">
   <div class="tabs"><a href="#teacher" data-t="exams" class="${tab === 'exams' ? 'on' : ''}">الامتحانات</a><a href="#teacher/students" data-t="students" class="${tab === 'students' ? 'on' : ''}">الطلاب</a><a href="#teacher/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}">الترتيب</a><a href="#teacher/chat" data-t="chat" class="${tab === 'chat' ? 'on' : ''}">التواصل</a><a href="#teacher/files" data-t="files" class="${tab === 'files' ? 'on' : ''}">الملفات</a><a href="#teacher/settings" data-t="settings" class="${tab === 'settings' ? 'on' : ''}">الإعدادات</a></div>${backBtn(inner)}${inner}</div>`);
   S.tTab = tab; setTimeout(() => refreshTDots(), 0);
   $('#out').onclick = async () => {
@@ -1250,8 +1250,7 @@ function teacherLogin() {
   view(`${topbar()}<div class="wrap narrow"><h1>دخول الدكتور</h1><div class="card">
   ${DEMO ? '' : '<label for="em">الإيميل</label><input type="email" id="em" dir="ltr" autocomplete="username" name="email">'}
   <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><div class="pwrap"><input type="password" id="pw" dir="ltr" autocomplete="current-password" name="password"><button type="button" class="eye" id="eye" aria-label="إظهار كلمة السر"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-  <div id="msg"></div><button class="btn block" id="lg">دخول</button>${bioSaved() ? '<button class="btn block ghost" id="bio" style="margin-top:8px">🔐 الدخول بالبصمة</button>' : ''}</div>
-  <p class="foot"><a href="#">صفحة الطلاب</a></p></div>`);
+  <div id="msg"></div><button class="btn block" id="lg">دخول</button>${bioSaved() ? '<button class="btn block ghost" id="bio" style="margin-top:8px">🔐 الدخول بالبصمة</button>' : ''}</div></div>`);
   const login = async () => {
     const ok = await S.store.login(DEMO ? '' : $('#em').value.trim(), $('#pw').value);
     if (!ok) return setMsg('بيانات الدخول غلط');
