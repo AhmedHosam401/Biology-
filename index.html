@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0f766e"><link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%230f766e'/%3E%3Cpath d='M24 11 7 20l17 9 17-9z' fill='%23fff'/%3E%3Cpath d='M14 26v6c0 2.5 4.5 5.5 10 5.5S34 34.5 34 32v-6l-10 5z' fill='%23fff' opacity='.8'/%3E%3C/svg%3E">
 <title>منصة د. أحمد الشرقاوي</title>
 <script>try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}</script>
@@ -146,7 +147,10 @@ label.row{flex-wrap:nowrap;align-items:flex-start}label.row>input[type=checkbox]
 .noselect img{-webkit-user-drag:none}
 #cover{position:fixed;inset:0;z-index:950;background:var(--bg);display:none;place-items:center;text-align:center;padding:24px}
 #cover.on{display:grid}
-@media print{#app,.ov{display:none!important}body::before{content:'الطباعة غير متاحة';display:block;padding:40px;font-size:2rem}}
+@media print{body:not(.rep) #app,body:not(.rep) .ov{display:none!important}body:not(.rep)::before{content:'الطباعة غير متاحة';display:block;padding:40px;font-size:2rem}body.rep #app,body.rep .ov{display:none!important}body.rep .rptov{position:static!important;overflow:visible!important}.noprint{display:none!important}}
+.rptov{position:fixed;inset:0;z-index:950;background:#fff;color:#122622;overflow:auto;--card:#fff;--ink:#122622;--muted:#5b7570;--line:#dce8e5;--soft:#e6f4f1;--ok:#067647;--bad:#b42318;--warn:#b54708;color-scheme:light}
+.rptov .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid #dce8e5;padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap}.rpt{max-width:780px;margin:0 auto;padding:20px 16px 40px;direction:rtl}.rpt h1{font-size:1.4rem;margin:0}.rpt table{width:100%;border-collapse:collapse}.rpt th,.rpt td{border-bottom:1px solid #dce8e5;padding:6px 8px;text-align:start;font-size:.9rem}
+.rpt .meter{height:8px;background:#e6f4f1;border-radius:6px;overflow:hidden}.rpt .meter i{display:block;height:100%}
 /* ورقة الإجابة (بابل شيت) */
 .pgs img{width:100%;display:block;margin:0 auto 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
 .sheetbtn{position:fixed;bottom:16px;left:16px;right:auto;z-index:36;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:12px 20px}
@@ -384,6 +388,14 @@ async function loadExamContent(meta, withImages = true) {
   return withImages ? resolveImages(meta, nc) : nc;
 }
 
+/* ساعة السيرفر: بنقارن ساعة الجهاز بتاريخ رد السيرفر عشان المؤقت ومواعيد الفتح والقفل متتأثرش بساعة الطالب */
+const sNow = () => Date.now() + (S.skew || 0);
+async function syncClock() {
+  try {
+    const t0 = Date.now(), r = await fetch(location.pathname + '?_=' + t0, { method: 'HEAD', cache: 'no-store' }), d = r.headers.get('date');
+    if (d) { const t1 = Date.now(), sk = new Date(d).getTime() + 500 - (t0 + t1) / 2; S.skew = Math.abs(sk) > 3000 ? Math.round(sk) : 0; }
+  } catch (e) {}
+}
 const msgSnip = m => (m.text || (m.imgId ? '📷 صورة' : '')).slice(0, 60);
 /* ===== تصدير XLSX حقيقي (من غير مكتبات) ===== */
 function zipStore(files) {
@@ -455,6 +467,12 @@ const DemoStore = {
   async listInbox() { return Object.values(this.db().inbox || {}); },
   async clearUnread(code) { const d = this.db(); if (d.inbox && d.inbox[code]) { d.inbox[code].unreadT = 0; this.save(d); } },
   async getMsgImg(id) { return (this.db().msgImgs || {})[id] || null; },
+  async setExtra(examId, code, min) { const d = this.db(); d.extras = d.extras || {}; if (min > 0) d.extras[examId + '_' + code] = { examId, code, min }; else delete d.extras[examId + '_' + code]; this.save(d); },
+  async getExtra(examId, code) { const x = (this.db().extras || {})[examId + '_' + code]; return x ? x.min : 0; },
+  async listExtras(examId) { return Object.values(this.db().extras || {}).filter(x => x.examId === examId); },
+  async listBank() { return Object.values(this.db().bank || {}).sort((a, b) => b.createdAt - a.createdAt); },
+  async saveBank(items) { const d = this.db(); d.bank = d.bank || {}; items.forEach(x => { d.bank[x.id] = x; }); this.save(d); },
+  async deleteBank(id) { const d = this.db(); if (d.bank) delete d.bank[id]; this.save(d); },
   async listRecentAttempts(n) { return Object.values(this.db().attempts).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0)).slice(0, n); },
   async setStudentGroup(code, group) { const d = this.db(); if (d.students[code]) d.students[code].group = group; this.save(d); },
   async listResultsByStudent(code) { return Object.values(this.db().results).filter(r => r.studentCode === code); },
@@ -606,6 +624,12 @@ const FB = {
     const s = await this.col('attempts').orderBy('startedAt', 'desc').limit(n).get();
     return s.docs.map(d => { const x = d.data(); return { ...x, startedAt: x.startedAt && x.startedAt.toMillis ? x.startedAt.toMillis() : 0 }; });
   },
+  setExtra(examId, code, min) { const r = this.col('extras').doc(examId + '_' + code); return min > 0 ? r.set({ examId, code, min }) : r.delete(); },
+  async getExtra(examId, code) { try { const d = await this.col('extras').doc(examId + '_' + code).get(); return d.exists ? d.data().min : 0; } catch (e) { return 0; } },
+  async listExtras(examId) { const s = await this.col('extras').where('examId', '==', examId).get(); return s.docs.map(d => d.data()); },
+  async listBank() { const s = await this.col('bank').get(); return s.docs.map(d => d.data()).sort((a, b) => b.createdAt - a.createdAt); },
+  async saveBank(items) { for (let i = 0; i < items.length; i += 100) { const b = this.db.batch(); items.slice(i, i + 100).forEach(x => b.set(this.col('bank').doc(x.id), x)); await b.commit(); } },
+  deleteBank(id) { return this.col('bank').doc(id).delete(); },
   setRegistration(open) { return this.col('settings').doc('app').set({ registrationOpen: !!open }, { merge: true }); },
   async getPending(code) { const d = await this.col('pending').doc(code).get(); return d.exists ? d.data() : null; },
   async listPending() { const s = await this.col('pending').get(); return s.docs.map(d => d.data()).sort((a, b) => a.createdAt - b.createdAt); },
@@ -664,7 +688,7 @@ const setSession = s => { if (s) ls.set('stu', JSON.stringify(s)); else ls.del('
 const themeBtn = '<button class="icon-btn" data-theme-toggle aria-label="تبديل الوضع الداكن"><span class="ic-moon">🌙</span><span class="ic-sun">☀️</span></button>';
 
 function view(html) { $('#app').onclick = null; $('#app').onchange = null; document.body.classList.remove('sheet-open'); $('#app').innerHTML = (DEMO ? '<div class="banner">وضع تجريبي: البيانات محفوظة في المتصفح ده بس</div>' : '') + html; }
-const topbar = (extra = '') => `<div class="top"><div class="logo"><i>${LOGO}</i>د. أحمد الشرقاوي</div><span class="sp"></span>${extra}${themeBtn}</div>`;
+const topbar = (extra = '') => `<div class="top"><div class="logo"><i>${LOGO}</i>د. أحمد الشرقاوي</div><span class="sp"></span>${window.__bip ? '<button class="btn sm ghost" data-install>📲 تثبيت</button>' : ''}${extra}${themeBtn}</div>`;
 
 const isRootHash = () => /^#?\/?(s(\/exams)?|teacher)?\/?$/.test(location.hash);
 const backBtn = html => (S.nav > 0 && !isRootHash() && html !== loadingInner && !/رجوع/.test(html)) ? '<div style="margin:4px 0 8px"><button class="btn sm ghost" data-back>→ رجوع</button></div>' : '';
@@ -757,7 +781,7 @@ function onHash() {
   S.nav = (S.nav || 0) + 1; router();
 }
 function router() {
-  clearInterval(S.timer);
+  clearInterval(S.timer); clearInterval(S.xiv);
   if (S.cleanup) { S.cleanup(); S.cleanup = null; }
   const p = location.hash.replace(/^#\/?/, '').split('/');
   if (p[0] === 'teacher') return teacherRoute(p);
@@ -847,7 +871,7 @@ async function studentExams(ses) {
   const cards = [];
   all.forEach((e, i) => {
     const a = atts[i];
-    const nowMs = Date.now(), tooLate = e.closesAt && nowMs > e.closesAt, tooEarly = e.opensAt && nowMs < e.opensAt;
+    const nowMs = sNow(), tooLate = e.closesAt && nowMs > e.closesAt, tooEarly = e.opensAt && nowMs < e.opensAt;
     let badge = '<span class="badge">لسه ما بدأتش</span>', btn = `<button class="btn sm" data-start="${e.id}" data-new="1">ابدأ الامتحان</button>`;
     if (!a && tooLate) { badge = '<span class="badge bad">انتهى وقت الامتحان</span>'; btn = ''; }
     else if (!a && tooEarly) { badge = '<span class="badge warn">لسه ما فتحش</span>'; btn = ''; }
@@ -855,7 +879,7 @@ async function studentExams(ses) {
     else {
       if (a || (!tooLate && !tooEarly)) pending++;
       if (a) {
-        const left = e.durationMin * 60 - Math.floor((Date.now() - a.startedAt) / 1000);
+        const left = e.durationMin * 60 - Math.floor((sNow() - a.startedAt) / 1000);
         if (left > 0) { badge = `<span class="badge warn">جاري · باقي ${Math.ceil(left / 60)} د</span>`; btn = `<button class="btn sm" data-start="${e.id}">كمّل الامتحان</button>`; }
         else { badge = '<span class="badge warn">انتهى الوقت</span>'; btn = `<button class="btn sm" data-start="${e.id}">تسليم إجاباتك</button>`; }
       }
@@ -888,8 +912,8 @@ async function startExam(id, ses) {
   if (att && att.submitted) throw new Error('انت سلّمت الامتحان ده قبل كده.');
   if (!att) {
     if (!meta.active) throw new Error('الامتحان مقفول دلوقتي');
-    if (meta.opensAt && Date.now() < meta.opensAt) throw new Error('الامتحان لسه ما فتحش. بيفتح ' + fmtDate(meta.opensAt));
-    if (meta.closesAt && Date.now() > meta.closesAt) throw new Error('انتهى وقت الامتحان (اتقفل ' + fmtDate(meta.closesAt) + ')');
+    if (meta.opensAt && sNow() < meta.opensAt) throw new Error('الامتحان لسه ما فتحش. بيفتح ' + fmtDate(meta.opensAt));
+    if (meta.closesAt && sNow() > meta.closesAt) throw new Error('انتهى وقت الامتحان (اتقفل ' + fmtDate(meta.closesAt) + ')');
     const st = await S.store.getStudent(ses.code);
     if (!st) { setSession(null); throw new Error('الكود ده مش متسجل. كلّم الدكتور.'); }
     ses.group = st.group || ''; setSession(ses);
@@ -897,8 +921,8 @@ async function startExam(id, ses) {
     att = await S.store.createAttempt(aid, { examId: meta.id, studentCode: ses.code, name: ses.name });
   }
   const nc = await loadExamContent(meta);
-  const exam = { ...meta, questions: nc.questions, pages: nc.pages };
-  const left = exam.durationMin * 60 - Math.floor((Date.now() - att.startedAt) / 1000);
+  const exam = { ...meta, questions: nc.questions, pages: nc.pages, extraMin: await S.store.getExtra(meta.id, ses.code) };
+  const left = (exam.durationMin + exam.extraMin) * 60 - Math.floor((sNow() - att.startedAt) / 1000);
   if (left <= 0) { await submitAnswers(exam, aid, ses, loadDraft(aid, exam.questions.length), loadEssay(aid)); return doneScreen(true, await finishInstant(exam, ses, loadDraft(aid, exam.questions.length)), ses); }
   runExam(exam, aid, ses, att.startedAt, att);
 }
@@ -1053,18 +1077,19 @@ function runExam(exam, aid, ses, startedAt, att) {
     busy = true; const b = $('#fin'); b.disabled = true; $('#xit').disabled = true; setMsg('');
     try {
       await submitAnswers(exam, aid, ses, ans, essay);
-      clearInterval(S.timer); if (S.cleanup) { S.cleanup(); S.cleanup = null; }
+      clearInterval(S.timer); clearInterval(S.xiv); if (S.cleanup) { S.cleanup(); S.cleanup = null; }
       doneScreen(auto, await finishInstant(exam, ses, ans), ses);
     }
     catch (e) { busy = false; b.disabled = false; $('#xit').disabled = false; setMsg('تعذر الإرسال، اتأكد من النت وإضغط تسليم تاني. إجاباتك محفوظة.'); }
   };
   const tick = () => {
-    const left = exam.durationMin * 60 - Math.floor((Date.now() - startedAt) / 1000), l = Math.max(0, left), tm = $('#tm');
+    const left = (exam.durationMin + (exam.extraMin || 0)) * 60 - Math.floor((sNow() - startedAt) / 1000), l = Math.max(0, left), tm = $('#tm');
     if (!tm) return;
     tm.textContent = pad(Math.floor(l / 60)) + ':' + pad(l % 60); tm.classList.toggle('low', l <= 60);
     if (left <= 0 && !busy) finish(true);
   };
   S.timer = setInterval(tick, 1000); tick();
+  S.xiv = setInterval(async () => { if (document.hidden || busy) return; try { const x = await S.store.getExtra(exam.id, ses.code); if (x !== (exam.extraMin || 0)) { exam.extraMin = x; tick(); } } catch (e) {} }, 60000);
   const disarm = S.cleanup = armSecurity(aid, att || {});
   let exiting = false;
   const exitFlow = async () => {
@@ -1076,7 +1101,8 @@ function runExam(exam, aid, ses, startedAt, att) {
   $('#xit').onclick = exitFlow;
   /* زر الرجوع في التليفون بيشتغل زي زر الخروج */
   try { history.pushState({ ex: 1 }, '', location.href); } catch (e) {}
-  const onPop = () => { try { history.pushState({ ex: 1 }, '', location.href); } catch (e) {} exitFlow(); };
+  const h0 = location.hash;
+  const onPop = () => { if (location.hash !== h0) return; try { history.pushState({ ex: 1 }, '', location.href); } catch (e) {} exitFlow(); };
   window.addEventListener('popstate', onPop);
   const cl0 = S.cleanup; S.cleanup = () => { window.removeEventListener('popstate', onPop); cl0(); };
   $('#fin').onclick = async () => {
@@ -1327,7 +1353,26 @@ async function teacherSettings() {
   ${Object.keys(SUBJECTS).map(k => `<div class="card"><b>أبواب ${subjLabel(k)}</b>
   <details class="hint"><summary>ℹ️ كل باب أو درس في…</summary><p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والدكتور مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p></details>
   <textarea id="tp_${k}" rows="7" placeholder="الباب الأول: ...&#10;الباب الثاني: ...">${esc(topicsOf(cfg, k).join('\n'))}</textarea></div>`).join('')}
+  <div class="card"><b>نسخة احتياطية</b>
+  <details class="hint"><summary>ℹ️ إيه اللي بيتحفظ؟</summary><p class="muted" style="margin:4px 0">الملف بيشمل الطلاب والامتحانات (بأسئلتها وصورها ومفتاح الإجابات) والإعدادات وبنك الأسئلة ونتايج الطلاب. الاستعادة بترجّع كل ده ما عدا النتايج (بتفضل في الملف للأرشيف). ملفات المراجع مش داخلة. احتفظ بالنسخة في Google Drive.</p></details>
+  <div class="row"><button class="btn sm" id="bkx">⬇ تنزيل نسخة احتياطية</button><label class="btn sm ghost" style="margin:0">⬆ استعادة من ملف<input type="file" id="bki" accept="application/json" hidden></label></div><div id="bkm" class="muted" style="margin-top:6px"></div></div>
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
+  $('#bkx').onclick = async () => {
+    const b = $('#bkx'), say = x => { $('#bkm').textContent = x; }; b.disabled = true;
+    try { const data = await exportAll(say); downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), 'نسخة احتياطية ' + new Date().toISOString().slice(0, 10) + '.json'); say('تم تنزيل النسخة'); }
+    catch (e) { say(e.message || 'تعذر عمل النسخة'); }
+    b.disabled = false;
+  };
+  $('#bki').onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    const say = x => { $('#bkm').textContent = x; };
+    try {
+      const data = JSON.parse(await f.text());
+      if (!data || data.kind !== 'exam-backup') throw new Error('الملف ده مش نسخة احتياطية من المنصة');
+      if (!(await modal({ title: 'استعادة نسخة', text: `هتتضاف/تتحدث ${data.students.length} طالب و${data.exams.length} امتحان من النسخة (اللي بنفس الكود هيتبدل). تكمل؟`, ok: 'استعد' }))) return;
+      await importAll(data, say); say('تمت الاستعادة ✓');
+    } catch (er) { say(er.message || 'تعذرت الاستعادة'); }
+  };
   $('#svs').onclick = async () => {
     const groups = splitLines($('#grps').value), topicsBy = {};
     Object.keys(SUBJECTS).forEach(k => { topicsBy[k] = splitLines($('#tp_' + k).value); });
@@ -1360,9 +1405,11 @@ async function teacherStudent(code) {
   const tp = topicsBySubject(rows);
   teacherShell('students', `<a href="#teacher/students">→ رجوع للطلاب</a>
   <div class="card"><h2 style="margin:0">${esc(st.name)}</h2><div class="muted">${st.group ? esc(st.group) : 'بدون مجموعة'} · الكود: <span class="code" style="font-size:.9rem">${esc(st.code)}</span></div></div>
+  <div class="row" style="margin:6px 0"><button class="btn sm" id="rpt" ${rows.length ? '' : 'disabled'}>📄 تقرير الطالب (PDF / واتساب)</button></div>
   <div class="stat"><div><b>${rows.length}</b>امتحانات</div><div><b>${rows.length ? avg + '%' : '-'}</b>المتوسط</div></div>
   ${tp || (rows.length ? '<div class="card muted">مفيش أبواب مربوطة بالأسئلة. حدد الأبواب من الإعدادات وربطها بالأسئلة في محرر الامتحان.</div>' : '')}
   <div class="card"><b>الامتحانات</b>${rows.length ? `<div class="tbl"><table><tr><th>الامتحان</th><th>المادة</th><th>الدرجة</th><th>%</th><th>التاريخ</th></tr>${rows.map(x => `<tr><td>${esc(x.title)}</td><td>${subjLabel(x.subject)}</td><td>${fmtN(x.score)}/${fmtN(x.total)}${x.pending ? ' <span class="badge warn">مقالي لم يُصحح</span>' : ''}</td><td>${pct(x)}%</td><td>${fmtDate(x.r.submittedAt)}</td></tr>`).join('')}</table></div>` : '<p class="muted">لسه ما سلّمش أي امتحان.</p>'}</div>`);
+  $('#rpt').onclick = () => showReport(st, rows, avg, pct);
 }
 
 /* ----- الملفات (حتى 5 ميجا، بتتقسم لأجزاء) ----- */
@@ -1460,6 +1507,53 @@ async function teacherRank() {
     const b = e.target.closest('[data-rc]'); if (!b) return; b.disabled = true;
     try { await recomputeRanks(b.dataset.rc); setMsg('اتحسب الترتيب', 'ok'); } catch (er) { setMsg(er.message); } b.disabled = false;
   };
+}
+
+
+/* ----- نسخة احتياطية ----- */
+async function exportAll(say) {
+  say('جاري تجميع البيانات...');
+  const [students, exams, settings, scores, bank, mats] = await Promise.all([S.store.listStudents(), S.store.listExams(), S.store.getSettings(), S.store.listExamScores(), S.store.listBank().catch(() => []), S.store.listMaterials().catch(() => [])]);
+  const out = [];
+  for (const e of exams) {
+    say(`امتحان ${out.length + 1} من ${exams.length}...`);
+    const [content, key, results] = await Promise.all([S.store.getContent(e.id), S.store.getKey(e.id), S.store.listResults(e.id)]);
+    const packs = []; for (let i = 0; i < (e.packs || 0); i++) { const p = await S.store.getPack(e.id + '_' + i); packs.push(p ? p.imgs : []); }
+    out.push({ exam: e, content, key, packs, results });
+  }
+  return { kind: 'exam-backup', version: 5, at: Date.now(), students, exams: out, settings, scores, bank, materials: mats.filter(m => m.kind === 'link') };
+}
+async function importAll(d, say) {
+  say('استعادة الطلاب...'); if (d.students.length) await S.store.addStudents(d.students);
+  let n = 0;
+  for (const x of d.exams) { say(`استعادة امتحان ${++n} من ${d.exams.length}...`); await S.store.saveExam(x.exam, x.content, x.key, x.packs || [], 0); }
+  say('استعادة الإعدادات والبنك...');
+  if (d.settings) await S.store.updateSettings(d.settings);
+  if (d.bank && d.bank.length) await S.store.saveBank(d.bank);
+  for (const s of d.scores || []) { try { await S.store.saveExamScore(s); } catch (e) {} }
+  for (const m of d.materials || []) { try { await S.store.addMaterial(m, null); } catch (e) {} }
+}
+
+
+/* ----- تقرير الطالب (طباعة/PDF + واتساب) ----- */
+function showReport(st, rows, avg, pct) {
+  const doctor = 'د. أحمد الشرقاوي', today = fmtDate(Date.now()).replace(/[⁦-⁩]/g, '').split('،')[0];
+  const subs = Object.keys(SUBJECTS).map(k => ({ k, topics: mergeTopics(rows.filter(r => r.subject === k).map(r => r.topics || [])), exams: rows.filter(r => r.subject === k) })).filter(s => s.exams.length);
+  const weak = subs.flatMap(s => s.topics.filter(x => x.c / x.t < 0.6).map(x => x.topic)), strong = subs.flatMap(s => s.topics.filter(x => x.c / x.t >= 0.85).map(x => x.topic));
+  const msg = `تقرير مستوى الطالب/ة ${st.name}\nالمتوسط العام: ${avg}% في ${rows.length} امتحان\n` + subs.map(s => `${SUBJECTS[s.k].name}: ${Math.round(s.exams.reduce((a, x) => a + pct(x), 0) / s.exams.length)}%`).join('\n') + (weak.length ? `\nيحتاج مراجعة: ${weak.join('، ')}` : '') + (strong.length ? `\nنقاط القوة: ${strong.join('، ')}` : '') + `\n— ${doctor}`;
+  const o = document.createElement('div'); o.className = 'rptov';
+  o.innerHTML = `<div class="bar noprint"><button class="btn sm" data-r="print">🖨 طباعة / حفظ PDF</button><a class="btn sm ghost" data-r="wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">واتساب</a><button class="btn sm ghost" data-r="x">إغلاق</button></div>
+  <div class="rpt"><div class="row" style="align-items:center"><div class="grow"><h1>تقرير مستوى الطالب</h1><div style="color:#5b7570">${doctor} · ${esc(today)}</div></div></div>
+  <div class="card" style="margin:12px 0"><b style="font-size:1.15rem">${esc(st.name)}</b><div style="color:#5b7570">${st.group ? esc(st.group) + ' · ' : ''}عدد الامتحانات: ${rows.length} · المتوسط العام: <b>${avg}%</b></div></div>
+  ${subs.map(s => `<h3 style="margin:16px 0 4px">${SUBJECTS[s.k].icon} ${SUBJECTS[s.k].name} · المتوسط ${Math.round(s.exams.reduce((a, x) => a + pct(x), 0) / s.exams.length)}%</h3>${s.topics.length ? topicBars(s.topics) : '<div style="color:#5b7570">لا توجد أبواب مربوطة بأسئلة هذه المادة.</div>'}`).join('')}
+  ${weak.length ? `<div style="margin-top:14px;padding:10px 12px;border-radius:10px;background:#fef3f2"><b>يحتاج مراجعة:</b> ${esc(weak.join('، '))}</div>` : ''}${strong.length ? `<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ecfdf3"><b>نقاط القوة:</b> ${esc(strong.join('، '))}</div>` : ''}
+  <h3 style="margin:16px 0 4px">الامتحانات</h3><table><tr><th>الامتحان</th><th>الدرجة</th><th>%</th><th>التاريخ</th></tr>${rows.map(x => `<tr><td>${esc(x.title)}</td><td>${fmtN(x.score)}/${fmtN(x.total)}${x.pending ? ' (المقالي قيد التصحيح)' : ''}</td><td>${pct(x)}%</td><td>${fmtDate(x.r.submittedAt)}</td></tr>`).join('')}</table></div>`;
+  o.onclick = e => {
+    const b = e.target.closest('[data-r]'); if (!b) return;
+    if (b.dataset.r === 'x') o.remove();
+    else if (b.dataset.r === 'print') { document.body.classList.add('rep'); setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove('rep'), 500); }, 100); }
+  };
+  document.body.appendChild(o);
 }
 
 /* ----- محرر الامتحان ----- */
@@ -2166,8 +2260,8 @@ function drawEditor(ex, isEdit) {
   <details class="hint"><summary>ℹ️ إيه اللي هيحصل؟</summary><p class="muted">${relNote(ex, bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay))}</p></details>
   <label class="row" style="font-weight:400"><input type="checkbox" data-k="showAnswers" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب إجاباته والإجابات الصحيحة مع النتيجة</label>
   <label class="row" style="font-weight:400"><input type="checkbox" data-k="showPts" ${ex.showPts !== false ? 'checked' : ''}> أظهر درجة كل سؤال للطالب أثناء الامتحان</label></div>
-  ${bubble ? bubbleEditor(ex) : `<div class="row"><button class="btn ghost" data-act="import">📥 استيراد أسئلة (PDF أو نص)</button>
-  ${topicList('', ex.subject).length ? `<select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق على كل الأسئلة</button>` : ''}</div><div id="impHost"></div>
+  ${bubble ? bubbleEditor(ex) : `<div class="row"><button class="btn ghost" data-act="import">📥 استيراد أسئلة (PDF أو نص)</button><button class="btn ghost" data-act="frombank">🏦 من بنك الأسئلة</button><button class="btn ghost" data-act="tobank">💾 حفظ الأسئلة في البنك</button>
+  ${topicList('', ex.subject).length ? `<select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق على كل الأسئلة</button>` : ''}</div><div id="impHost"></div><div id="bankHost"></div>
   <div class="card"><div class="row"><span class="muted">درجة كل أسئلة الاختيار:</span><input type="number" id="bulkP" min="0.25" step="0.25" value="1" style="width:80px"><button class="btn sm ghost" data-act="bulkp">طبّق على كل الأسئلة</button><span class="muted" style="font-size:.85rem">وتقدر تغيّر درجة أي سؤال لوحده</span></div></div>
   ${(() => { const nums = qNums(ex.questions); return ex.questions.map((q, i) => `<div id="qc${i}">${qEditor(q, i, ex.subject, nums[i], nums[i].multi)}</div>`).join(''); })()}
   <div class="row"><button class="btn ghost" data-act="addq">+ سؤال اختيارات</button><button class="btn ghost" data-act="adde">+ سؤال مقالي</button></div>`}
@@ -2177,7 +2271,7 @@ function drawEditor(ex, isEdit) {
   const root = $('#ed'), redraw = () => drawEditor(ex, isEdit);
   root.oninput = e => {
     const t = e.target, d = t.dataset; if (!S.guard) setGuard();
-    if (t.closest('#impHost')) return;
+    if (t.closest('#impHost,#bankHost')) return;
     if (d.k) { if (t.type !== 'checkbox' && t.tagName !== 'SELECT' && d.k !== 'n') ex[d.k] = t.type === 'number' ? Number(t.value) : t.value; }
     else if (d.bp !== undefined) ex.bPts[+d.bp] = +t.value > 0 ? +t.value : 1;
     else if (d.be !== undefined) ex.bEssays[+d.be] = +t.value > 0 ? +t.value : 1;
@@ -2185,7 +2279,7 @@ function drawEditor(ex, isEdit) {
   };
   root.onchange = async e => {
     const t = e.target, d = t.dataset; if (!S.guard) setGuard();
-    if (t.closest('#impHost')) return;
+    if (t.closest('#impHost,#bankHost')) return;
     const dp = t.closest('[data-dtp]'); if (dp) { ex[dp.dataset.dtp] = readDt(dp); redraw(); return; }
     if (d.k === 'subject') { ex.subject = t.value; redraw(); }
     else if (d.k === 'type') { ex.type = t.value; redraw(); }
@@ -2244,6 +2338,8 @@ function drawEditor(ex, isEdit) {
       for (let i = A - 1; i < Math.min(B, ex.n); i++) ex.bTopics[i] = v; redraw();
     }
     else if (a === 'import') openImport(ex, redraw);
+    else if (a === 'frombank') openBank(ex, redraw);
+    else if (a === 'tobank') await saveToBank(ex);
     else if (a === 'save') await saveEditor(ex, b);
   };
 }
@@ -2295,6 +2391,53 @@ async function saveEditor(ex, btn) {
   btn.disabled = true; setMsg('جاري الحفظ...', 'ok');
   try { await S.store.saveExam(exam, content, key, packs, ex.oldPacks || 0); S.guard = null; go('#teacher'); }
   catch (e) { btn.disabled = false; setMsg(e.message); }
+}
+
+
+/* ----- بنك الأسئلة ----- */
+async function saveToBank(ex) {
+  const qs = ex.questions.filter(q => isEssay(q) ? (q.text.trim() || q.image) : (q.image || q.text.trim()));
+  if (!qs.length) return setMsg('مفيش أسئلة تتحفظ');
+  const units = []; qs.forEach(q => { if (q.cont && units.length) units[units.length - 1].push(q); else units.push([q]); });
+  const items = [], big = [];
+  units.forEach(u => {
+    const items0 = u.map(q => ({ text: q.text || '', image: q.image || '', options: q.options || [], correct: q.correct ?? -1, topic: q.topic || '', pts: qPts(q), ...(q.letters ? { letters: true } : {}), ...(q.cont ? { cont: true } : {}), ...(isEssay(q) ? { type: 'essay' } : {}) }));
+    delete items0[0].cont;
+    const it = { id: 'q' + hashStr(JSON.stringify(items0)).toString(36), subject: ex.subject || 'bio', topic: items0[0].topic, items: items0, createdAt: Date.now(), preview: (items0[0].text || '').slice(0, 90) };
+    if (JSON.stringify(it).length > 900000) big.push(it); else items.push(it);
+  });
+  try { await S.store.saveBank(items); setMsg(`اتحفظ ${items.length} سؤال في البنك${big.length ? ` (و${big.length} سؤال صورهم كبيرة اتخطوا)` : ''}`, 'ok'); }
+  catch (e) { setMsg(e.message); }
+}
+async function openBank(ex, redraw) {
+  const host = $('#bankHost'); if (!host) return;
+  if (host.innerHTML) { host.innerHTML = ''; return; }
+  host.innerHTML = '<div class="card muted">جاري تحميل البنك...</div>';
+  let all = []; try { all = await S.store.listBank(); } catch (e) { host.innerHTML = `<div class="msg bad">${esc(e.message)}</div>`; return; }
+  let subj = ex.subject || 'bio', term = '';
+  const draw = () => {
+    const list = all.filter(x => (!subj || x.subject === subj) && (!term || (x.preview + ' ' + x.topic).includes(term)));
+    host.innerHTML = `<div class="card"><div class="row"><b class="grow">بنك الأسئلة (${list.length})</b><button class="btn sm ghost" data-b="x">إغلاق</button></div>
+    <div class="row" style="margin-top:6px"><select data-b="subj" style="width:auto"><option value="">كل المواد</option>${Object.keys(SUBJECTS).map(k => `<option value="${k}" ${k === subj ? 'selected' : ''}>${subjLabel(k)}</option>`).join('')}</select><input type="text" data-b="term" placeholder="بحث" value="${esc(term)}" class="grow"></div>
+    ${list.length ? list.map(x => `<div class="row" style="margin-top:8px;align-items:flex-start"><input type="checkbox" data-bk="${x.id}"><div class="grow">${x.items.length > 1 ? `<span class="badge">${x.items.length} أجزاء</span> ` : ''}${x.items[0].type === 'essay' ? '<span class="badge">مقالي</span> ' : ''}${esc(x.preview) || (x.items[0].image ? '(سؤال بصورة)' : '(بدون نص)')}${x.topic ? `<div class="muted" style="font-size:.8rem">${esc(x.topic)}</div>` : ''}</div><button class="btn sm danger" data-bd="${x.id}">×</button></div>`).join('') : '<p class="muted">البنك فاضي. استخدم "حفظ الأسئلة في البنك" من أي امتحان.</p>'}
+    <button class="btn block" data-b="add" style="margin-top:10px">إضافة المحدد للامتحان</button></div>`;
+  };
+  draw();
+  host.onchange = e => { const t = e.target; if (t.dataset.b === 'subj') { subj = t.value; draw(); } };
+  host.oninput = e => { const t = e.target; if (t.dataset.b === 'term') { term = t.value; const p = t.selectionStart; draw(); const n = host.querySelector('[data-b=term]'); n.focus(); n.setSelectionRange(p, p); } };
+  host.onclick = async e => {
+    e.stopPropagation();
+    const b = e.target.closest('[data-b],[data-bd]'); if (!b) return;
+    if (b.dataset.bd) { if (!confirm('حذف السؤال من البنك؟')) return; await S.store.deleteBank(b.dataset.bd); all = all.filter(x => x.id !== b.dataset.bd); draw(); return; }
+    if (b.dataset.b === 'x') { host.innerHTML = ''; return; }
+    if (b.dataset.b === 'add') {
+      const sel = [...host.querySelectorAll('[data-bk]:checked')].map(c => all.find(x => x.id === c.dataset.bk)).filter(Boolean);
+      if (!sel.length) return;
+      if (ex.questions.length === 1 && !ex.questions[0].text.trim() && !ex.questions[0].image && ex.questions[0].options.every(o => !o.trim())) ex.questions = [];
+      sel.forEach(x => x.items.forEach((q, i) => ex.questions.push({ ...JSON.parse(JSON.stringify(q)), ...(i ? { cont: true } : {}) })));
+      if (!S.guard) setGuard(); redraw();
+    }
+  };
 }
 /* ========= التواصل (رسائل بين الطالب والدكتور) ========= */
 S.mic = S.mic || {};
@@ -2428,6 +2571,7 @@ async function results(id, silent) {
   <div class="stat"><div><b>${rows.length}</b>سلّموا</div><div><b>${avg}%</b>المتوسط</div><div><b>${base.length ? pct(base[0].score) + '%' : '-'}</b>الأعلى</div><div><b>${base.length ? pct(base[base.length - 1].score) + '%' : '-'}</b>الأقل</div></div>
   ${hasEs && nPend ? `<div class="msg warn">${nPend} طالب لسه مقاليهم متصححش. اضغط "تصحيح" جنب اسم كل طالب.</div>` : ''}
   <div class="card" id="live"></div>
+  <div class="card" id="extraCard"></div>
   <div class="card"><b>نشر النتائج للطلاب</b>
   <details class="hint"><summary>ℹ️ توضيح</summary><p class="muted" style="margin:4px 0">${ex.release === 'instant' ? 'نتيجة فورية: الطالب بيشوف درجته أول ما يسلّم' + (hasEs ? ' (الاختيارات بس، والمقالي بيظهر لما تصحح وتنشر)' : '') + '.' : 'النتيجة بتظهر للطلاب لما تنشرها.'} ${ex.published ? 'النتائج منشورة حاليًا.' : 'لسه ما اتنشرتش.'}</p></details>
   <label class="row" style="font-weight:400"><input type="checkbox" id="showAns" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب الأسئلة والإجابات الصحيحة وإجاباته</label>
@@ -2467,6 +2611,16 @@ async function results(id, silent) {
   const onVis = () => { if (!document.hidden) refreshAll(); };
   document.addEventListener('visibilitychange', onVis); window.addEventListener('online', onVis);
   S.cleanup = () => { clearInterval(liveIv); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', onVis); };
+  const drawExtra = async () => {
+    const card = $('#extraCard'); if (!card) return;
+    const [studs, ext] = await Promise.all([S.store.listStudents(), S.store.listExtras(id)]), nm = c => (studs.find(s => s.code === c) || { name: c }).name;
+    card.innerHTML = `<details ${ext.length ? 'open' : ''}><summary><b>⏱ وقت إضافي لطالب</b></summary><p class="muted" style="margin:6px 0;font-size:.85rem">بتزود دقايق لطالب معين في الامتحان ده (حتى لو بدأ). بيوصله خلال دقيقة.</p>
+    <div class="row"><select id="exS" class="grow"><option value="">اختار الطالب</option>${studs.map(s => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join('')}</select><input type="number" id="exM" min="1" max="240" value="10" style="width:80px"><button class="btn sm" id="exA">إضافة</button></div>
+    ${ext.map(x => `<div class="row" style="margin-top:6px"><span class="grow">${esc(nm(x.code))}: +${x.min} دقيقة</span><button class="btn sm danger" data-xr="${esc(x.code)}">إلغاء</button></div>`).join('')}</details>`;
+    $('#exA').onclick = async () => { const c = $('#exS').value, m = Math.round(+$('#exM').value); if (!c || !(m >= 1 && m <= 240)) return; try { await S.store.setExtra(id, c, m); drawExtra(); } catch (er) { alert(er.message); } };
+    card.querySelectorAll('[data-xr]').forEach(b => { b.onclick = async () => { await S.store.setExtra(id, b.dataset.xr, 0); drawExtra(); }; });
+  };
+  drawExtra().catch(() => {});
   $('#live').onclick = e => { if (e.target.closest('[data-live]')) refreshLive(); };
   const syncScores = async (e2, rs2) => { if (!counts()) { await S.store.deleteExamScore(id); await recomputeRanks(subjOf(e2)); return; } await saveScores(e2, rs2); };
   if (ex.release === 'instant' && !hasEs && rows.length) { saveScores(ex, rows, true).catch(() => {}); }
@@ -2558,6 +2712,11 @@ async function gradePage(id, code) {
 
 /* ========= تشغيل ========= */
 (async function boot() {
+  syncClock(); setInterval(syncClock, 600000);
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__bip = e; document.querySelectorAll('.top .sp').forEach(sp => { if (!document.querySelector('[data-install]')) sp.insertAdjacentHTML('afterend', '<button class="btn sm ghost" data-install>📲 تثبيت</button>'); }); });
+  window.addEventListener('appinstalled', () => { window.__bip = null; document.querySelectorAll('[data-install]').forEach(b => b.remove()); });
+  document.addEventListener('click', async e => { if (e.target.closest('[data-install]') && window.__bip) { const p = window.__bip; window.__bip = null; p.prompt(); try { await p.userChoice; } catch (er) {} document.querySelectorAll('[data-install]').forEach(b => b.remove()); } });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
   document.addEventListener('click', e => {
     if (!e.target.closest('[data-theme-toggle]')) return;
     const n = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
