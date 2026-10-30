@@ -59,8 +59,8 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .nav a{flex:1;text-align:center;color:var(--muted);font-size:.8rem;padding:4px;border-radius:12px;font-weight:600}
 .nav a b{display:block;font-size:1.25rem;line-height:1.3}
 .nav a.on{color:var(--accent);background:var(--soft)}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin:4px 0 8px}
-.tabs a{padding:6px 16px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-weight:700;white-space:nowrap;background:var(--card)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.tabs a{flex:1 1 28%;text-align:center;padding:7px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-weight:700;white-space:nowrap;background:var(--card)}
 .tabs a.on{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 .chip{padding:5px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
@@ -128,6 +128,10 @@ pre{background:var(--soft);border-radius:12px;padding:8px;margin:6px 0;white-spa
 .nav a.pulse b,.tabs a.pulse{animation:pulse 1.6s infinite}.nav a.pulse{color:#e03131}.tabs a.pulse{border-color:#e03131;color:#e03131}.nav a.pulse.on,.tabs a.pulse.on{animation:pulse 1.6s infinite}
 @media (prefers-reduced-motion:reduce){.nav a.pulse b,.tabs a.pulse{animation:none}}
 .chat{display:flex;flex-direction:column;margin:8px 0}.cb{max-width:86%;padding:8px 12px;border-radius:14px;margin:5px 0;word-break:break-word}.cb .tx{white-space:pre-wrap}.cb.me{background:var(--brand);color:var(--on-brand);margin-inline-end:auto}.cb.th{background:var(--soft);margin-inline-start:auto}.cb img{max-width:100%;max-height:260px;border-radius:10px;display:block;margin-top:6px;cursor:zoom-in;background:#fff}.cb .ct{font-size:.7rem;opacity:.75;margin-top:4px}.cb .cl{font-size:.75rem;font-weight:700;opacity:.85;margin-bottom:2px}
+*{scrollbar-width:none}*::-webkit-scrollbar{display:none}
+details.xd{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0;background:var(--card)}details.xd>summary{font-weight:700;cursor:pointer;color:var(--ink)}details.xd[open]>summary{margin-bottom:8px}
+.dtp{display:block}.dtr{display:flex;gap:6px;margin-bottom:6px;align-items:center}.dtr select{flex:1 1 0;min-width:0}
+a.logo{color:inherit;text-decoration:none;cursor:pointer}
 .newb{background:#e03131;color:#fff;border-radius:999px;font-size:.72rem;padding:1px 8px;font-weight:700}
 .part{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
 label.row{flex-wrap:nowrap;align-items:flex-start}label.row>input[type=checkbox],label.row>input[type=radio]{flex:none;margin-top:5px}
@@ -688,7 +692,7 @@ const setSession = s => { if (s) ls.set('stu', JSON.stringify(s)); else ls.del('
 const themeBtn = '<button class="icon-btn" data-theme-toggle aria-label="تبديل الوضع الداكن"><span class="ic-moon">🌙</span><span class="ic-sun">☀️</span></button>';
 
 function view(html) { $('#app').onclick = null; $('#app').onchange = null; document.body.classList.remove('sheet-open'); $('#app').innerHTML = (DEMO ? '<div class="banner">وضع تجريبي: البيانات محفوظة في المتصفح ده بس</div>' : '') + html; }
-const topbar = (extra = '') => `<div class="top"><div class="logo"><i>${LOGO}</i>د. أحمد الشرقاوي</div><span class="sp"></span>${window.__bip ? '<button class="btn sm ghost" data-install>📲 تثبيت</button>' : ''}${extra}${themeBtn}</div>`;
+const topbar = (extra = '') => `<div class="top"><a class="logo" href="${location.hash.startsWith('#teacher') ? '#teacher' : '#s/exams'}" aria-label="الصفحة الرئيسية"><i>${LOGO}</i>د. أحمد الشرقاوي</a><span class="sp"></span>${window.__bip ? '<button class="btn sm ghost" data-install>📲 تثبيت</button>' : ''}${extra}${themeBtn}</div>`;
 
 const isRootHash = () => /^#?\/?(s(\/exams)?|teacher)?\/?$/.test(location.hash);
 const backBtn = html => (S.nav > 0 && !isRootHash() && html !== loadingInner && !/رجوع/.test(html)) ? '<div style="margin:4px 0 8px"><button class="btn sm ghost" data-back>→ رجوع</button></div>' : '';
@@ -720,14 +724,16 @@ async function refreshDots(tab) {
   const ses = getSession(); if (!ses || !$('.nav')) return;
   const v = await newStamps(ses), sn = getSeen(ses) || {};
   let changed = false;
-  ['exams', 'files', 'results', 'rank', 'chat'].forEach(t => { if (sn[t] === undefined) { sn[t] = v[t]; changed = true; } });
+  ['exams', 'files', 'results', 'rank', 'chat'].forEach(t => { if (sn[t] === undefined) { sn[t] = t === 'chat' ? 0 : v[t]; changed = true; } });
   if (changed) ls.set(seenKey(ses), JSON.stringify(sn));
   document.querySelectorAll('.nav a[data-t]').forEach(a => {
     const t = a.dataset.t, has = a.querySelector('.dot');
     if (t !== tab && v[t] > (sn[t] || 0)) { if (!has) a.insertAdjacentHTML('beforeend', '<span class="dot"></span>'); a.classList.add('pulse'); } else { if (has) has.remove(); a.classList.remove('pulse'); }
   });
 }
+if (!window.__sIv) { window.__sIv = setInterval(() => { if (!document.hidden && document.querySelector('.nav')) { S.stampCache = null; refreshDots(S.curTab); } }, 60000); }
 function studentShell(tab, inner) {
+  S.curTab = tab;
   view(`${topbar('<button class="btn sm ghost" id="sout">خروج</button>')}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
   <nav class="nav"><a href="#s/exams" data-t="exams" class="${tab === 'exams' ? 'on' : ''}"><b>📝</b>الامتحانات</a><a href="#s/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}"><b>🏆</b>الترتيب</a><a href="#s/results" data-t="results" class="${tab === 'results' ? 'on' : ''}"><b>📊</b>نتايجي</a><a href="#s/chat" data-t="chat" class="${tab === 'chat' ? 'on' : ''}"><b>💬</b>التواصل</a><a href="#s/files" data-t="files" class="${tab === 'files' ? 'on' : ''}"><b>📚</b>الملفات</a></nav>`);
   setTimeout(() => refreshDots(tab), 0);
@@ -784,6 +790,7 @@ function router() {
   clearInterval(S.timer); clearInterval(S.xiv);
   if (S.cleanup) { S.cleanup(); S.cleanup = null; }
   const p = location.hash.replace(/^#\/?/, '').split('/');
+  try { const mf = document.querySelector('link[rel=manifest]'), want = p[0] === 'teacher' ? 'manifest-doctor.webmanifest' : 'manifest.webmanifest'; if (mf && mf.getAttribute('href') !== want) mf.setAttribute('href', want); const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f766e'; document.title = p[0] === 'teacher' ? 'لوحة الدكتور' : 'منصة د. أحمد الشرقاوي'; } catch (e) {}
   if (p[0] === 'teacher') return teacherRoute(p);
   return studentRoute(p[0] === 's' ? p : ['s', 'exams']);
 }
@@ -794,7 +801,7 @@ function studentLogin(note) {
   <div class="card"><label for="cd">الكود الشخصي</label><input type="text" id="cd" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" style="letter-spacing:3px;text-align:center;font-size:1.2rem">
   <div id="msg">${note ? `<div class="msg bad">${esc(note)}</div>` : ''}</div><button class="btn block" id="go">دخول</button>
   <p class="muted" style="margin-bottom:0">أول مرة؟ <a href="#s/register">سجّل حساب جديد</a>.${DEMO ? ' للتجربة: DEMO01' : ''}</p></div>
-  <p class="foot"><a href="#teacher">دخول الدكتور</a></p></div>`);
+</div>`);
   const login = async () => {
     let code = $('#cd').value.trim().replace(/\s+/g, '');
     if (!code) return setMsg('اكتب الكود');
@@ -1218,16 +1225,43 @@ async function teacherRoute(p) {
   } catch (e) { teacherShell('exams', `<div class="msg bad">${esc(e.message)}</div>`); }
 }
 
+/* ===== الدخول بالبصمة (للدكتور بس) =====
+   بنستخدم WebAuthn كقفل محلي: البصمة بتفك بيانات الدخول المحفوظة على الجهاز ده بس. */
+const bioSaved = () => { try { return !!JSON.parse(ls.get('bio')); } catch (e) { return false; } };
+const bioClear = () => ls.del('bio');
+const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u))), unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function bioAvailable() { try { return !!(window.PublicKeyCredential && window.isSecureContext && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch (e) { return false; } }
+async function bioEnable(email, pw) {
+  const cred = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'منصة د. أحمد الشرقاوي', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: email || 'doctor', displayName: 'الدكتور' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } });
+  ls.set('bio', JSON.stringify({ id: b64(cred.rawId), e: email, p: pw }));
+}
+async function bioUnlock() {
+  const s = JSON.parse(ls.get('bio')); if (!s) throw new Error('البصمة مش مفعّلة');
+  await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: unb64(s.id) }], userVerification: 'required', rpId: location.hostname, timeout: 60000 } });
+  return s;
+}
+async function offerBio(email, pw) {
+  if (DEMO || bioSaved() || ls.get('bioNo') || !(await bioAvailable())) return;
+  const yes = await modal({ title: 'الدخول بالبصمة', text: 'تحب تدخل المرة الجاية بالبصمة (أو قفل الشاشة) من غير ما تكتب الإيميل وكلمة السر؟ بيتحفظ على الجهاز ده بس، ومتفعّلش ده إلا على تليفونك الشخصي. وتقدر تلغيه من الإعدادات.', ok: 'فعّل البصمة', cancel: 'مش دلوقتي' });
+  if (!yes) { ls.set('bioNo', '1'); return; }
+  try { await bioEnable(email, pw); } catch (e) { /* اتلغت */ }
+}
 function teacherLogin() {
   view(`${topbar()}<div class="wrap narrow"><h1>دخول الدكتور</h1><div class="card">
-  ${DEMO ? '' : '<label for="em">الإيميل</label><input type="email" id="em" dir="ltr">'}
-  <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><div class="pwrap"><input type="password" id="pw" dir="ltr"><button type="button" class="eye" id="eye" aria-label="إظهار كلمة السر"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-  <div id="msg"></div><button class="btn block" id="lg">دخول</button></div>
+  ${DEMO ? '' : '<label for="em">الإيميل</label><input type="email" id="em" dir="ltr" autocomplete="username" name="email">'}
+  <label for="pw">${DEMO ? 'كلمة السر (للتجربة: 1234)' : 'كلمة السر'}</label><div class="pwrap"><input type="password" id="pw" dir="ltr" autocomplete="current-password" name="password"><button type="button" class="eye" id="eye" aria-label="إظهار كلمة السر"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+  <div id="msg"></div><button class="btn block" id="lg">دخول</button>${bioSaved() ? '<button class="btn block ghost" id="bio" style="margin-top:8px">🔐 الدخول بالبصمة</button>' : ''}</div>
   <p class="foot"><a href="#">صفحة الطلاب</a></p></div>`);
   const login = async () => {
     const ok = await S.store.login(DEMO ? '' : $('#em').value.trim(), $('#pw').value);
     if (!ok) return setMsg('بيانات الدخول غلط');
+    await offerBio(DEMO ? '' : $('#em').value.trim(), $('#pw').value);
     router();
+  };
+  const bb = $('#bio');
+  if (bb) bb.onclick = async () => {
+    try { const c = await bioUnlock(); const ok = await S.store.login(c.e, c.p); if (!ok) { bioClear(); return setMsg('بيانات البصمة قديمة. ادخل بالإيميل وكلمة السر وفعّل البصمة من جديد.'); } router(); }
+    catch (er) { setMsg(er && er.name === 'NotAllowedError' ? 'اتلغت البصمة أو فشلت' : (er.message || 'تعذر الدخول بالبصمة')); }
   };
   $('#eye').onclick = () => { const i = $('#pw'), show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('#eye').innerHTML = show ? EYE_OFF : EYE_ON; i.focus(); };
   $('#lg').onclick = login; $('#pw').onkeydown = e => { if (e.key === 'Enter') login(); };
@@ -1353,10 +1387,20 @@ async function teacherSettings() {
   ${Object.keys(SUBJECTS).map(k => `<div class="card"><b>أبواب ${subjLabel(k)}</b>
   <details class="hint"><summary>ℹ️ كل باب أو درس في…</summary><p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والدكتور مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p></details>
   <textarea id="tp_${k}" rows="7" placeholder="الباب الأول: ...&#10;الباب الثاني: ...">${esc(topicsOf(cfg, k).join('\n'))}</textarea></div>`).join('')}
+  <div class="card"><b>الدخول بالبصمة</b><p class="muted" style="margin:4px 0;font-size:.85rem">${bioSaved() ? 'مفعّل على الجهاز ده. بيدخلك من غير إيميل وكلمة سر بعد التحقق بالبصمة.' : 'غير مفعّل. هيتعرض عليك بعد تسجيل الدخول التالي (لو الجهاز بيدعم).'}</p>
+  ${bioSaved() ? '<button class="btn sm danger" id="bioOff">إلغاء البصمة على الجهاز ده</button>' : '<button class="btn sm ghost" id="bioOn">تفعيل البصمة</button>'}</div>
   <div class="card"><b>نسخة احتياطية</b>
   <details class="hint"><summary>ℹ️ إيه اللي بيتحفظ؟</summary><p class="muted" style="margin:4px 0">الملف بيشمل الطلاب والامتحانات (بأسئلتها وصورها ومفتاح الإجابات) والإعدادات وبنك الأسئلة ونتايج الطلاب. الاستعادة بترجّع كل ده ما عدا النتايج (بتفضل في الملف للأرشيف). ملفات المراجع مش داخلة. احتفظ بالنسخة في Google Drive.</p></details>
   <div class="row"><button class="btn sm" id="bkx">⬇ تنزيل نسخة احتياطية</button><label class="btn sm ghost" style="margin:0">⬆ استعادة من ملف<input type="file" id="bki" accept="application/json" hidden></label></div><div id="bkm" class="muted" style="margin-top:6px"></div></div>
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
+  const bo = $('#bioOff'); if (bo) bo.onclick = () => { bioClear(); ls.del('bioNo'); teacherSettings(); };
+  const bn = $('#bioOn'); if (bn) bn.onclick = async () => {
+    if (!(await bioAvailable())) return setMsg('الجهاز أو المتصفح ده مش بيدعم البصمة');
+    const pw = await modal({ title: 'تفعيل البصمة', html: '<p style="margin:0 0 8px">اكتب كلمة السر مرة واحدة لتخزينها على الجهاز ده.</p><input type="password" id="bpw" dir="ltr" autocomplete="current-password">', ok: 'متابعة', read: () => $('#bpw').value });
+    if (!pw) return;
+    const em = (S.store.auth && S.store.auth.currentUser && S.store.auth.currentUser.email) || '';
+    try { await S.store.auth.signInWithEmailAndPassword(em, pw); await bioEnable(em, pw); ls.del('bioNo'); teacherSettings(); } catch (e) { setMsg('كلمة السر غلط أو اتلغت البصمة'); }
+  };
   $('#bkx').onclick = async () => {
     const b = $('#bkx'), say = x => { $('#bkm').textContent = x; }; b.disabled = true;
     try { const data = await exportAll(say); downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), 'نسخة احتياطية ' + new Date().toISOString().slice(0, 10) + '.json'); say('تم تنزيل النسخة'); }
@@ -2156,12 +2200,12 @@ const topicSelect = (cur, subj, attrs) => { const l = topicList(cur, subj); retu
 function qEditor(q, i, subj, num, multi) {
   const pt = `<label class="muted" style="font-weight:400;margin:0">الدرجة <input type="number" min="0.25" step="0.25" data-q="${i}" data-f="pts" value="${fmtN(qPts(q))}" style="width:76px;display:inline-block"></label>`;
   const head = `<div class="row"><b class="grow">سؤال ${num.n}${multi ? ' · جزء ' + num.p : ''}${q.letters && !q.cont ? ' <span class="badge">صورة + أ ب ج د</span>' : ''}${isEssay(q) ? ' <span class="badge">مقالي</span>' : ''}</b>${pt}<button class="btn sm danger" data-act="delq" data-q="${i}">${q.cont ? 'حذف الجزء' : 'حذف السؤال'}</button></div>`;
-  const topic = topicList(q.topic, subj).length ? `<label style="margin:8px 0 2px">الباب</label>${topicSelect(q.topic, subj, `data-q="${i}" data-f="topic"`)}` : '';
+  const topic = topicList(q.topic, subj).length ? `<details class="xd" ${q.topic ? 'open' : ''}><summary>🏷 الباب (اختياري)</summary>${topicSelect(q.topic, subj, `data-q="${i}" data-f="topic"`)}</details>` : '';
+  const imgBlk = `<details class="xd" ${q.image ? 'open' : ''}><summary>🖼 صورة للسؤال (اختياري)</summary>${q.image ? `<img data-zoom src="${esc(q.image)}" alt="" style="cursor:zoom-in;max-width:240px;display:block;margin:8px 0;border-radius:12px"><button class="btn sm danger" data-act="rmimg" data-q="${i}">شيل الصورة</button>` : `<input type="file" accept="image/*" data-q="${i}" data-f="img">`}</details>`;
   if (isEssay(q)) {
     return `<div class="card">${head}
     <textarea rows="3" data-q="${i}" data-f="text" placeholder="نص السؤال المقالي">${esc(q.text)}</textarea>
-    ${q.image ? `<img data-zoom src="${esc(q.image)}" alt="" style="cursor:zoom-in;max-width:240px;display:block;margin:8px 0;border-radius:12px"><button class="btn sm danger" data-act="rmimg" data-q="${i}">شيل الصورة</button>`
-      : `<label style="font-weight:400" class="muted">صورة (اختياري): <input type="file" accept="image/*" data-q="${i}" data-f="img"></label>`}
+    ${imgBlk}
     <div class="muted" style="margin-top:6px">الطالب بيكتب الإجابة أو يرفع صورة ورقته، وانت بتصححها وتحط الدرجة من صفحة النتائج.</div>${topic}</div>`;
   }
   if (q.letters && q.cont) {
@@ -2181,8 +2225,7 @@ function qEditor(q, i, subj, num, multi) {
   }
   return `<div class="card">${head}
   <textarea rows="2" data-q="${i}" data-f="text" placeholder="نص السؤال">${esc(q.text)}</textarea>
-  ${q.image ? `<img data-zoom src="${esc(q.image)}" alt="" style="cursor:zoom-in;max-width:240px;display:block;margin:8px 0;border-radius:12px"><button class="btn sm danger" data-act="rmimg" data-q="${i}">شيل الصورة</button>`
-    : `<label style="font-weight:400" class="muted">صورة (اختياري): <input type="file" accept="image/*" data-q="${i}" data-f="img"></label>`}
+  ${imgBlk}
   ${topic}
   ${q.correct < 0 ? '<div class="msg bad" style="padding:4px 10px;margin:8px 0 4px">حدد الإجابة الصحيحة بالدايرة</div>' : '<div class="muted" style="margin-top:8px">حدد الإجابة الصحيحة بالدايرة</div>'}
   ${q.options.map((o, k) => `<div class="row" style="margin:6px 0"><input type="radio" name="c${i}" data-q="${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}>
@@ -2220,13 +2263,13 @@ function dtPicker(key, ms) {
   const ys = [Y, Y + 1, Y + 2]; if (p.y && !ys.includes(p.y)) ys.unshift(p.y);
   const mins = [...new Set([...Array.from({ length: 12 }, (_, k) => k * 5), p.i])].sort((a, b) => a - b);
   return `<div class="dtp" data-dtp="${key}">
-  <select data-dp="d" aria-label="اليوم"><option value="">اليوم</option>${Array.from({ length: 31 }, (_, k) => op(k + 1, k + 1, p.d)).join('')}</select>
+  <div class="dtr"><select data-dp="d" aria-label="اليوم"><option value="">اليوم</option>${Array.from({ length: 31 }, (_, k) => op(k + 1, k + 1, p.d)).join('')}</select>
   <select data-dp="m" aria-label="الشهر"><option value="">الشهر</option>${MONTHS_AR.map((n, k) => op(k + 1, n, p.m)).join('')}</select>
   <select data-dp="y" aria-label="السنة"><option value="">السنة</option>${ys.map(y => op(y, y, p.y)).join('')}</select>
-  <select data-dp="h" aria-label="الساعة">${Array.from({ length: 12 }, (_, k) => op(k + 1, k + 1, p.h)).join('')}</select>
+  </div><div class="dtr"><select data-dp="h" aria-label="الساعة">${Array.from({ length: 12 }, (_, k) => op(k + 1, k + 1, p.h)).join('')}</select>
   <select data-dp="i" aria-label="الدقيقة">${mins.map(x => op(x, String(x).padStart(2, '0'), p.i)).join('')}</select>
   <select data-dp="ap" aria-label="صباحًا أو مساءً">${op('am', 'صباحًا', p.ap)}${op('pm', 'مساءً', p.ap)}</select>
-  ${ms ? `<button type="button" class="btn sm ghost" data-dpclr="${key}">مسح</button>` : ''}</div>
+  ${ms ? `<button type="button" class="btn sm ghost" data-dpclr="${key}">مسح</button>` : ''}</div></div>
   <div class="muted dtsum">${ms ? fmtDate(ms) : 'مش محدد'}</div>`;
 }
 function readDt(dp) {
@@ -2248,21 +2291,24 @@ function drawEditor(ex, isEdit) {
   <div class="row"><label class="grow" style="margin:12px 0 0">المادة<select data-k="subject">${subjOptions(ex.subject)}</select></label>
   <label class="grow" style="margin:12px 0 0">نوع الامتحان<select data-k="type"><option value="mcq" ${bubble ? '' : 'selected'}>أسئلة (كتابة أو استيراد)</option><option value="bubble" ${bubble ? 'selected' : ''}>ملف PDF + بابل شيت</option></select></label></div>
   <label>المدة (بالدقايق)</label><input type="number" min="1" data-k="durationMin" value="${ex.durationMin}">
-  <label>يفتح في (اختياري)</label>${dtPicker('opensAt', ex.opensAt)}
-  <label>يقفل في (اختياري)</label>${dtPicker('closesAt', ex.closesAt)}
+  <label class="row" style="font-weight:400;margin-top:12px"><input type="checkbox" data-k="active" ${ex.active ? 'checked' : ''}> مفتوح للطلاب</label></div>
+  <details class="xd" ${(ex.opensAt || ex.closesAt || ex.groups.length) ? 'open' : ''}><summary>🗓 الموعد والمجموعة ${(ex.opensAt || ex.closesAt || ex.groups.length) ? '<span class="badge">مفعّل</span>' : '<span class="muted" style="font-weight:400">(اختياري)</span>'}</summary>
+  <label>يفتح في</label>${dtPicker('opensAt', ex.opensAt)}
+  <label>يقفل في</label>${dtPicker('closesAt', ex.closesAt)}
   <details class="hint"><summary>ℹ️ لو حددت وقت قفل، الطالب…</summary><p class="muted">لو حددت وقت قفل، الطالب بيشوف في صفحة الامتحانات إن الامتحان متاح لحد الوقت ده بس، وبعده مش هيقدر يبدأه. اللي بدأ قبل القفل يكمّل مدته عادي.</p></details>
-  ${bubble ? '' : `<label class="row" style="font-weight:400"><input type="checkbox" data-k="shuffle" ${ex.shuffle ? 'checked' : ''}> ترتيب الأسئلة والاختيارات عشوائي لكل طالب</label>`}
-  <label class="row" style="font-weight:400"><input type="checkbox" data-k="active" ${ex.active ? 'checked' : ''}> مفتوح للطلاب</label>
-  ${gl.length ? `<label>متاح لمجموعة</label><div class="muted" style="font-size:.85rem;margin-bottom:4px">من غير اختيار = كل الطلاب</div>${gl.map(g => `<label class="row" style="font-weight:400;margin:4px 0"><input type="checkbox" data-gk="${esc(g)}" ${ex.groups.includes(g) ? 'checked' : ''}> ${esc(g)}</label>`).join('')}` : ''}</div>
-  <div class="card"><b>نتيجة الامتحان للطلاب</b>
+  ${gl.length ? `<label>متاح لمجموعة</label><div class="muted" style="font-size:.85rem;margin-bottom:4px">من غير اختيار = كل الطلاب</div>${gl.map(g => `<label class="row" style="font-weight:400;margin:4px 0"><input type="checkbox" data-gk="${esc(g)}" ${ex.groups.includes(g) ? 'checked' : ''}> ${esc(g)}</label>`).join('')}` : ''}</details>
+  ${bubble ? '' : `<details class="xd"><summary>🔀 ترتيب الأسئلة <span class="muted" style="font-weight:400">(اختياري)</span></summary><label class="row" style="font-weight:400"><input type="checkbox" data-k="shuffle" ${ex.shuffle ? 'checked' : ''}> ترتيب الأسئلة والاختيارات عشوائي لكل طالب</label></details>`}
+  <details class="xd"><summary>📊 ظهور النتيجة للطلاب <span class="muted" style="font-weight:400">(${ex.release === 'instant' ? 'تظهر مباشرة' : 'الدكتور يعلنها'})</span></summary>
   <label class="row" style="font-weight:400;margin:6px 0"><input type="radio" name="rel" data-k="release" value="manual" ${ex.release === 'instant' ? '' : 'checked'}> الدكتور هو اللي بيعلنها (مفيش حاجة بتظهر قبل ما تنشر)</label>
   <label class="row" style="font-weight:400;margin:6px 0"><input type="radio" name="rel" data-k="release" value="instant" ${ex.release === 'instant' ? 'checked' : ''}> تظهر مباشرة بعد ما الطالب يسلّم</label>
   <details class="hint"><summary>ℹ️ إيه اللي هيحصل؟</summary><p class="muted">${relNote(ex, bubble ? ex.bEssays.length > 0 : ex.questions.some(isEssay))}</p></details>
   <label class="row" style="font-weight:400"><input type="checkbox" data-k="showAnswers" ${ex.showAnswers !== false ? 'checked' : ''}> أظهر للطالب إجاباته والإجابات الصحيحة مع النتيجة</label>
-  <label class="row" style="font-weight:400"><input type="checkbox" data-k="showPts" ${ex.showPts !== false ? 'checked' : ''}> أظهر درجة كل سؤال للطالب أثناء الامتحان</label></div>
-  ${bubble ? bubbleEditor(ex) : `<div class="row"><button class="btn ghost" data-act="import">📥 استيراد أسئلة (PDF أو نص)</button><button class="btn ghost" data-act="frombank">🏦 من بنك الأسئلة</button><button class="btn ghost" data-act="tobank">💾 حفظ الأسئلة في البنك</button>
-  ${topicList('', ex.subject).length ? `<select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق على كل الأسئلة</button>` : ''}</div><div id="impHost"></div><div id="bankHost"></div>
-  <div class="card"><div class="row"><span class="muted">درجة كل أسئلة الاختيار:</span><input type="number" id="bulkP" min="0.25" step="0.25" value="1" style="width:80px"><button class="btn sm ghost" data-act="bulkp">طبّق على كل الأسئلة</button><span class="muted" style="font-size:.85rem">وتقدر تغيّر درجة أي سؤال لوحده</span></div></div>
+  <label class="row" style="font-weight:400"><input type="checkbox" data-k="showPts" ${ex.showPts !== false ? 'checked' : ''}> أظهر درجة كل سؤال للطالب أثناء الامتحان</label></details>
+  ${bubble ? bubbleEditor(ex) : `<div class="row"><button class="btn ghost" data-act="import">📥 استيراد (PDF أو نص)</button><button class="btn ghost" data-act="frombank">🏦 من البنك</button></div><div id="impHost"></div><div id="bankHost"></div>
+  <details class="xd"><summary>🧰 أدوات جماعية <span class="muted" style="font-weight:400">(اختيارية)</span></summary>
+  <div class="row"><span class="muted">درجة كل الأسئلة:</span><input type="number" id="bulkP" min="0.25" step="0.25" value="1" style="width:80px"><button class="btn sm ghost" data-act="bulkp">طبّق</button></div>
+  ${topicList('', ex.subject).length ? `<div class="row" style="margin-top:8px"><select id="bulkT" style="width:auto"><option value="">الباب...</option>${topicList('', ex.subject).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select><button class="btn sm ghost" data-act="bulkt">طبّق الباب على كل الأسئلة</button></div>` : ''}
+  <div class="row" style="margin-top:8px"><button class="btn sm ghost" data-act="tobank">💾 حفظ الأسئلة في البنك</button></div></details>
   ${(() => { const nums = qNums(ex.questions); return ex.questions.map((q, i) => `<div id="qc${i}">${qEditor(q, i, ex.subject, nums[i], nums[i].multi)}</div>`).join(''); })()}
   <div class="row"><button class="btn ghost" data-act="addq">+ سؤال اختيارات</button><button class="btn ghost" data-act="adde">+ سؤال مقالي</button></div>`}
   <div class="savebar"><div class="sb"><div id="msg" class="grow"></div><button class="btn" data-act="save">حفظ الامتحان</button></div></div></div>`);

@@ -2,6 +2,7 @@
   "name": "منصة د. أحمد الشرقاوي",
   "short_name": "الشرقاوي",
   "description": "امتحانات الأحياء والجيولوجيا - ثالثة ثانوي",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
