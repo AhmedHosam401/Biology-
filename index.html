@@ -133,6 +133,8 @@ pre{background:var(--soft);border-radius:12px;padding:8px;margin:6px 0;white-spa
 @media (prefers-reduced-motion:reduce){.nav a.pulse b,.tabs a.pulse{animation:none}}
 .chat{display:flex;flex-direction:column;margin:8px 0}.cb{max-width:86%;padding:8px 12px;border-radius:14px;margin:5px 0;word-break:break-word}.cb .tx{white-space:pre-wrap}.cb.me{background:var(--brand);color:var(--on-brand);margin-inline-end:auto}.cb.th{background:var(--soft);margin-inline-start:auto}.cb img{max-width:100%;max-height:260px;border-radius:10px;display:block;margin-top:6px;cursor:zoom-in;background:#fff}.cb .ct{font-size:.7rem;opacity:.75;margin-top:4px}.cb .cl{font-size:.75rem;font-weight:700;opacity:.85;margin-bottom:2px}
 *{scrollbar-width:none}*::-webkit-scrollbar{display:none}
+.tour{position:fixed;inset:0;z-index:980}.tour .th{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.68);pointer-events:none;transition:all .25s;border:2px solid #fff}
+.tour .tc{position:fixed;left:16px;right:16px;max-width:420px;margin:0 auto;background:var(--card);color:var(--ink);border-radius:16px;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.4)}.tour .tt{font-weight:800;font-size:1.1rem;margin-bottom:4px}.tour .tx{line-height:1.7}
 details.xd{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0;background:var(--card)}details.xd>summary{font-weight:700;cursor:pointer;color:var(--ink)}details.xd[open]>summary{margin-bottom:8px}
 .dtp{display:block}.dtr{display:flex;gap:6px;margin-bottom:6px;align-items:center}.dtr select{flex:1 1 0;min-width:0}
 a.logo{color:inherit;text-decoration:none;cursor:pointer}
@@ -913,7 +915,9 @@ async function studentExams(ses) {
   const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
   ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
   studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>${sumStrip}
-  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}`);
+  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button></div>`);
+  $('#tourBtn').onclick = () => runTour(TOUR_STUDENT, studentTourKey(ses));
+  maybeStudentTour(ses);
   $('#main').onclick = async e => {
     const c = e.target.closest('[data-subj]');
     if (c) { S.subjExams = c.dataset.subj; return studentExams(ses); }
@@ -1295,7 +1299,7 @@ async function dashboard() {
   ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b>${tv.news[e.id] ? ` <span class="newb">${tv.news[e.id]} جديد</span>` : ''}${live[e.id] ? ` <span class="badge ok">🟢 ${live[e.id]} بيمتحن الآن</span>` : ''}<div class="muted">${subjLabel(subjOf(e))} · ${e.type === 'bubble' ? 'ورقة PDF + بابل شيت' : 'أسئلة'} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة${e.groups && e.groups.length ? ' · ' + esc(e.groups.join('، ')) : ' · كل الطلاب'}</div></div>${e.closesAt ? `<span class="badge">يقفل ${fmtDate(e.closesAt)}</span>` : ''}${e.release === 'instant' ? '<span class="badge">نتيجة فورية</span>' : ''}${e.hasEssay ? '<span class="badge">مقالي</span>' : ''}${e.published ? '<span class="badge ok">النتايج منشورة</span>' : ''}</div>
   <div class="row" style="margin-top:10px"><label class="row" style="margin:0;font-weight:400"><input type="checkbox" data-act="active" data-id="${e.id}" ${e.active ? 'checked' : ''}> مفتوح للطلاب</label><span class="grow"></span>
   <a class="btn sm" href="#teacher/results/${e.id}">النتائج</a><a class="btn sm ghost" href="#teacher/edit/${e.id}">تعديل</a><button class="btn sm danger" data-act="del" data-id="${e.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش امتحانات. اضغط "امتحان جديد".</div>'}</div>`);
-  const root = $('#dash');
+  const root = $('#dash'); maybeTeacherTour();
   root.onchange = async e => { const t = e.target; if (t.dataset.act === 'active') { try { await S.store.setActive(t.dataset.id, t.checked); } catch (er) { t.checked = !t.checked; alert(er.message); } } };
   root.onclick = async e => {
     const c = e.target.closest('[data-subj]'); if (c) { S.subjDash = c.dataset.subj; return dashboard(); }
@@ -1406,12 +1410,14 @@ async function teacherSettings() {
   ${Object.keys(SUBJECTS).map(k => `<div class="card"><b>أبواب ${subjLabel(k)}</b>
   <details class="hint"><summary>ℹ️ كل باب أو درس في…</summary><p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والدكتور مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p></details>
   <textarea id="tp_${k}" rows="7" placeholder="الباب الأول: ...&#10;الباب الثاني: ...">${esc(topicsOf(cfg, k).join('\n'))}</textarea></div>`).join('')}
+  <div class="card"><b>شرح اللوحة</b><p class="muted" style="margin:4px 0;font-size:.85rem">جولة سريعة على أهم حاجات اللوحة.</p><button class="btn sm ghost" id="tourT">❓ إعادة الشرح</button></div>
   <div class="card"><b>الدخول بالبصمة</b><p class="muted" style="margin:4px 0;font-size:.85rem">${bioSaved() ? 'مفعّل على الجهاز ده. بيدخلك من غير إيميل وكلمة سر بعد التحقق بالبصمة.' : 'غير مفعّل. هيتعرض عليك بعد تسجيل الدخول التالي (لو الجهاز بيدعم).'}</p>
   ${bioSaved() ? '<button class="btn sm danger" id="bioOff">إلغاء البصمة على الجهاز ده</button>' : '<button class="btn sm ghost" id="bioOn">تفعيل البصمة</button>'}</div>
   <div class="card"><b>نسخة احتياطية</b>
   <details class="hint"><summary>ℹ️ إيه اللي بيتحفظ؟</summary><p class="muted" style="margin:4px 0">الملف بيشمل الطلاب والامتحانات (بأسئلتها وصورها ومفتاح الإجابات) والإعدادات وبنك الأسئلة ونتايج الطلاب. الاستعادة بترجّع كل ده ما عدا النتايج (بتفضل في الملف للأرشيف). ملفات المراجع مش داخلة. احتفظ بالنسخة في Google Drive.</p></details>
   <div class="row"><button class="btn sm" id="bkx">⬇ تنزيل نسخة احتياطية</button><label class="btn sm ghost" style="margin:0">⬆ استعادة من ملف<input type="file" id="bki" accept="application/json" hidden></label></div><div id="bkm" class="muted" style="margin-top:6px"></div></div>
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
+  $('#tourT').onclick = () => { go('#teacher'); setTimeout(() => runTour(TOUR_TEACHER, 'tour_t'), 600); };
   const bo = $('#bioOff'); if (bo) bo.onclick = () => { bioClear(); ls.del('bioNo'); teacherSettings(); };
   const bn = $('#bioOn'); if (bn) bn.onclick = async () => {
     if (!(await bioAvailable())) return setMsg('الجهاز أو المتصفح ده مش بيدعم البصمة');
@@ -2613,6 +2619,58 @@ async function teacherThread(code) {
   }, 25000);
   S.cleanup = () => clearInterval(iv);
 }
+/* ========= الجولة التعريفية (أول مرة) ========= */
+const TOUR_STUDENT = [
+  { t: 'أهلاً بيك 👋', x: 'دي منصة د. أحمد الشرقاوي للامتحانات (أحياء وجيولوجيا). هنعرّفك بكل حاجة في أقل من دقيقة. تقدر تتخطى في أي وقت.' },
+  { sel: '.nav a[data-t=exams]', t: 'الامتحانات', x: 'هنا الامتحانات المطلوبة منك. اضغط "ابدأ الامتحان" وهيبدأ المؤقت فورًا. لو في موعد قفل هيظهر على الكارت.' },
+  { t: 'مهم أثناء الامتحان ⚠️', x: 'خروجك من صفحة الامتحان أو محاولة تصوير الشاشة بتتسجل وبتظهر للدكتور. زر "خروج" الأحمر (وزر الرجوع في التليفون) بيقفل الامتحان وبيسلّم إجاباتك، ومتقدرش ترجع تكمله. إجاباتك بتتحفظ تلقائي حتى لو عملت ريفريش.' },
+  { t: 'الأسئلة المقالية ✍️', x: 'تقدر تكتب إجابتك، أو ترفع صورة حلك المكتوب بخط اليد (حتى 3 صور). رفع الصورة مش بيتحسب خروج من الامتحان. اضغط على أي صورة في السؤال عشان تكبّرها بصباعين.' },
+  { sel: '.nav a[data-t=rank]', t: 'الترتيب', x: 'لوحة الشرف: أول 3 طلاب في كل مادة حسب مجموع الدرجات.' },
+  { sel: '.nav a[data-t=results]', t: 'نتايجي', x: 'درجاتك وتفاصيل كل امتحان بعد ما الدكتور يعلن النتيجة، ومستواك في كل باب.' },
+  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ابعت رسالة أو صورة للدكتور، وهتلاقي رده هنا. أي حاجة جديدة بتظهر عليها نقطة حمرا.' },
+  { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'مذكرات وروابط ومراجع الدكتور بتلاقيها هنا.' },
+  { t: 'جاهز! 🎓', x: 'بالتوفيق. لو احتجت الشرح ده تاني اضغط "❓ شرح المنصة" في آخر صفحة الامتحانات.' }];
+const TOUR_TEACHER = [
+  { t: 'أهلاً يا دكتور 👋', x: 'جولة سريعة على أهم حاجات اللوحة. تقدر تتخطاها وتعيدها من الإعدادات.' },
+  { sel: '.nav a[data-t=exams]', t: 'الامتحانات', x: 'اضغط "امتحان جديد": اكتب العنوان والمدة، واستورد الأسئلة من PDF أو نص، أو اختار من بنك الأسئلة. الخيارات الإضافية (الموعد، المجموعة، ظهور النتيجة) في قوائم مطوية. زر الحفظ ثابت تحت.' },
+  { sel: '.nav a[data-t=exams]', t: 'النتائج والنشر', x: 'من كارت كل امتحان: "النتائج" فيها الدرجات ومتابعة الخروج والتصوير، وتصحيح المقالي، ونشر النتايج للطلاب، ووقت إضافي لطالب، وتصدير Excel.' },
+  { sel: '.nav a[data-t=students]', t: 'الطلاب', x: 'أضف طلاب (كود لكل طالب)، افتح التسجيل الذاتي، حدد المجموعات، وانسخ رابط الطلاب. وفيه زر "الترتيب" للتحكم في ظهوره للطلاب.' },
+  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة).' },
+  { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'شارك روابط وملفات (حتى 5 ميجا) مع الطلاب.' },
+  { sel: '.nav a[data-t=settings]', t: 'الإعدادات', x: 'المجموعات وأبواب كل مادة، الدخول بالبصمة، والنسخة الاحتياطية. نزّل نسخة احتياطية كل فترة واحتفظ بيها على Google Drive.' },
+  { t: 'تمام ✅', x: 'النقط الحمرا والنبض على أي تبويب معناها فيه جديد (طالب سلّم، رسالة، طلب تسجيل). بالتوفيق!' }];
+function runTour(steps, key) {
+  if (document.querySelector('.tour')) return;
+  let i = 0;
+  const ov = document.createElement('div'); ov.className = 'tour';
+  ov.innerHTML = '<div class="th"></div><div class="tc" role="dialog"><div class="tt"></div><div class="tx"></div><div class="row" style="margin-top:12px"><span class="muted" id="tn"></span><span class="grow"></span><button class="btn sm ghost" data-t="skip">تخطي</button><button class="btn sm ghost" data-t="prev">السابق</button><button class="btn sm" data-t="next">التالي</button></div></div>';
+  document.body.appendChild(ov);
+  const th = ov.querySelector('.th'), tc = ov.querySelector('.tc');
+  const done = () => { try { ls.set(key, '1'); } catch (e) {} ov.remove(); window.removeEventListener('resize', show); };
+  function show() {
+    const s = steps[i], el = s.sel && document.querySelector(s.sel);
+    ov.querySelector('.tt').textContent = s.t; ov.querySelector('.tx').textContent = s.x; ov.querySelector('#tn').textContent = (i + 1) + ' / ' + steps.length;
+    ov.querySelector('[data-t=prev]').style.visibility = i ? 'visible' : 'hidden';
+    ov.querySelector('[data-t=next]').textContent = i === steps.length - 1 ? 'ابدأ' : 'التالي';
+    ov.querySelector('[data-t=skip]').style.display = i === steps.length - 1 ? 'none' : '';
+    tc.style.top = tc.style.bottom = ''; tc.style.transform = '';
+    if (el) {
+      const r = el.getBoundingClientRect(), pd = 6;
+      Object.assign(th.style, { display: 'block', left: r.left - pd + 'px', top: r.top - pd + 'px', width: r.width + 2 * pd + 'px', height: r.height + 2 * pd + 'px' });
+      tc.style.bottom = (innerHeight - r.top + 16) + 'px';
+    } else { Object.assign(th.style, { display: 'block', left: '50%', top: '50%', width: '0', height: '0' }); tc.style.top = '50%'; tc.style.transform = 'translateY(-50%)'; }
+  }
+  ov.onclick = e => {
+    const b = e.target.closest('[data-t]'); if (!b) return;
+    if (b.dataset.t === 'skip') return done();
+    if (b.dataset.t === 'prev') { i = Math.max(0, i - 1); return show(); }
+    if (i >= steps.length - 1) return done(); i++; show();
+  };
+  window.addEventListener('resize', show); show();
+}
+const studentTourKey = ses => 'tour_s_' + ses.code;
+function maybeStudentTour(ses) { if (!ls.get(studentTourKey(ses))) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]') && !location.hash.includes('exam/')) runTour(TOUR_STUDENT, studentTourKey(ses)); }, 700); }
+function maybeTeacherTour() { if (!ls.get('tour_t')) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]')) runTour(TOUR_TEACHER, 'tour_t'); }, 700); }
 
 /* ----- النتائج ----- */
 async function results(id, silent) {
