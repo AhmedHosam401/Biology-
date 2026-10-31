@@ -16,15 +16,19 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',Tahoma,sans-serif;line-height:1.7;transition:background .2s,color .2s}
 a{color:var(--accent);text-decoration:none}
-h1{font-size:1.5rem;margin:.2em 0}
-h2{font-size:1.2rem;margin:.4em 0}
+h1{font-size:1.6rem;font-weight:800;margin:.2em 0}
+h2{font-size:1.3rem;font-weight:800;margin:.7em 0 .3em}
+h3{font-size:1rem;font-weight:700;color:var(--muted);margin:1em 0 .3em}
+.card>b:first-child{display:block;font-size:1.05rem;margin-bottom:4px}
 .top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:10px 16px}
 .logo{font-weight:700;display:flex;align-items:center;gap:8px}
 .logo i{font-style:normal;background:var(--soft);width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
 .sp{flex:1}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto}.icon-btn .ic{width:20px;height:20px}.btn .ic{display:inline-block;vertical-align:middle;width:18px;height:18px;margin:0 0 0 4px}
+.rc{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:var(--card)}.rc .pct{font-weight:800;font-size:1.15rem;color:var(--accent)}.rc .row.g{gap:6px;margin:6px 0;flex-wrap:wrap}
 .icon-btn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:1.05rem;display:grid;place-items:center;padding:0}
 .ic-sun{display:none}
-:root[data-theme=dark] .ic-sun{display:inline}
+:root[data-theme=dark] .ic-sun{display:block}
 :root[data-theme=dark] .ic-moon{display:none}
 .wrap{max-width:860px;margin:0 auto;padding:16px}
 .pb{padding-bottom:100px}
@@ -57,7 +61,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .badge.bad{background:var(--bad-bg);color:var(--bad)}
 .nav{position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--card);border-top:1px solid var(--line);display:flex;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
 .nav a{flex:1;text-align:center;color:var(--muted);font-size:.8rem;padding:4px;border-radius:12px;font-weight:600}
-.nav a b{display:block;font-size:1.25rem;line-height:1.3}
+.nav a b{display:block;line-height:1.3;margin-bottom:2px}
 .nav a.on{color:var(--accent);background:var(--soft)}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
 .tabs a{flex:1 1 28%;text-align:center;padding:7px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-weight:700;white-space:nowrap;background:var(--card)}
@@ -689,7 +693,9 @@ const FB = {
 const S = { store: DEMO ? DemoStore : FB, timer: null, nav: 0, guard: null };
 const getSession = () => { try { return JSON.parse(ls.get('stu')); } catch (e) { return null; } };
 const setSession = s => { if (s) ls.set('stu', JSON.stringify(s)); else ls.del('stu'); };
-const themeBtn = '<button class="icon-btn" data-theme-toggle aria-label="تبديل الوضع الداكن"><span class="ic-moon">🌙</span><span class="ic-sun">☀️</span></button>';
+const IC = {"exams": "<path d=\"M6 3h9l4 4v14H6z\"/><path d=\"M14 3v5h5M9 13h7M9 17h7\"/>", "rank": "<path d=\"M8 4h8v5a4 4 0 0 1-8 0z\"/><path d=\"M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6\"/>", "results": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>", "chat": "<path d=\"M4 5h16v11H9l-5 4z\"/>", "files": "<path d=\"M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z\"/><path d=\"M4 19V5M9 8h6\"/>", "students": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 20a6 6 0 0 1 12 0\"/><circle cx=\"17.5\" cy=\"9\" r=\"2.5\"/><path d=\"M16 14.5a5 5 0 0 1 6 5\"/>", "settings": "<path d=\"M4 7h10M18 7h2M4 17h2M10 17h10\"/><circle cx=\"16\" cy=\"7\" r=\"2\"/><circle cx=\"8\" cy=\"17\" r=\"2\"/>", "door": "<path d=\"M10 4H5v16h5M15 8l4 4-4 4M19 12H9\"/>", "moon": "<path d=\"M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5\"/>"};
+const ico = k => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+const themeBtn = `<button class="icon-btn" data-theme-toggle aria-label="تبديل الوضع الداكن"><span class="ic-moon">${ico('moon')}</span><span class="ic-sun">${ico('sun')}</span></button>`;
 
 function view(html) { $('#app').onclick = null; $('#app').onchange = null; document.body.classList.remove('sheet-open'); $('#app').innerHTML = (DEMO ? '<div class="banner">وضع تجريبي: البيانات محفوظة في المتصفح ده بس</div>' : '') + html; }
 const topbar = (extra = '') => `<div class="top"><a class="logo" href="${location.hash.startsWith('#teacher') ? '#teacher' : '#s/exams'}" aria-label="الصفحة الرئيسية"><i>${LOGO}</i>د. أحمد الشرقاوي</a><span class="sp"></span>${window.__bip ? '<button class="btn sm ghost" data-install>📲 تثبيت</button>' : ''}${extra}${themeBtn}</div>`;
@@ -734,8 +740,8 @@ async function refreshDots(tab) {
 if (!window.__sIv) { window.__sIv = setInterval(() => { if (!document.hidden && document.querySelector('.nav')) { S.stampCache = null; refreshDots(S.curTab); } }, 60000); }
 function studentShell(tab, inner) {
   S.curTab = tab;
-  view(`${topbar('<button class="btn sm ghost" id="sout" aria-label="خروج" title="خروج">🚪</button>')}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
-  <nav class="nav"><a href="#s/exams" data-t="exams" class="${tab === 'exams' ? 'on' : ''}"><b>📝</b>الامتحانات</a><a href="#s/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}"><b>🏆</b>الترتيب</a><a href="#s/results" data-t="results" class="${tab === 'results' ? 'on' : ''}"><b>📊</b>نتايجي</a><a href="#s/chat" data-t="chat" class="${tab === 'chat' ? 'on' : ''}"><b>💬</b>التواصل</a><a href="#s/files" data-t="files" class="${tab === 'files' ? 'on' : ''}"><b>📚</b>الملفات</a></nav>`);
+  view(`${topbar(`<button class="btn sm ghost" id="sout" aria-label="خروج" title="خروج">${ico('door')}</button>`)}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
+  <nav class="nav">${[['exams', '#s/exams', 'الامتحانات'], ['rank', '#s/rank', 'الترتيب'], ['results', '#s/results', 'نتايجي'], ['chat', '#s/chat', 'التواصل'], ['files', '#s/files', 'الملفات']].map(([k, hr, l]) => `<a href="${hr}" data-t="${k}" class="${tab === k ? 'on' : ''}"><b>${ico(k)}</b>${l}</a>`).join('')}</nav>`);
   setTimeout(() => refreshDots(tab), 0);
   $('#sout').onclick = async () => { if (await modal({ title: 'تسجيل الخروج', text: 'هتخرج من الموقع وترجع لصفحة تسجيل الدخول، وهتحتاج كودك تدخل تاني. تكمل؟', ok: 'خروج' })) { setSession(null); go('#'); } };
 }
@@ -755,17 +761,23 @@ async function tStamps() {
   S.tCache = { at: Date.now(), v }; return v;
 }
 async function refreshTDots() {
-  if (!document.querySelector('.tabs a[data-t]') || !S.store.isTeacher()) return;
+  if (!document.querySelector('.nav a[data-t]') || !S.store.isTeacher()) return;
   const v = await tStamps(), m = { exams: v.newTotal, students: v.pending, chat: v.unread };
-  document.querySelectorAll('.tabs a[data-t]').forEach(a => {
+  document.querySelectorAll('.nav a[data-t]').forEach(a => {
     const has = a.querySelector('.dot');
     if (m[a.dataset.t] > 0) { if (!has) a.insertAdjacentHTML('beforeend', '<span class="dot"></span>'); a.classList.add('pulse'); } else { if (has) has.remove(); a.classList.remove('pulse'); }
   });
 }
 if (!window.__tIv) { window.__tIv = setInterval(() => { if (!document.hidden) { S.tCache = null; refreshTDots(); } }, 75000); document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTDots(); }); }
 function teacherShell(tab, inner) {
-  view(`${topbar('<button class="btn sm ghost" id="out" aria-label="خروج" title="خروج">🚪</button>')}<div class="wrap">
-  <div class="tabs"><a href="#teacher" data-t="exams" class="${tab === 'exams' ? 'on' : ''}">الامتحانات</a><a href="#teacher/students" data-t="students" class="${tab === 'students' ? 'on' : ''}">الطلاب</a><a href="#teacher/rank" data-t="rank" class="${tab === 'rank' ? 'on' : ''}">الترتيب</a><a href="#teacher/chat" data-t="chat" class="${tab === 'chat' ? 'on' : ''}">التواصل</a><a href="#teacher/files" data-t="files" class="${tab === 'files' ? 'on' : ''}">الملفات</a><a href="#teacher/settings" data-t="settings" class="${tab === 'settings' ? 'on' : ''}">الإعدادات</a></div>${backBtn(inner)}${inner}</div>`);
+  const noNav = inner.includes('id="ed"');
+  view(`${topbar(`<button class="btn sm ghost" id="out" aria-label="خروج" title="خروج">${ico('door')}</button>`)}<div class="wrap ${noNav ? '' : 'pb'}">${backBtn(inner)}${inner}</div>
+  ${noNav ? '' : `<nav class="nav">${[['exams', '#teacher', 'الامتحانات'], ['students', '#teacher/students', 'الطلاب'], ['chat', '#teacher/chat', 'التواصل'], ['files', '#teacher/files', 'الملفات'], ['settings', '#teacher/settings', 'الإعدادات']].map(([k, hr, l]) => `<a href="${hr}" data-t="${k}" class="${tab === k ? 'on' : ''}"><b>${ico(k)}</b>${l}</a>`).join('')}</nav>`}`);
+  $('#out').onclick = async () => {
+    const warn = S.guard ? ' <b>وفيه تعديلات في الامتحان مش محفوظة وهتضيع.</b>' : '';
+    if (!(await modal({ title: 'تسجيل الخروج', html: '<p style="margin:0">هتخرج من الموقع وترجع لصفحة تسجيل الدخول.' + warn + '</p>', ok: 'خروج' }))) return;
+    S.guard = null; await S.store.logout(); go('#teacher');
+  };
   S.tTab = tab; setTimeout(() => refreshTDots(), 0);
   $('#out').onclick = async () => {
     const warn = S.guard ? ' <b>وفيه تعديلات في الامتحان مش محفوظة وهتضيع.</b>' : '';
@@ -894,7 +906,13 @@ async function studentExams(ses) {
     if (subj && subjOf(e) !== subj) return;
     cards.push(`<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b><div class="muted">${subjLabel(subjOf(e))} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة</div>${e.opensAt || e.closesAt ? `<div class="muted" style="color:var(--warn)">⏰ ${e.opensAt ? 'بيفتح ' + fmtDate(e.opensAt) + ' ' : ''}${e.closesAt ? 'ومتاح لحد ' + fmtDate(e.closesAt) : ''}</div>` : ''}</div>${!(a && a.submitted) && e.createdAt > prevSeen ? '<span class="newb">جديد</span>' : ''}${badge}</div>${btn ? `<div style="margin-top:10px">${btn}</div>` : ''}</div>`);
   });
-  studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>
+  let pubs = []; try { pubs = (await S.store.listPublished(ses.code)).sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0)); } catch (e) {}
+  const nowN = sNow(), openL = all.filter((e, i) => !(atts[i] && atts[i].submitted) && !(e.closesAt && nowN > e.closesAt) && !(e.opensAt && nowN < e.opensAt));
+  const soon = openL.filter(e => e.closesAt).sort((a, b) => a.closesAt - b.closesAt)[0], nextOpen = all.filter((e, i) => !atts[i] && e.opensAt && nowN < e.opensAt).sort((a, b) => a.opensAt - b.opensAt)[0];
+  const fin = pubs.filter(d => !d.pending && d.total), avgP = fin.length ? Math.round(fin.reduce((s2, d) => s2 + d.score / d.total * 100, 0) / fin.length) : null, last = pubs[0];
+  const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
+  ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
+  studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>${sumStrip}
   <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}`);
   $('#main').onclick = async e => {
     const c = e.target.closest('[data-subj]');
@@ -1296,7 +1314,7 @@ async function teacherStudents() {
   const [all, pend, cfg] = await Promise.all([S.store.listStudents(), S.store.listPending(), S.store.getSettings()]), link = location.href.split('#')[0];
   const groups = cfg.groups || [], fg = S.fgrp || '__all';
   const list = fg === '__all' ? all : all.filter(s => (s.group || '') === (fg === '__none' ? '' : fg));
-  teacherShell('students', `<div class="card"><b>رابط الطلاب</b><div class="row" style="margin-top:6px"><span class="code grow" style="font-size:.8rem;letter-spacing:0;word-break:break-all">${esc(link)}</span><button class="btn sm ghost" id="cp">نسخ</button></div></div>
+  teacherShell('students', `<div class="row" style="margin:4px 0"><a class="btn sm ghost" href="#teacher/rank">${ico('rank')} الترتيب</a></div><div class="card"><b>رابط الطلاب</b><div class="row" style="margin-top:6px"><span class="code grow" style="font-size:.8rem;letter-spacing:0;word-break:break-all">${esc(link)}</span><button class="btn sm ghost" id="cp">نسخ</button></div></div>
   <div class="card"><label class="row" style="font-weight:400;margin:0"><input type="checkbox" id="regOpen" ${cfg.registrationOpen ? 'checked' : ''}> التسجيل الذاتي مفتوح للطلاب</label>
   <p class="muted" style="margin:4px 0 0;font-size:.85rem">افتحه وقت تسجيل الطلاب بس وقفله بعدها. الطالب بيسجل اسمه وكوده وبيستنى موافقتك.</p></div>
   ${pend.length ? `<div class="card"><div class="row"><b class="grow">طلبات التسجيل (${pend.length})</b><button class="btn sm" id="okall">قبول الكل</button></div>
@@ -1305,7 +1323,9 @@ async function teacherStudents() {
   <p class="muted" style="font-size:.85rem;margin:8px 0 0">راجع الأسماء قبل القبول: اسم مش معروف أو مكرر يبقى ارفضه.</p></div>` : ''}
   <div class="card"><div class="row"><b class="grow">الطلاب (${list.length}${list.length !== all.length ? ' من ' + all.length : ''})</b><button class="btn sm ghost" id="cpl" ${list.length ? '' : 'disabled'}>نسخ القايمة</button></div>
   ${groups.length ? `<select id="fgrp" style="margin-top:8px"><option value="__all" ${fg === '__all' ? 'selected' : ''}>كل المجموعات</option><option value="__none" ${fg === '__none' ? 'selected' : ''}>بدون مجموعة</option>${groups.map(g => `<option value="${esc(g)}" ${g === fg ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select>` : ''}
-  ${list.length ? `<div class="tbl"><table><tr><th>الاسم</th>${groups.length ? '<th>المجموعة</th>' : ''}<th>الكود</th><th></th></tr>${list.map(s => `<tr><td><a href="#teacher/student/${esc(s.code)}">${esc(s.name)}</a></td>${groups.length ? `<td><select data-grp="${esc(s.code)}">${grpOptions(groups, s.group || '')}</select></td>` : ''}<td><span class="code">${esc(s.code)}</span>${s.self ? ' <span class="muted" style="font-size:.8rem">(اختاره الطالب)</span>' : ''}</td><td style="white-space:nowrap"><button class="btn sm ghost" data-edit="${esc(s.code)}">تعديل</button> <button class="btn sm danger" data-del="${esc(s.code)}">حذف</button></td></tr>`).join('')}</table></div>
+  ${list.length ? `${list.map(s => `<div class="rc"><div class="row"><a class="grow" href="#teacher/student/${esc(s.code)}"><b>${esc(s.name)}</b></a><span class="code">${esc(s.code)}</span></div>${s.self ? '<div class="muted" style="font-size:.8rem">(اختار الكود بنفسه)</div>' : ''}
+  ${groups.length ? `<div style="margin:6px 0"><select data-grp="${esc(s.code)}">${grpOptions(groups, s.group || '')}</select></div>` : ''}
+  <div class="row" style="margin-top:6px"><button class="btn sm ghost" data-edit="${esc(s.code)}">تعديل</button><button class="btn sm danger" data-del="${esc(s.code)}">حذف</button></div></div>`).join('')}
   <details class="hint"><summary>ℹ️ الأكواد سرية: ابعت لكل طالب…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الأكواد سرية: ابعت لكل طالب كوده بس. الطلاب اللي سجلوا بنفسهم كودهم ظاهر لك هنا برضه.</p></details>` : '<p class="muted">لسه مفيش طلاب.</p>'}
   <div class="card"><b>إضافة طلاب</b><p class="muted" style="margin:4px 0">اكتب اسم كل طالب في سطر، وهيتعمل لكل واحد كود شخصي يدخل بيه.</p>
   <textarea id="names" rows="5" placeholder="أحمد محمد&#10;سارة علي"></textarea>
@@ -1533,10 +1553,10 @@ function rankTotals(scores, subj) {
   return list;
 }
 async function teacherRank() {
-  teacherShell('rank', loadingInner);
+  teacherShell('students', loadingInner);
   const [cfg, scores] = await Promise.all([S.store.getSettings(), S.store.listExamScores()]);
   const hidden = { ...(cfg.rankHidden || {}) }, medal = ['🥇', '🥈', '🥉'];
-  teacherShell('rank', `<h2>🏆 الترتيب</h2><p class="muted" style="margin:0">مجموع درجات كل الامتحانات المعلنة في كل مادة. الطلاب بيشوفوا أول 3 بس، وانت بتشوف الكل.</p>
+  teacherShell('students', `<h2>${ico('rank')}الترتيب</h2><p class="muted" style="margin:0">مجموع درجات كل الامتحانات المعلنة في كل مادة. الطلاب بيشوفوا أول 3 بس، وانت بتشوف الكل.</p>
   ${Object.keys(SUBJECTS).map(k => { const list = rankTotals(scores, k); return `<div class="card"><div class="row"><b class="grow">${subjLabel(k)}</b></div>
     <label class="row" style="font-weight:400;margin:8px 0"><input type="checkbox" data-rk="${k}" ${hidden[k] ? '' : 'checked'}> إظهار الترتيب للطلاب</label>
     ${list.length ? `<div class="tbl"><table><tr><th>الترتيب</th><th>الطالب</th><th>الدرجات</th><th>امتحانات</th></tr>${list.map(x => `<tr><td>${medal[x.rank - 1] || x.rank}</td><td>${esc(x.name)}</td><td>${fmtN(x.pts)}</td><td>${x.exams}</td></tr>`).join('')}</table></div>` : '<p class="muted" style="margin:6px 0 0">لسه مفيش نتايج معلنة في المادة دي.</p>'}
@@ -2623,8 +2643,11 @@ async function results(id, silent) {
   <div class="row" style="margin-top:8px"><button class="btn" id="pub" ${rows.length ? '' : 'disabled'}>${ex.published ? 'تحديث النشر' : (hasEs ? 'نشر النتائج (بعد التصحيح)' : 'نشر النتائج')}</button>${ex.published ? '<button class="btn danger" id="unpub">إخفاء النتائج</button>' : ''}</div><div id="msg"></div>
   <p class="muted" style="font-size:.85rem;margin:6px 0 0">لو حد سلّم بعد النشر اضغط "تحديث النشر".</p></div>
   <div class="card"><div class="row"><b class="grow">الدرجات</b><button class="btn sm" id="csv" ${rows.length ? '' : 'disabled'}>تصدير Excel</button></div>
-  ${rows.length ? `<div class="tbl"><table><tr><th>#</th><th>الاسم</th><th>الكود</th>${hasEs ? '<th>الاختيارات</th><th>المقالي</th>' : ''}<th>الدرجة</th><th>%</th><th>وقت التسليم</th><th>الخروج من الصفحة</th><th>محاولات تصوير</th><th>خروج قصير</th><th></th></tr>
-  ${rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}${r.exited ? ' <span class="badge warn">خرج من الامتحان</span>' : ''}${r.photos ? ` <span class="badge">📷 ${r.photos}</span>` : ''}</td><td><span class="code" style="font-size:.85rem">${esc(r.studentCode || '')}</span></td>${hasEs ? `<td>${fmtN(r.mcq)}/${fmtN(sc0.mcqT)}</td><td>${r.pending ? '<span class="badge warn">لم يُصحح</span>' : fmtN(r.es) + '/' + fmtN(sc0.esT)}</td>` : ''}<td>${fmtN(r.score)}/${fmtN(total)}</td><td>${r.pending ? '—' : pct(r.score) + '%'}</td><td>${fmtDate(r.submittedAt)}</td><td>${r.leaves ? `<span class="badge warn">⚠ ${r.leaves} مرة${r.awaySec ? ' · ' + fmtSec(r.awaySec) : ''}</span>` : '<span class="muted">—</span>'}</td><td>${r.shots ? `<span class="badge bad">📷 ${r.shots}</span>` : '<span class="muted">—</span>'}</td><td>${r.short ? `<span class="badge warn">⚡ ${r.short}</span>` : '<span class="muted">—</span>'}</td><td>${hasEs && r.studentCode ? `<a class="btn sm" href="#teacher/grade/${esc(id)}/${esc(r.studentCode)}">تصحيح</a> ` : ''}<button class="btn sm danger" data-id="${esc(r.id)}">إعادة</button></td></tr>`).join('')}</table></div>
+  ${rows.length ? `${rows.map((r, i) => `<div class="rc"><div class="row"><b class="grow">${i + 1}. ${esc(r.name)}</b><span class="pct">${r.pending ? '—' : pct(r.score) + '%'}</span></div>
+  <div class="muted" style="font-size:.85rem"><span class="code" style="font-size:.85rem">${esc(r.studentCode || '')}</span> · ${fmtDate(r.submittedAt)}</div>
+  <div class="row g"><span class="badge ok">${fmtN(r.score)}/${fmtN(total)}</span>${hasEs ? `<span class="badge">اختيارات ${fmtN(r.mcq)}/${fmtN(sc0.mcqT)}</span>${r.pending ? '<span class="badge warn">المقالي لم يُصحح</span>' : `<span class="badge">مقالي ${fmtN(r.es)}/${fmtN(sc0.esT)}</span>`}` : ''}
+  ${r.exited ? '<span class="badge warn">خرج من الامتحان</span>' : ''}${r.photos ? `<span class="badge">📷 رفع ${r.photos}</span>` : ''}${r.leaves ? `<span class="badge warn">⚠ خروج ${r.leaves} مرة${r.awaySec ? ' · ' + fmtSec(r.awaySec) : ''}</span>` : ''}${r.shots ? `<span class="badge bad">📷 تصوير ${r.shots}</span>` : ''}${r.short ? `<span class="badge warn">⚡ خروج قصير ${r.short}</span>` : ''}</div>
+  <div class="row">${hasEs && r.studentCode ? `<a class="btn sm" href="#teacher/grade/${esc(id)}/${esc(r.studentCode)}">تصحيح</a>` : ''}<button class="btn sm danger" data-id="${esc(r.id)}">إعادة</button></div></div>`).join('')}
   <details class="hint"><summary>ℹ️ ⚡ خروج قصير = خرج…</summary><p class="muted" style="font-size:.85rem">⚡ خروج قصير = خرج أقل من 3 ثواني، ودي علامة ممكن تدل على لقطة شاشة من الموبايل (المتصفح مش بيقدر يعرف لقطة الشاشة بشكل مؤكد). زر "إعادة" بيمسح نتيجة الطالب وبيسمحله يمتحن تاني. الخروج من الصفحة وتصوير الشاشة تنبيهات للمراجعة مش دليل قاطع.</p></details>` : '<p class="muted">لسه محدش سلّم.</p>'}</div>
   ${classTopics.length ? `<div class="card"><b>مستوى الفصل في كل باب</b><p class="muted" style="margin:2px 0 0;font-size:.85rem">الأضعف فوق.</p>${topicBars(classTopics)}</div>` : ''}
   ${rows.length ? `<div class="card"><b>نسبة الإجابة الصحيحة لكل سؤال</b>${ex.questions.map((q, i) => { if (isEssay(q)) return ''; const ok = rows.filter(r => r.answers[i] === key.answers[i]).length; return `<div class="row" style="margin-top:6px"><span class="muted grow">${qLabel(q, i)}</span><b>${Math.round(ok / rows.length * 100)}%</b></div>`; }).join('')}</div>` : ''}</div>`);
