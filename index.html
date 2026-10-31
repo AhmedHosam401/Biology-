@@ -354,7 +354,7 @@ function topicsBySubject(rows) {
 }
 
 /* ========= الصور والملفات الكبيرة (تتقسم لأجزاء عشان حد 1 ميجا للمستند في Firestore) ========= */
-const PACK_CHARS = 700000, BLOB_CHARS = 600000, MAX_FILE = 5 * 1024 * 1024;
+const PACK_CHARS = 700000, BLOB_CHARS = 600000, MAX_FILE = 25 * 1024 * 1024;
 const refOf = (k, j) => '@' + k + '.' + j;
 const parseRef = s => { const m = /^@(\d+)\.(\d+)$/.exec(s || ''); return m ? [+m[1], +m[2]] : null; };
 /* imgs: مصفوفة data URLs. بترجع {refs, packs}. لو الحجم صغير بتسيبهم جوه المستند نفسه */
@@ -597,9 +597,9 @@ const FB = {
     if (old === st.code) { await this.col('students').doc(old).set(st); return; }
     await this.col('students').doc(st.code).set(st); await this.deleteStudent(old);
   },
-  async updateMaterial(old, m, parts) {
+  async updateMaterial(old, m, parts, prog) {
     if (parts) {
-      for (let i = 0; i < parts.length; i += 4) { const b = this.db.batch(); parts.slice(i, i + 4).forEach((p, j) => b.set(this.col('blobParts').doc(m.id + '_' + (i + j)), { d: p })); await b.commit(); }
+      for (let i = 0; i < parts.length; i += 4) { const b = this.db.batch(); parts.slice(i, i + 4).forEach((p, j) => b.set(this.col('blobParts').doc(m.id + '_' + (i + j)), { d: p })); await b.commit(); if (prog) prog(Math.min(parts.length, i + 4), parts.length); }
       for (let i = parts.length; i < (old.parts || 0); i++) { try { await this.col('blobParts').doc(m.id + '_' + i).delete(); } catch (e) {} }
     }
     await this.col('materials').doc(m.id).set(m);
@@ -672,8 +672,8 @@ const FB = {
   async unpublish(examId, codes) { for (let i = 0; i < codes.length; i += 400) { const b = this.db.batch(); codes.slice(i, i + 400).forEach(c => b.delete(this.col('students').doc(c).collection('results').doc(examId))); await b.commit(); } },
   async listPublished(code) { const s = await this.col('students').doc(code).collection('results').get(); return s.docs.map(d => d.data()); },
   async listMaterials() { const s = await this.col('materials').orderBy('createdAt', 'desc').get(); return s.docs.map(d => d.data()); },
-  async addMaterial(m, parts) {
-    if (parts) for (let i = 0; i < parts.length; i += 4) { const b = this.db.batch(); parts.slice(i, i + 4).forEach((p, j) => b.set(this.col('blobParts').doc(m.id + '_' + (i + j)), { d: p })); await b.commit(); }
+  async addMaterial(m, parts, prog) {
+    if (parts) for (let i = 0; i < parts.length; i += 4) { const b = this.db.batch(); parts.slice(i, i + 4).forEach((p, j) => b.set(this.col('blobParts').doc(m.id + '_' + (i + j)), { d: p })); await b.commit(); if (prog) prog(Math.min(parts.length, i + 4), parts.length); }
     await this.col('materials').doc(m.id).set(m);
   },
   async deleteMaterial(m) {
@@ -705,6 +705,43 @@ const topbar = (extra = '') => `<div class="top"><a class="logo" href="${locatio
 const isRootHash = () => /^#?\/?(s(\/exams)?|teacher)?\/?$/.test(location.hash);
 const backBtn = html => (S.nav > 0 && !isRootHash() && html !== loadingInner && !/رجوع/.test(html)) ? '<div style="margin:4px 0 8px"><button class="btn sm ghost" data-back>→ رجوع</button></div>' : '';
 /* ===== علامات "جديد" (نقطة حمراء) للطالب: بتختفي لما يفتح الصفحة ===== */
+
+/* ===== الإشعارات (محلية: بتشتغل والتطبيق مفتوح أو شغال في الخلفية، مش بتحتاج سيرفر) ===== */
+const notifSupported = () => 'Notification' in window;
+const notifOn = () => { try { return notifSupported() && Notification.permission === 'granted' && ls.get('notif') === '1'; } catch (e) { return false; } };
+async function notify(title, body, tag, hash) {
+  if (!notifOn()) return;
+  const opt = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png', dir: 'rtl', lang: 'ar', renotify: true, data: { hash } };
+  try { const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.ready : null; if (reg && reg.showNotification) return await reg.showNotification(title, opt); } catch (e) {}
+  try { new Notification(title, opt); } catch (e) {}
+}
+async function notifEnable() {
+  if (!notifSupported()) throw new Error('المتصفح ده مش بيدعم الإشعارات. لو على آيفون: ثبّت الموقع على الشاشة الرئيسية الأول.');
+  const p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  if (p !== 'granted') throw new Error('الإشعارات مرفوضة من المتصفح. فعّلها من إعدادات الموقع في المتصفح وجرب تاني.');
+  ls.set('notif', '1');
+}
+const notifCard = () => `<div class="card"><b>🔔 الإشعارات</b><p class="muted" style="margin:4px 0 8px;font-size:.85rem">${notifOn() ? 'مفعّلة على الجهاز ده: هيجيلك تنبيه لما يكون فيه جديد، طول ما المتصفح أو التطبيق شغال (حتى لو في الخلفية).' : 'فعّلها عشان يجيلك تنبيه على الموبايل لما يكون فيه جديد. بتشتغل طول ما المتصفح أو التطبيق شغال في الخلفية. على آيفون لازم تثبّت الموقع على الشاشة الرئيسية الأول.'}</p>
+  <button class="btn sm ${notifOn() ? 'danger' : ''}" id="ntf">${notifOn() ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}</button><div id="ntm" class="muted" style="margin-top:6px;font-size:.85rem"></div></div>`;
+function bindNotif(redraw) {
+  const b = $('#ntf'); if (!b) return;
+  b.onclick = async () => {
+    if (notifOn()) { ls.set('notif', '0'); return redraw(); }
+    try { await notifEnable(); await notify('تم تفعيل الإشعارات ✓', 'هيجيلك تنبيه هنا لما يكون فيه جديد.', 'hello', ''); redraw(); } catch (e) { $('#ntm').textContent = e.message; }
+  };
+}
+const NTF_ST = { exams: ['امتحان جديد', 'فيه امتحان جديد متاح ليك على المنصة.', '#s/exams'], chat: ['رسالة جديدة', 'الدكتور بعتلك رسالة جديدة.', '#s/chat'], results: ['نتيجة جديدة', 'نزلت نتيجة جديدة ليك.', '#s/results'], files: ['ملف جديد', 'الدكتور شارك ملف أو رابط جديد.', '#s/files'], rank: ['الترتيب اتحدث', 'لوحة الشرف اتحدّثت.', '#s/rank'] };
+function notifyStudent(ses, v, sn, tab) {
+  if (!notifOn()) return;
+  let nt = {}; try { nt = JSON.parse(ls.get('ntd_' + ses.code)) || {}; } catch (e) {}
+  let ch = false;
+  Object.keys(NTF_ST).forEach(t => {
+    const base = Math.max(sn[t] || 0, nt[t] || 0);
+    if (v[t] > base) { if (document.hidden) notify(NTF_ST[t][0], NTF_ST[t][1], 'n_' + t, NTF_ST[t][2]); nt[t] = v[t]; ch = true; }
+  });
+  if (ch) ls.set('ntd_' + ses.code, JSON.stringify(nt));
+}
+
 const seenKey = ses => 'seen_' + ses.code;
 const getSeen = ses => { try { return JSON.parse(ls.get(seenKey(ses))) || null; } catch (e) { return null; } };
 /* بيرجّع آخر وقت شافه الطالب في التبويب ده، وبيسجّل إنه شاف لحد stamp. أول مرة: كل القديم يعتبر متشاف */
@@ -734,12 +771,13 @@ async function refreshDots(tab) {
   let changed = false;
   ['exams', 'files', 'results', 'rank', 'chat'].forEach(t => { if (sn[t] === undefined) { sn[t] = t === 'chat' ? 0 : v[t]; changed = true; } });
   if (changed) ls.set(seenKey(ses), JSON.stringify(sn));
+  notifyStudent(ses, v, sn, tab);
   document.querySelectorAll('.nav a[data-t]').forEach(a => {
     const t = a.dataset.t, has = a.querySelector('.dot');
     if (t !== tab && v[t] > (sn[t] || 0)) { if (!has) a.insertAdjacentHTML('beforeend', '<span class="dot"></span>'); a.classList.add('pulse'); } else { if (has) has.remove(); a.classList.remove('pulse'); }
   });
 }
-if (!window.__sIv) { window.__sIv = setInterval(() => { if (!document.hidden && document.querySelector('.nav')) { S.stampCache = null; refreshDots(S.curTab); } }, 60000); }
+if (!window.__sIv) { window.__sIv = setInterval(() => { if ((!document.hidden || notifOn()) && document.querySelector('.nav')) { S.stampCache = null; refreshDots(S.curTab); } }, 60000); }
 function studentShell(tab, inner) {
   S.curTab = tab;
   view(`${topbar(`<button class="btn sm ghost" id="sout" aria-label="خروج" title="خروج">${ico('door')}</button>`)}<div class="wrap pb" id="main">${backBtn(inner)}${inner}</div>
@@ -765,12 +803,18 @@ async function tStamps() {
 async function refreshTDots() {
   if (!document.querySelector('.nav a[data-t]') || !S.store.isTeacher()) return;
   const v = await tStamps(), m = { exams: v.newTotal, students: v.pending, chat: v.unread };
+  const pv = S.tPrev; S.tPrev = { ...m };
+  if (pv && document.hidden && notifOn()) {
+    if (m.exams > pv.exams) notify('تسليمات جديدة', 'طلاب بدأوا أو سلّموا امتحان على المنصة.', 't_exams', '#teacher');
+    if (m.students > pv.students) notify('طلب تسجيل جديد', 'فيه طالب بيطلب الانضمام للمنصة.', 't_students', '#teacher/students');
+    if (m.chat > pv.chat) notify('رسالة جديدة', 'طالب بعتلك رسالة.', 't_chat', '#teacher/chat');
+  }
   document.querySelectorAll('.nav a[data-t]').forEach(a => {
     const has = a.querySelector('.dot');
     if (m[a.dataset.t] > 0) { if (!has) a.insertAdjacentHTML('beforeend', '<span class="dot"></span>'); a.classList.add('pulse'); } else { if (has) has.remove(); a.classList.remove('pulse'); }
   });
 }
-if (!window.__tIv) { window.__tIv = setInterval(() => { if (!document.hidden) { S.tCache = null; refreshTDots(); } }, 75000); document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTDots(); }); }
+if (!window.__tIv) { window.__tIv = setInterval(() => { if (!document.hidden || notifOn()) { S.tCache = null; refreshTDots(); } }, 75000); document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTDots(); }); }
 function teacherShell(tab, inner) {
   const noNav = inner.includes('id="ed"');
   view(`${topbar(`<button class="btn sm ghost" id="out" aria-label="خروج" title="خروج">${ico('door')}</button>`)}<div class="wrap ${noNav ? '' : 'pb'}">${backBtn(inner)}${inner}</div>
@@ -915,8 +959,9 @@ async function studentExams(ses) {
   const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
   ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
   studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>${sumStrip}
-  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button></div>`);
+  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button></div>`);
   $('#tourBtn').onclick = () => runTour(TOUR_STUDENT, studentTourKey(ses));
+  const redrawN = () => { $('#ntw').innerHTML = notifCard(); bindNotif(redrawN); }; bindNotif(redrawN);
   maybeStudentTour(ses);
   $('#main').onclick = async e => {
     const c = e.target.closest('[data-subj]');
@@ -1242,6 +1287,7 @@ async function teacherRoute(p) {
     if (p[1] === 'settings') return await teacherSettings();
     if (p[1] === 'files') return await teacherFiles();
     if (p[1] === 'rank') return await teacherRank();
+    if (p[1] === 'class') return await classReport();
     if (p[1] === 'chat') return await teacherChat(p[2]);
     await dashboard();
   } catch (e) { teacherShell('exams', `<div class="msg bad">${esc(e.message)}</div>`); }
@@ -1294,12 +1340,12 @@ async function dashboard() {
   const [all, tv] = await Promise.all([S.store.listExams(), tStamps()]), subj = S.subjDash || '';
   const live = {}; tv.att.forEach(a => { const ex = all.find(x => x.id === a.examId); if (ex && !a.submitted && (a.startedAt || 0) > Date.now() - (ex.durationMin + 2) * 60000) live[a.examId] = (live[a.examId] || 0) + 1; });
   const exams = subj ? all.filter(e => subjOf(e) === subj) : all;
-  teacherShell('exams', `<div id="dash"><div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
+  teacherShell('exams', `<div id="dash"><div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn ghost" href="#teacher/class">${ico('rank')} تقرير الفصل</a><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
   ${subjChips(subj)}
   ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b>${tv.news[e.id] ? ` <span class="newb">${tv.news[e.id]} جديد</span>` : ''}${live[e.id] ? ` <span class="badge ok">🟢 ${live[e.id]} بيمتحن الآن</span>` : ''}<div class="muted">${subjLabel(subjOf(e))} · ${e.type === 'bubble' ? 'ورقة PDF + بابل شيت' : 'أسئلة'} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة${e.groups && e.groups.length ? ' · ' + esc(e.groups.join('، ')) : ' · كل الطلاب'}</div></div>${e.closesAt ? `<span class="badge">يقفل ${fmtDate(e.closesAt)}</span>` : ''}${e.release === 'instant' ? '<span class="badge">نتيجة فورية</span>' : ''}${e.hasEssay ? '<span class="badge">مقالي</span>' : ''}${e.published ? '<span class="badge ok">النتايج منشورة</span>' : ''}</div>
   <div class="row" style="margin-top:10px"><label class="row" style="margin:0;font-weight:400"><input type="checkbox" data-act="active" data-id="${e.id}" ${e.active ? 'checked' : ''}> مفتوح للطلاب</label><span class="grow"></span>
   <a class="btn sm" href="#teacher/results/${e.id}">النتائج</a><a class="btn sm ghost" href="#teacher/edit/${e.id}">تعديل</a><button class="btn sm danger" data-act="del" data-id="${e.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش امتحانات. اضغط "امتحان جديد".</div>'}</div>`);
-  const root = $('#dash'); maybeTeacherTour();
+  const root = $('#dash'); maybeTeacherTour(); setTimeout(maybeAutoBackup, 1500);
   root.onchange = async e => { const t = e.target; if (t.dataset.act === 'active') { try { await S.store.setActive(t.dataset.id, t.checked); } catch (er) { t.checked = !t.checked; alert(er.message); } } };
   root.onclick = async e => {
     const c = e.target.closest('[data-subj]'); if (c) { S.subjDash = c.dataset.subj; return dashboard(); }
@@ -1413,10 +1459,15 @@ async function teacherSettings() {
   <div class="card"><b>شرح اللوحة</b><p class="muted" style="margin:4px 0;font-size:.85rem">جولة سريعة على أهم حاجات اللوحة.</p><button class="btn sm ghost" id="tourT">❓ إعادة الشرح</button></div>
   <div class="card"><b>الدخول بالبصمة</b><p class="muted" style="margin:4px 0;font-size:.85rem">${bioSaved() ? 'مفعّل على الجهاز ده. بيدخلك من غير إيميل وكلمة سر بعد التحقق بالبصمة.' : 'غير مفعّل. هيتعرض عليك بعد تسجيل الدخول التالي (لو الجهاز بيدعم).'}</p>
   ${bioSaved() ? '<button class="btn sm danger" id="bioOff">إلغاء البصمة على الجهاز ده</button>' : '<button class="btn sm ghost" id="bioOn">تفعيل البصمة</button>'}</div>
+  ${notifCard()}
+  <div class="card"><b>نسخة احتياطية تلقائية</b>
+  <p class="muted" style="margin:4px 0 8px;font-size:.85rem">بتتنزل لوحدها أول ما تفتح المنصة بعد انتهاء المدة (مفيش حاجة بتشتغل وانت مش فاتح المنصة). آخر نسخة: <b id="bkl">${(+ls.get('bkLast')) ? fmtDate(+ls.get('bkLast')) : 'لسه'}</b></p>
+  <select id="bke">${[['0', 'متوقفة'], ['3', 'كل 3 أيام'], ['7', 'كل 7 أيام'], ['14', 'كل 14 يوم'], ['30', 'كل 30 يوم']].map(([v, l]) => `<option value="${v}" ${String(bkEvery() < 0 ? 0 : bkEvery()) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
   <div class="card"><b>نسخة احتياطية</b>
   <details class="hint"><summary>ℹ️ إيه اللي بيتحفظ؟</summary><p class="muted" style="margin:4px 0">الملف بيشمل الطلاب والامتحانات (بأسئلتها وصورها ومفتاح الإجابات) والإعدادات وبنك الأسئلة ونتايج الطلاب. الاستعادة بترجّع كل ده ما عدا النتايج (بتفضل في الملف للأرشيف). ملفات المراجع مش داخلة. احتفظ بالنسخة في Google Drive.</p></details>
   <div class="row"><button class="btn sm" id="bkx">⬇ تنزيل نسخة احتياطية</button><label class="btn sm ghost" style="margin:0">⬆ استعادة من ملف<input type="file" id="bki" accept="application/json" hidden></label></div><div id="bkm" class="muted" style="margin-top:6px"></div></div>
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
+  bindNotif(teacherSettings); $('#bke').onchange = e => { ls.set('bkEvery', e.target.value); };
   $('#tourT').onclick = () => { go('#teacher'); setTimeout(() => runTour(TOUR_TEACHER, 'tour_t'), 600); };
   const bo = $('#bioOff'); if (bo) bo.onclick = () => { bioClear(); ls.del('bioNo'); teacherSettings(); };
   const bn = $('#bioOn'); if (bn) bn.onclick = async () => {
@@ -1428,7 +1479,7 @@ async function teacherSettings() {
   };
   $('#bkx').onclick = async () => {
     const b = $('#bkx'), say = x => { $('#bkm').textContent = x; }; b.disabled = true;
-    try { const data = await exportAll(say); downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), 'نسخة احتياطية ' + new Date().toISOString().slice(0, 10) + '.json'); say('تم تنزيل النسخة'); }
+    try { await runBackup(say); const l = $('#bkl'); if (l) l.textContent = fmtDate(Date.now()); say('تم تنزيل النسخة'); }
     catch (e) { say(e.message || 'تعذر عمل النسخة'); }
     b.disabled = false;
   };
@@ -1481,7 +1532,7 @@ async function teacherStudent(code) {
   $('#rpt').onclick = () => showReport(st, rows, avg, pct);
 }
 
-/* ----- الملفات (حتى 5 ميجا، بتتقسم لأجزاء) ----- */
+/* ----- الملفات (حتى 25 ميجا، بتتقسم لأجزاء) ----- */
 async function teacherFiles() {
   teacherShell('files', loadingInner);
   const list = await S.store.listMaterials();
@@ -1489,11 +1540,11 @@ async function teacherFiles() {
   <label for="mt">العنوان</label><input type="text" id="mt">
   <label for="md">وصف (اختياري)</label><input type="text" id="md">
   <label for="ms">المادة</label><select id="ms">${subjOptions('bio')}</select>
-  <label for="mk">النوع</label><select id="mk"><option value="link">رابط (Google Drive أو يوتيوب أو أي موقع)</option><option value="file">ملف (حتى 5 ميجا)</option></select>
+  <label for="mk">النوع</label><select id="mk"><option value="link">رابط (Google Drive أو يوتيوب أو أي موقع)</option><option value="file">ملف (حتى 25 ميجا)</option></select>
   <div id="bl"><label for="mu">الرابط</label><input type="url" id="mu" dir="ltr" placeholder="https://..."></div>
   <div id="bf" style="display:none"><label for="mf">الملف</label><input type="file" id="mf"></div>
   <div id="msg"></div><button class="btn block" id="addm">نشر للطلاب</button>
-  <details class="hint"><summary>ℹ️ الملفات الأكبر من 5 ميجا…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الملفات الأكبر من 5 ميجا (أو الفيديو) ارفعها على Google Drive أو يوتيوب وحط الرابط. افتح الرابط للجميع (Anyone with the link).</p></details></div>
+  <details class="hint"><summary>ℹ️ الملفات الأكبر من 25 ميجا…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الملف بيتخزن في قاعدة بيانات Firebase المجانية (المساحة الكلية 1 جيجا) وكل مرة طالب بيفتحه بيتحسب من حصة القراءة اليومية، فالأفضل تحتفظ بالملفات الكبيرة قليلة. الملفات الأكبر من 25 ميجا (أو الفيديو الطويل) ارفعها على Google Drive أو يوتيوب وحط الرابط. افتح الرابط للجميع (Anyone with the link).</p></details></div>
   <h2>الملفات المنشورة</h2>
   ${list.length ? list.map(m => `<div class="card"><div class="row"><span style="font-size:1.4rem">${m.kind === 'link' ? '🔗' : '📄'}</span><div class="grow"><b>${esc(m.title)}</b>${m.desc ? `<div class="muted">${esc(m.desc)}</div>` : ''}<div class="muted" style="font-size:.8rem">${subjLabel(subjOf(m))} · ${fmtDate(m.createdAt)}</div></div>
   <button class="btn sm ghost" data-edit="${m.id}">تعديل</button><button class="btn sm danger" data-del="${m.id}">حذف</button></div></div>`).join('') : '<div class="card muted">لسه مفيش ملفات.</div>'}`);
@@ -1508,11 +1559,11 @@ async function teacherFiles() {
         m.url = $('#mu').value.trim(); if (!isHttp(m.url)) return setMsg('اكتب رابط صحيح يبدأ بـ https://');
       } else {
         const f = $('#mf').files[0]; if (!f) return setMsg('اختار ملف');
-        if (f.size > MAX_FILE) return setMsg('الملف أكبر من 5 ميجا. ارفعه على Google Drive وحط الرابط.');
+        if (f.size > MAX_FILE) return setMsg('الملف أكبر من 25 ميجا. ارفعه على Google Drive وحط الرابط.');
         const url = await readDataUrl(f), b64 = url.slice(url.indexOf(',') + 1);
         parts = chunkStr(b64); m.parts = parts.length; m.fileName = f.name; m.mime = f.type || 'application/octet-stream'; m.size = f.size;
       }
-      $('#addm').disabled = true; $('#addm').textContent = 'جاري الرفع...'; await S.store.addMaterial(m, parts); teacherFiles();
+      $('#addm').disabled = true; $('#addm').textContent = 'جاري الرفع...'; await S.store.addMaterial(m, parts, (a, n) => { $('#addm').textContent = `جاري الرفع... ${Math.round(a / n * 100)}%`; }); teacherFiles();
     } catch (e) { $('#addm').disabled = false; $('#addm').textContent = 'نشر للطلاب'; setMsg(e.message); }
   };
   $('#app').onclick = async e => {
@@ -1541,7 +1592,7 @@ async function editMaterial(m, preset) {
   try {
     if (m.kind === 'link') { if (!isHttp(r.url)) return bad('اكتب رابط صحيح يبدأ بـ https://'); if (r.url !== m.url) m2.updatedAt = Date.now(); m2.url = r.url; }
     else if (r.file) {
-      if (r.file.size > MAX_FILE) return bad('الملف أكبر من 5 ميجا. ارفعه على Google Drive وحط الرابط.');
+      if (r.file.size > MAX_FILE) return bad('الملف أكبر من 25 ميجا. ارفعه على Google Drive وحط الرابط.');
       const url = await readDataUrl(r.file); parts = chunkStr(url.slice(url.indexOf(',') + 1));
       Object.assign(m2, { parts: parts.length, fileName: r.file.name, mime: r.file.type || 'application/octet-stream', size: r.file.size, updatedAt: Date.now() });
     }
@@ -1578,6 +1629,35 @@ async function teacherRank() {
   };
 }
 
+
+
+/* ----- نسخة احتياطية تلقائية: بتتنزل لوحدها لما تفتح المنصة والفترة عدّت (مفيش سيرفر يشتغل وانت مش فاتح) ----- */
+const bkEvery = () => { const v = ls.get('bkEvery'); return v === null || v === undefined || v === '' ? -1 : +v; };
+const bkName = () => 'نسخة احتياطية ' + new Date().toISOString().slice(0, 10) + '.json';
+async function runBackup(say) {
+  const data = await exportAll(say || (() => {}));
+  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), bkName());
+  ls.set('bkLast', String(Date.now()));
+}
+async function maybeAutoBackup() {
+  if (DEMO && !window.__bkTest) return;
+  let ev = bkEvery();
+  if (ev === 0 || S.bkRan) return;
+  if (!ls.get('tour_t')) return;
+  S.bkRan = true;
+  if (ev < 0) {
+    const yes = await modal({ title: 'نسخة احتياطية تلقائية', text: 'تحب المنصة تنزّل لك نسخة احتياطية لوحدها كل 7 أيام لما تفتحها؟ بتتحفظ في تنزيلات الجهاز، احتفظ بيها في Google Drive. تقدر تغيّر المدة أو توقفها من الإعدادات.', ok: 'فعّل (كل 7 أيام)', cancel: 'لأ' });
+    ls.set('bkEvery', yes ? '7' : '0'); if (!yes) return; ev = 7;
+  }
+  const last = +ls.get('bkLast') || 0;
+  if (last && Date.now() - last < ev * 86400000) return;
+  try {
+    const [st, ex] = await Promise.all([S.store.listStudents(), S.store.listExams()]);
+    if (!st.length && !ex.length) return;
+    await runBackup();
+    const el = document.getElementById('dash'); if (el) el.insertAdjacentHTML('afterbegin', '<div class="msg ok">✓ تم تنزيل نسخة احتياطية تلقائية في تنزيلات الجهاز.</div>');
+  } catch (e) { S.bkRan = false; }
+}
 
 /* ----- نسخة احتياطية ----- */
 async function exportAll(say) {
@@ -2636,7 +2716,7 @@ const TOUR_TEACHER = [
   { sel: '.nav a[data-t=exams]', t: 'النتائج والنشر', x: 'من كارت كل امتحان: "النتائج" فيها الدرجات ومتابعة الخروج والتصوير، وتصحيح المقالي، ونشر النتايج للطلاب، ووقت إضافي لطالب، وتصدير Excel.' },
   { sel: '.nav a[data-t=students]', t: 'الطلاب', x: 'أضف طلاب (كود لكل طالب)، افتح التسجيل الذاتي، حدد المجموعات، وانسخ رابط الطلاب. وفيه زر "الترتيب" للتحكم في ظهوره للطلاب.' },
   { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة).' },
-  { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'شارك روابط وملفات (حتى 5 ميجا) مع الطلاب.' },
+  { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'شارك روابط وملفات (حتى 25 ميجا) مع الطلاب.' },
   { sel: '.nav a[data-t=settings]', t: 'الإعدادات', x: 'المجموعات وأبواب كل مادة، الدخول بالبصمة، والنسخة الاحتياطية. نزّل نسخة احتياطية كل فترة واحتفظ بيها على Google Drive.' },
   { t: 'تمام ✅', x: 'النقط الحمرا والنبض على أي تبويب معناها فيه جديد (طالب سلّم، رسالة، طلب تسجيل). بالتوفيق!' }];
 function runTour(steps, key) {
@@ -2671,6 +2751,79 @@ function runTour(steps, key) {
 const studentTourKey = ses => 'tour_s_' + ses.code;
 function maybeStudentTour(ses) { if (!ls.get(studentTourKey(ses))) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]') && !location.hash.includes('exam/')) runTour(TOUR_STUDENT, studentTourKey(ses)); }, 700); }
 function maybeTeacherTour() { if (!ls.get('tour_t')) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]')) runTour(TOUR_TEACHER, 'tour_t'); }, 700); }
+/* ========= تقرير الفصل: مقارنة الامتحانات + أكتر الأسئلة غلطًا + الأبواب الأضعف + طلاب محتاجين متابعة ========= */
+async function classData(e) {
+  const c = S.clsCache = S.clsCache || {}, hit = c[e.id];
+  if (hit && Date.now() - hit.at < 300000) return hit.v;
+  const [key, rs, content] = await Promise.all([S.store.getKey(e.id), S.store.listResults(e.id), loadExamContent(e, false)]);
+  const qs = content.questions, ka = (key && key.answers) || [], sc0 = scoreOf(qs, [], ka, null), total = sc0.total;
+  const rows = rs.map(r => { const sc = scoreOf(qs, r.answers || [], ka, r.grades); return { code: r.studentCode || '', name: r.name, pct: total ? Math.round(sc.score / total * 100) : 0, pending: sc.pending, ans: r.answers || [], topics: byTopic(qs, r.answers || [], ka) }; });
+  const done = rows.filter(r => !r.pending);
+  const qstats = qs.map((q, i) => {
+    if (isEssay(q)) return null;
+    const wrong = {}; let ok = 0, blank = 0;
+    rows.forEach(r => { const a = r.ans[i]; if (a === ka[i]) ok++; else if (typeof a === 'number' && a >= 0) wrong[a] = (wrong[a] || 0) + 1; else blank++; });
+    const top = Object.entries(wrong).sort((x, y) => y[1] - x[1])[0];
+    return { i, q, ok, n: rows.length, blank, topWrong: top ? { idx: +top[0], c: top[1] } : null };
+  }).filter(Boolean);
+  const v = { e, rows, done, qstats, avg: done.length ? Math.round(done.reduce((s, r) => s + r.pct, 0) / done.length) : null, hi: done.length ? Math.max(...done.map(r => r.pct)) : null, lo: done.length ? Math.min(...done.map(r => r.pct)) : null };
+  c[e.id] = { at: Date.now(), v }; return v;
+}
+async function classReport() {
+  teacherShell('exams', loadingInner);
+  const subj = S.subjCls || '';
+  const [all, studs] = await Promise.all([S.store.listExams(), S.store.listStudents()]);
+  const list = (subj ? all.filter(e => subjOf(e) === subj) : all).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  const data = (await Promise.all(list.map(e => classData(e).catch(() => null)))).filter(Boolean);
+  const withRes = data.filter(d => d.rows.length);
+  const draw = () => {
+    const allDone = withRes.flatMap(d => d.done), tot = withRes.reduce((s, d) => s + d.rows.length, 0);
+    const clsAvg = allDone.length ? Math.round(allDone.reduce((s, r) => s + r.pct, 0) / allDone.length) : null;
+    const col = p => p < 50 ? 'var(--bad)' : p < 75 ? 'var(--warn)' : 'var(--ok)';
+    const cmp = withRes.map((d, k) => {
+      const prev = k ? withRes[k - 1].avg : null, dl = d.avg !== null && prev !== null ? d.avg - prev : null;
+      const sCount = studs.filter(s => visibleTo(d.e, s.group || '')).length || studs.length;
+      return `<div style="margin:12px 0"><div class="row"><span class="grow"><b>${esc(d.e.title)}</b><div class="muted" style="font-size:.8rem">${subjLabel(subjOf(d.e))} · ${fmtDate(d.e.createdAt)} · سلّم ${d.rows.length} من ${sCount}</div></span>
+      <b style="color:${d.avg === null ? 'inherit' : col(d.avg)}">${d.avg === null ? '—' : d.avg + '%'}</b>${dl === null ? '' : `<span class="badge ${dl > 0 ? 'ok' : dl < 0 ? 'bad' : ''}">${dl > 0 ? '▲' : dl < 0 ? '▼' : '='} ${Math.abs(dl)}</span>`}</div>
+      <div class="meter"><i style="width:${d.avg || 0}%;background:${d.avg === null ? 'var(--muted)' : col(d.avg)}"></i></div>
+      ${d.avg === null ? '' : `<div class="muted" style="font-size:.8rem">الأعلى ${d.hi}% · الأقل ${d.lo}%</div>`}</div>`;
+    }).join('');
+    const label = qs => { const q = qs.q; return `${esc(d0(qs).e.title)} · سؤال ${qs.i + 1}${q.text ? ': ' + esc(q.text.slice(0, 60)) : ''}`; };
+    const d0 = qs => qs._d;
+    const qAll = withRes.flatMap(d => d.qstats.map(x => (x._d = d, x))).filter(x => x.n >= 2 && x.ok / x.n < 0.6).sort((a, b) => a.ok / a.n - b.ok / b.n || b.n - a.n).slice(0, 10);
+    const optName = (x, idx) => x.q.letters ? LETTERS[idx] : 'الاختيار ' + (idx + 1);
+    const hard = qAll.map(x => `<div class="row" style="margin-top:8px"><div class="grow"><div style="font-size:.9rem">${label(x)}</div>
+      <div class="muted" style="font-size:.8rem">${x.topWrong ? `أكتر إجابة غلط: ${optName(x, x.topWrong.idx)} (${x.topWrong.c} طالب)` : ''}${x.blank ? `${x.topWrong ? ' · ' : ''}${x.blank} بدون إجابة` : ''}</div></div>
+      <b style="color:${col(Math.round(x.ok / x.n * 100))}">${Math.round(x.ok / x.n * 100)}%</b></div>`).join('');
+    const topics = (() => {
+      const bySubj = Object.keys(SUBJECTS).map(k => { const t = mergeTopics(withRes.filter(d => subjOf(d.e) === k).flatMap(d => d.rows.map(r => r.topics))); return t.length ? `<div class="card"><b>${subjLabel(k)}: مستوى الفصل في كل باب (كل الامتحانات)</b><p class="muted" style="margin:2px 0 0;font-size:.85rem">الأضعف فوق.</p>${topicBars(t)}</div>` : ''; });
+      return bySubj.join('');
+    })();
+    const perStu = {};
+    withRes.forEach(d => d.done.forEach(r => { if (r.code) (perStu[r.code] = perStu[r.code] || { name: r.name, p: [] }).p.push(r.pct); }));
+    const last = withRes[withRes.length - 1];
+    const missing = last ? studs.filter(s => visibleTo(last.e, s.group || '') && !last.rows.some(r => r.code === s.code)) : [];
+    const watch = Object.entries(perStu).map(([c, o]) => { const a = Math.round(o.p.reduce((s, x) => s + x, 0) / o.p.length), l = o.p[o.p.length - 1], f = o.p.length > 1 ? o.p[0] : null; return { c, name: o.name, a, l, n: o.p.length, dl: f === null ? null : l - o.p[o.p.length - 2] }; })
+      .filter(x => x.a < 60 || (x.dl !== null && x.dl <= -15)).sort((a, b) => a.a - b.a);
+    const stuHtml = watch.map(x => `<a class="row" href="#teacher/student/${esc(x.c)}" style="margin-top:8px;text-decoration:none;color:inherit"><span class="grow">${esc(x.name)}<div class="muted" style="font-size:.8rem">المتوسط ${x.a}% في ${x.n} امتحان · آخر امتحان ${x.l}%</div></span>${x.dl !== null && x.dl <= -15 ? `<span class="badge bad">▼ ${Math.abs(x.dl)}</span>` : ''}<span class="badge ${x.a < 50 ? 'bad' : 'warn'}">${x.a}%</span></a>`).join('');
+    $('#cr').innerHTML = withRes.length ? `<div class="stat"><div><b>${withRes.length}</b>امتحان</div><div><b>${tot}</b>تسليم</div><div><b>${clsAvg === null ? '—' : clsAvg + '%'}</b>متوسط الفصل</div></div>
+    <div class="card"><div class="row"><b class="grow">مقارنة الامتحانات</b><button class="btn sm" id="crx">تصدير Excel</button></div><p class="muted" style="margin:2px 0 0;font-size:.85rem">متوسط الفصل في كل امتحان بالترتيب الزمني، والسهم بيقارن بالامتحان اللي قبله.</p>${cmp}</div>
+    <div class="card"><b>أكتر الأسئلة غلطًا</b><p class="muted" style="margin:2px 0 8px;font-size:.85rem">الأسئلة اللي أقل من 60% من الطلاب جاوبوها صح (الأصعب فوق).</p>${hard || '<p class="muted" style="margin:0">مفيش أسئلة تحت 60%. أداء الفصل كويس 👏</p>'}</div>
+    ${topics}
+    <div class="card"><b>طلاب محتاجين متابعة</b><p class="muted" style="margin:2px 0 6px;font-size:.85rem">متوسطهم أقل من 60% أو نزلوا 15 درجة أو أكتر في آخر امتحان.</p>${stuHtml || '<p class="muted" style="margin:0">مفيش حد تحت المستوى حاليًا.</p>'}</div>
+    ${missing.length ? `<div class="card"><b>لم يسلّموا آخر امتحان</b><p class="muted" style="margin:2px 0 6px;font-size:.85rem">${esc(last.e.title)}</p>${missing.map(s => `<a class="badge warn" href="#teacher/student/${esc(s.code)}" style="margin:2px;text-decoration:none">${esc(s.name)}</a>`).join(' ')}</div>` : ''}` : '<div class="card muted">لسه مفيش نتايج كفاية. هتظهر التقارير بعد ما الطلاب يسلّموا امتحانات.</div>';
+    const x = $('#crx');
+    if (x) x.onclick = () => {
+      const rowsX = [['الامتحان', 'المادة', 'التاريخ', 'عدد التسليمات', 'المتوسط %', 'الأعلى %', 'الأقل %']].concat(withRes.map(d => [d.e.title, subjLabel(subjOf(d.e)), fmtDate(d.e.createdAt).replace(/[⁦-⁩]/g, ''), d.rows.length, d.avg === null ? '' : d.avg, d.hi === null ? '' : d.hi, d.lo === null ? '' : d.lo]));
+      const rowsQ = [[], ['أكتر الأسئلة غلطًا'], ['الامتحان', 'رقم السؤال', 'نسبة الصح %', 'عدد الطلاب']].concat(qAll.map(q => [q._d.e.title, q.i + 1, Math.round(q.ok / q.n * 100), q.n]));
+      downloadBlob(xlsxBlob(rowsX.concat(rowsQ), 'تقرير الفصل'), 'تقرير الفصل.xlsx');
+    };
+  };
+  teacherShell('exams', `<div id="crw"><a href="#teacher">→ رجوع</a><div class="row"><h2 class="grow">${ico('rank')} تقرير الفصل</h2><button class="btn sm ghost" id="crf">تحديث</button></div>${subjChips(subj)}<div id="cr"></div></div>`);
+  draw();
+  $('#crw').onclick = e => { const c = e.target.closest('[data-subj]'); if (c) { S.subjCls = c.dataset.subj; return classReport(); } };
+  $('#crf').onclick = () => { S.clsCache = {}; classReport(); };
+}
 
 /* ----- النتائج ----- */
 async function results(id, silent) {
@@ -2842,7 +2995,7 @@ async function gradePage(id, code) {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__bip = e; document.querySelectorAll('.top .sp').forEach(sp => { if (!document.querySelector('[data-install]')) sp.insertAdjacentHTML('afterend', '<button class="btn sm ghost" data-install>📲 تثبيت</button>'); }); });
   window.addEventListener('appinstalled', () => { window.__bip = null; document.querySelectorAll('[data-install]').forEach(b => b.remove()); });
   document.addEventListener('click', async e => { if (e.target.closest('[data-install]') && window.__bip) { const p = window.__bip; window.__bip = null; p.prompt(); try { await p.userChoice; } catch (er) {} document.querySelectorAll('[data-install]').forEach(b => b.remove()); } });
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {}); if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { const h = e.data && e.data.goto; if (h) go(h); });
   document.addEventListener('click', e => {
     if (!e.target.closest('[data-theme-toggle]')) return;
     const n = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
