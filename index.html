@@ -180,6 +180,7 @@ body.sheet-open .pb2{padding-bottom:56vh}
 .cropbox{position:relative;display:inline-block;max-width:100%;touch-action:none;cursor:crosshair;user-select:none}
 .cropbox canvas{max-width:100%;height:auto;display:block;border:1px solid var(--line)}
 .cropbox .sel{position:absolute;border:2px solid #e11d48;background:rgba(225,29,72,.15);pointer-events:none}
+.cdel{background:none;border:0;cursor:pointer;font-size:.9rem;opacity:.55;padding:0 4px;margin-inline-end:4px}.cdel:hover{opacity:1}
 </style>
 </head>
 <body>
@@ -465,11 +466,17 @@ const DemoStore = {
     const d = this.db(); d.chat = d.chat || {}; d.inbox = d.inbox || {}; d.msgImgs = d.msgImgs || {};
     if (imgD) d.msgImgs[m.imgId] = imgD;
     targets.forEach(t => {
-      (d.chat[t.code] = d.chat[t.code] || []).push({ ...m, id: uid() });
+      (d.chat[t.code] = d.chat[t.code] || []).push({ ...m, id: (targets.length === 1 && m.id) || uid() });
       const ib = d.inbox[t.code] = d.inbox[t.code] || { code: t.code, name: t.name, unreadT: 0 };
       ib.name = t.name; ib.lastAt = m.createdAt; ib.lastText = msgSnip(m); ib.lastFrom = m.from;
       if (m.from === 't') ib.lastTAt = m.createdAt; else { ib.lastSAt = m.createdAt; ib.unreadT = (ib.unreadT || 0) + 1; }
     });
+    this.save(d);
+  },
+  async deleteMsg(code, msg, byTeacher) {
+    const d = this.db(); d.chat = d.chat || {}; d.chat[code] = (d.chat[code] || []).filter(x => x.id !== msg.id);
+    if (byTeacher && msg.imgId && d.msgImgs) delete d.msgImgs[msg.imgId];
+    if (byTeacher && d.inbox && d.inbox[code]) { const l = d.chat[code].slice().sort((a, b) => a.createdAt - b.createdAt).pop(); Object.assign(d.inbox[code], l ? { lastAt: l.createdAt, lastText: msgSnip(l), lastFrom: l.from } : { lastAt: 0, lastText: '', lastFrom: '' }); }
     this.save(d);
   },
   async listMsgs(code) { return ((this.db().chat || {})[code] || []).slice().sort((a, b) => a.createdAt - b.createdAt); },
@@ -616,7 +623,7 @@ const FB = {
     for (let i = 0; i < targets.length; i += 100) {
       const b = this.db.batch();
       targets.slice(i, i + 100).forEach(t => {
-        const id = uid();
+        const id = (targets.length === 1 && m.id) || uid();
         b.set(this.col('students').doc(t.code).collection('msgs').doc(id), { ...m, id });
         const ib = { code: t.code, name: t.name, lastAt: m.createdAt, lastText: msgSnip(m), lastFrom: m.from };
         if (m.from === 't') ib.lastTAt = m.createdAt; else { ib.lastSAt = m.createdAt; ib.unreadT = F.increment(1); }
@@ -624,6 +631,13 @@ const FB = {
       });
       await b.commit();
     }
+  },
+  async deleteMsg(code, msg, byTeacher) {
+    await this.col('students').doc(code).collection('msgs').doc(msg.id).delete();
+    if (!byTeacher) return;
+    if (msg.imgId) { try { await this.col('msgImgs').doc(msg.imgId).delete(); } catch (e) {} }
+    const s = await this.col('students').doc(code).collection('msgs').orderBy('createdAt', 'desc').limit(1).get(), l = s.empty ? null : s.docs[0].data();
+    await this.col('inbox').doc(code).set(l ? { lastAt: l.createdAt, lastText: msgSnip(l), lastFrom: l.from } : { lastAt: 0, lastText: '', lastFrom: '' }, { merge: true });
   },
   async listMsgs(code) { const s = await this.col('students').doc(code).collection('msgs').orderBy('createdAt', 'desc').limit(100).get(); return s.docs.map(d => d.data()).reverse(); },
   async getInbox(code) { const d = await this.col('inbox').doc(code).get(); return d.exists ? d.data() : null; },
@@ -959,8 +973,9 @@ async function studentExams(ses) {
   const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
   ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
   studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>${sumStrip}
-  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button></div>`);
+  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button> <button class="btn sm ghost" id="wnBtn">🎉 ما الجديد</button></div>`);
   $('#tourBtn').onclick = () => runTour(TOUR_STUDENT, studentTourKey(ses));
+  $('#wnBtn').onclick = () => showWhatsNew('s', true);
   const redrawN = () => { $('#ntw').innerHTML = notifCard(); bindNotif(redrawN); }; bindNotif(redrawN);
   maybeStudentTour(ses);
   $('#main').onclick = async e => {
@@ -1456,7 +1471,7 @@ async function teacherSettings() {
   ${Object.keys(SUBJECTS).map(k => `<div class="card"><b>أبواب ${subjLabel(k)}</b>
   <details class="hint"><summary>ℹ️ كل باب أو درس في…</summary><p class="muted" style="margin:4px 0">كل باب أو درس في سطر. بتربط كل سؤال بباب، وبكده بيظهر للطالب والدكتور مستواه في كل باب. لو غيرت اسم باب، الأسئلة القديمة بتفضل بالاسم القديم.</p></details>
   <textarea id="tp_${k}" rows="7" placeholder="الباب الأول: ...&#10;الباب الثاني: ...">${esc(topicsOf(cfg, k).join('\n'))}</textarea></div>`).join('')}
-  <div class="card"><b>شرح اللوحة</b><p class="muted" style="margin:4px 0;font-size:.85rem">جولة سريعة على أهم حاجات اللوحة.</p><button class="btn sm ghost" id="tourT">❓ إعادة الشرح</button></div>
+  <div class="card"><b>شرح اللوحة</b><p class="muted" style="margin:4px 0;font-size:.85rem">جولة سريعة على أهم حاجات اللوحة.</p><div class="row"><button class="btn sm ghost" id="tourT">❓ إعادة الشرح</button><button class="btn sm ghost" id="wnT">🎉 ما الجديد</button></div></div>
   <div class="card"><b>الدخول بالبصمة</b><p class="muted" style="margin:4px 0;font-size:.85rem">${bioSaved() ? 'مفعّل على الجهاز ده. بيدخلك من غير إيميل وكلمة سر بعد التحقق بالبصمة.' : 'غير مفعّل. هيتعرض عليك بعد تسجيل الدخول التالي (لو الجهاز بيدعم).'}</p>
   ${bioSaved() ? '<button class="btn sm danger" id="bioOff">إلغاء البصمة على الجهاز ده</button>' : '<button class="btn sm ghost" id="bioOn">تفعيل البصمة</button>'}</div>
   ${notifCard()}
@@ -1467,6 +1482,7 @@ async function teacherSettings() {
   <details class="hint"><summary>ℹ️ إيه اللي بيتحفظ؟</summary><p class="muted" style="margin:4px 0">الملف بيشمل الطلاب والامتحانات (بأسئلتها وصورها ومفتاح الإجابات) والإعدادات وبنك الأسئلة ونتايج الطلاب. الاستعادة بترجّع كل ده ما عدا النتايج (بتفضل في الملف للأرشيف). ملفات المراجع مش داخلة. احتفظ بالنسخة في Google Drive.</p></details>
   <div class="row"><button class="btn sm" id="bkx">⬇ تنزيل نسخة احتياطية</button><label class="btn sm ghost" style="margin:0">⬆ استعادة من ملف<input type="file" id="bki" accept="application/json" hidden></label></div><div id="bkm" class="muted" style="margin-top:6px"></div></div>
   <div id="msg"></div><button class="btn block" id="svs">حفظ الإعدادات</button>`);
+  $('#wnT').onclick = () => showWhatsNew('t', true);
   bindNotif(teacherSettings); $('#bke').onchange = e => { ls.set('bkEvery', e.target.value); };
   $('#tourT').onclick = () => { go('#teacher'); setTimeout(() => runTour(TOUR_TEACHER, 'tour_t'), 600); };
   const bo = $('#bioOff'); if (bo) bo.onclick = () => { bioClear(); ls.del('bioNo'); teacherSettings(); };
@@ -1643,7 +1659,7 @@ async function maybeAutoBackup() {
   if (DEMO && !window.__bkTest) return;
   let ev = bkEvery();
   if (ev === 0 || S.bkRan) return;
-  if (!ls.get('tour_t')) return;
+  if ((!ls.get('tour_t') && ls.get('tour_off') !== '1') || (+ls.get('wn_seen') || 0) < APP_VER) return;
   S.bkRan = true;
   if (ev < 0) {
     const yes = await modal({ title: 'نسخة احتياطية تلقائية', text: 'تحب المنصة تنزّل لك نسخة احتياطية لوحدها كل 7 أيام لما تفتحها؟ بتتحفظ في تنزيلات الجهاز، احتفظ بيها في Google Drive. تقدر تغيّر المدة أو توقفها من الإعدادات.', ok: 'فعّل (كل 7 أيام)', cancel: 'لأ' });
@@ -2598,7 +2614,7 @@ function chatBubbles(msgs, me, prevSeen) {
   return `<div class="chat">${msgs.map(m => {
     const mine = m.from === me, lab = m.to === 'all' ? 'رسالة لكل الطلاب' : (m.to && m.to.startsWith('group:') ? 'رسالة لمجموعة ' + m.to.slice(6) : '');
     return `<div class="cb ${mine ? 'me' : 'th'}">${lab ? `<div class="cl">${esc(lab)}</div>` : ''}${m.text ? `<div class="tx">${esc(m.text)}</div>` : ''}${m.imgId ? `<img data-mi="${esc(m.imgId)}" alt="" ${S.mic[m.imgId] ? `src="${S.mic[m.imgId]}"` : ''}>` : ''}
-    <div class="ct">${chatTime(m.createdAt)}${!mine && prevSeen !== undefined && m.createdAt > prevSeen ? ' <span class="newb">جديد</span>' : ''}</div></div>`;
+    <div class="ct">${m.id && (me === 't' || mine) ? `<button class="cdel" data-md="${esc(m.id)}" aria-label="حذف الرسالة" title="حذف الرسالة">🗑</button>` : ''}${chatTime(m.createdAt)}${!mine && prevSeen !== undefined && m.createdAt > prevSeen ? ' <span class="newb">جديد</span>' : ''}</div></div>`;
   }).join('')}</div>`;
 }
 function loadChatImgs(root) {
@@ -2623,6 +2639,15 @@ function wireComposer(onSend) {
     b.disabled = false;
   };
 }
+/* حذف رسالة: الطالب يحذف رسايله بس، والدكتور يحذف أي رسالة في المحادثة */
+function chatDel(code, me, getMsgs, setMsgs, draw) {
+  return async e => {
+    const b = e.target.closest('button[data-md]'); if (!b) return;
+    const msg = getMsgs().find(x => x.id === b.dataset.md); if (!msg) return;
+    if (!(await modal({ title: 'حذف الرسالة', text: me === 't' ? 'هتتمسح الرسالة دي من المحادثة عند الطالب كمان. تكمل؟' : 'هتتمسح الرسالة دي من المحادثة عندك وعند الدكتور. تكمل؟', ok: 'احذف' }))) return;
+    try { await S.store.deleteMsg(code, msg, me === 't'); setMsgs(getMsgs().filter(x => x.id !== msg.id)); draw(); } catch (er) { alert(er.message || 'تعذر الحذف'); }
+  };
+}
 const imgClick = e => { const im = e.target.closest('img[data-mi]'); if (im && im.src) zoomImg(im.src); };
 
 async function studentChat(ses) {
@@ -2632,12 +2657,13 @@ async function studentChat(ses) {
   studentShell('chat', `<h2>💬 التواصل مع الدكتور</h2><div id="thr"></div>${composerHtml}`);
   const draw = () => { const t = $('#thr'); if (!t) return; t.innerHTML = chatBubbles(msgs, 's', prev); loadChatImgs(t); };
   draw(); window.scrollTo(0, document.body.scrollHeight);
-  $('#main').onclick = imgClick;
+  const delS = chatDel(ses.code, 's', () => msgs, v => { msgs = v; }, draw);
+  $('#main').onclick = e => { imgClick(e); delS(e); };
   wireComposer(async (text, img) => {
-    const m = { from: 's', text, createdAt: Date.now(), to: 't', ...(img ? { imgId: uid() } : {}) };
+    const m = { id: uid(), from: 's', text, createdAt: Date.now(), to: 't', ...(img ? { imgId: uid() } : {}) };
     await S.store.sendMsgs([{ code: ses.code, name: ses.name }], m, img || null);
     if (m.imgId) S.mic[m.imgId] = img;
-    msgs.push({ ...m, id: uid() }); draw(); window.scrollTo(0, document.body.scrollHeight);
+    msgs.push({ ...m }); draw(); window.scrollTo(0, document.body.scrollHeight);
   });
   const iv = setInterval(async () => {
     if (document.hidden) return;
@@ -2686,12 +2712,13 @@ async function teacherThread(code) {
   teacherShell('chat', `<h2>💬 ${esc(st.name)} <span class="code" style="font-size:.85rem">${esc(code)}</span></h2><div id="thr"></div>${composerHtml}`);
   const draw = () => { const t = $('#thr'); if (!t) return; t.innerHTML = chatBubbles(msgs, 't'); loadChatImgs(t); };
   draw(); window.scrollTo(0, document.body.scrollHeight);
-  $('.wrap').onclick = imgClick;
+  const delT = chatDel(code, 't', () => msgs, v => { msgs = v; }, draw);
+  $('.wrap').onclick = e => { imgClick(e); delT(e); };
   wireComposer(async (text, img) => {
-    const m = { from: 't', text, createdAt: Date.now(), to: 'one', ...(img ? { imgId: uid() } : {}) };
+    const m = { id: uid(), from: 't', text, createdAt: Date.now(), to: 'one', ...(img ? { imgId: uid() } : {}) };
     await S.store.sendMsgs([{ code, name: st.name }], m, img || null);
     if (m.imgId) S.mic[m.imgId] = img;
-    msgs.push({ ...m, id: uid() }); draw(); window.scrollTo(0, document.body.scrollHeight);
+    msgs.push({ ...m }); draw(); window.scrollTo(0, document.body.scrollHeight);
   });
   const iv = setInterval(async () => {
     if (document.hidden) return;
@@ -2707,7 +2734,8 @@ const TOUR_STUDENT = [
   { t: 'الأسئلة المقالية ✍️', x: 'تقدر تكتب إجابتك، أو ترفع صورة حلك المكتوب بخط اليد (حتى 3 صور). رفع الصورة مش بيتحسب خروج من الامتحان. اضغط على أي صورة في السؤال عشان تكبّرها بصباعين.' },
   { sel: '.nav a[data-t=rank]', t: 'الترتيب', x: 'لوحة الشرف: أول 3 طلاب في كل مادة حسب مجموع الدرجات.' },
   { sel: '.nav a[data-t=results]', t: 'نتايجي', x: 'درجاتك وتفاصيل كل امتحان بعد ما الدكتور يعلن النتيجة، ومستواك في كل باب.' },
-  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ابعت رسالة أو صورة للدكتور، وهتلاقي رده هنا. أي حاجة جديدة بتظهر عليها نقطة حمرا.' },
+  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ابعت رسالة أو صورة للدكتور، وهتلاقي رده هنا. تقدر تحذف رسايلك بزر 🗑. أي حاجة جديدة بتظهر عليها نقطة حمرا.' },
+  { sel: '#ntw', t: 'الإشعارات 🔔', x: 'فعّل الإشعارات من هنا عشان يجيلك تنبيه على الموبايل لما ينزل امتحان أو رسالة أو نتيجة جديدة.' },
   { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'مذكرات وروابط ومراجع الدكتور بتلاقيها هنا.' },
   { t: 'جاهز! 🎓', x: 'بالتوفيق. لو احتجت الشرح ده تاني اضغط "❓ شرح المنصة" في آخر صفحة الامتحانات.' }];
 const TOUR_TEACHER = [
@@ -2715,18 +2743,20 @@ const TOUR_TEACHER = [
   { sel: '.nav a[data-t=exams]', t: 'الامتحانات', x: 'اضغط "امتحان جديد": اكتب العنوان والمدة، واستورد الأسئلة من PDF أو نص، أو اختار من بنك الأسئلة. الخيارات الإضافية (الموعد، المجموعة، ظهور النتيجة) في قوائم مطوية. زر الحفظ ثابت تحت.' },
   { sel: '.nav a[data-t=exams]', t: 'النتائج والنشر', x: 'من كارت كل امتحان: "النتائج" فيها الدرجات ومتابعة الخروج والتصوير، وتصحيح المقالي، ونشر النتايج للطلاب، ووقت إضافي لطالب، وتصدير Excel.' },
   { sel: '.nav a[data-t=students]', t: 'الطلاب', x: 'أضف طلاب (كود لكل طالب)، افتح التسجيل الذاتي، حدد المجموعات، وانسخ رابط الطلاب. وفيه زر "الترتيب" للتحكم في ظهوره للطلاب.' },
-  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة).' },
+  { sel: 'a[href="#teacher/class"]', t: 'تقرير الفصل 📊', x: 'مقارنة الامتحانات، أكتر الأسئلة غلطًا، الأبواب الأضعف، والطلاب المحتاجين متابعة.' },
+  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة). تقدر تحذف أي رسالة بزر 🗑.' },
   { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'شارك روابط وملفات (حتى 25 ميجا) مع الطلاب.' },
-  { sel: '.nav a[data-t=settings]', t: 'الإعدادات', x: 'المجموعات وأبواب كل مادة، الدخول بالبصمة، والنسخة الاحتياطية. نزّل نسخة احتياطية كل فترة واحتفظ بيها على Google Drive.' },
+  { sel: '.nav a[data-t=settings]', t: 'الإعدادات', x: 'المجموعات وأبواب كل مادة، الإشعارات، الدخول بالبصمة، والنسخة الاحتياطية (يدوية أو تلقائية). احتفظ بالنسخ على Google Drive.' },
   { t: 'تمام ✅', x: 'النقط الحمرا والنبض على أي تبويب معناها فيه جديد (طالب سلّم، رسالة، طلب تسجيل). بالتوفيق!' }];
 function runTour(steps, key) {
   if (document.querySelector('.tour')) return;
   let i = 0;
   const ov = document.createElement('div'); ov.className = 'tour';
-  ov.innerHTML = '<div class="th"></div><div class="tc" role="dialog"><div class="tt"></div><div class="tx"></div><div class="row" style="margin-top:12px"><span class="muted" id="tn"></span><span class="grow"></span><button class="btn sm ghost" data-t="skip">تخطي</button><button class="btn sm ghost" data-t="prev">السابق</button><button class="btn sm" data-t="next">التالي</button></div></div>';
+  ov.innerHTML = '<div class="th"></div><div class="tc" role="dialog"><div class="tt"></div><div class="tx"></div><div class="row" style="margin-top:12px"><span class="muted" id="tn"></span><span class="grow"></span><button class="btn sm ghost" data-t="skip">تخطي</button><button class="btn sm ghost" data-t="prev">السابق</button><button class="btn sm" data-t="next">التالي</button></div><label class="row" style="margin:10px 0 0;font-weight:400;font-size:.85rem"><input type="checkbox" id="tnv"> متظهرش الشرح ده تاني على الجهاز ده</label></div>';
   document.body.appendChild(ov);
   const th = ov.querySelector('.th'), tc = ov.querySelector('.tc');
-  const done = () => { try { ls.set(key, '1'); } catch (e) {} ov.remove(); window.removeEventListener('resize', show); };
+  ov.querySelector('#tnv').checked = ls.get('tour_off') === '1';
+  const done = () => { try { ls.set(key, '1'); ls.set('wn_seen', String(APP_VER)); if (ov.querySelector('#tnv').checked) ls.set('tour_off', '1'); else ls.del('tour_off'); } catch (e) {} ov.remove(); window.removeEventListener('resize', show); };
   function show() {
     const s = steps[i], el = s.sel && document.querySelector(s.sel);
     ov.querySelector('.tt').textContent = s.t; ov.querySelector('.tx').textContent = s.x; ov.querySelector('#tn').textContent = (i + 1) + ' / ' + steps.length;
@@ -2749,8 +2779,33 @@ function runTour(steps, key) {
   window.addEventListener('resize', show); show();
 }
 const studentTourKey = ses => 'tour_s_' + ses.code;
-function maybeStudentTour(ses) { if (!ls.get(studentTourKey(ses))) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]') && !location.hash.includes('exam/')) runTour(TOUR_STUDENT, studentTourKey(ses)); }, 700); }
-function maybeTeacherTour() { if (!ls.get('tour_t')) setTimeout(() => { if (document.querySelector('.nav a[data-t=exams]')) runTour(TOUR_TEACHER, 'tour_t'); }, 700); }
+function maybeStudentTour(ses) { setTimeout(() => { if (!document.querySelector('.nav a[data-t=exams]') || location.hash.includes('exam/')) return; if (!ls.get(studentTourKey(ses)) && ls.get('tour_off') !== '1') runTour(TOUR_STUDENT, studentTourKey(ses)); else maybeWhatsNew('s', studentTourKey(ses)); }, 700); }
+function maybeTeacherTour() { setTimeout(() => { if (!document.querySelector('.nav a[data-t=exams]')) return; if (!ls.get('tour_t') && ls.get('tour_off') !== '1') runTour(TOUR_TEACHER, 'tour_t'); else maybeWhatsNew('t', 'tour_t'); }, 700); }
+/* ========= ما الجديد (بيظهر مرة واحدة بعد كل تحديث) =========
+   لما تضيف ميزة جديدة: ارفع APP_VER وضيف عنصر في أول WHATS_NEW (r: 's' للطالب، 't' للدكتور، '' للاتنين). */
+const APP_VER = 10;
+const WHATS_NEW = [
+  { v: 10, d: 'نوفمبر 2026', items: [
+    { r: 't', t: '📊 تقرير الفصل: مقارنة الامتحانات، أكتر الأسئلة غلطًا، الأبواب الأضعف، والطلاب المحتاجين متابعة (من صفحة الامتحانات).' },
+    { r: 't', t: '💾 نسخة احتياطية تلقائية بتتنزل لوحدها كل فترة تحددها (من الإعدادات).' },
+    { r: '', t: '🔔 إشعارات على الموبايل لما يكون فيه جديد (فعّلها من آخر صفحة الامتحانات للطالب، ومن الإعدادات للدكتور).' },
+    { r: 't', t: '📎 رفع ملفات حتى 25 ميجا بدل 5.' },
+    { r: '', t: '🗑 تقدر تحذف رسايل التواصل (الطالب يحذف رسايله، والدكتور يحذف أي رسالة).' },
+    { r: '', t: '❓ شرح المنصة بقى فيه خيار "متظهرش تاني"، وفيه نافذة "ما الجديد" دي بعد كل تحديث.' }] }];
+function whatsNewHtml(role, since) {
+  const parts = WHATS_NEW.filter(w => w.v > since).map(w => { const it = w.items.filter(x => !x.r || x.r === role); return it.length ? `<div style="margin:0 0 10px"><b>${w.d}</b><ul style="margin:6px 0 0;padding-inline-start:20px;line-height:1.8">${it.map(x => `<li>${esc(x.t)}</li>`).join('')}</ul></div>` : ''; });
+  return parts.join('') || '<p style="margin:0">مفيش جديد.</p>';
+}
+async function showWhatsNew(role, all) {
+  await modal({ title: 'ما الجديد 🎉', html: whatsNewHtml(role, all ? 0 : (+ls.get('wn_seen') || 0)), ok: 'تمام', cancel: '' });
+  ls.set('wn_seen', String(APP_VER));
+}
+function maybeWhatsNew(role, tourKey) {
+  if ((+ls.get('wn_seen') || 0) >= APP_VER) return;
+  if (!ls.get(tourKey) && !ls.get('tour_off')) return;
+  showWhatsNew(role, false);
+}
+
 /* ========= تقرير الفصل: مقارنة الامتحانات + أكتر الأسئلة غلطًا + الأبواب الأضعف + طلاب محتاجين متابعة ========= */
 async function classData(e) {
   const c = S.clsCache = S.clsCache || {}, hit = c[e.id];
