@@ -663,7 +663,7 @@ const FB = {
   },
   async deleteMsg(code, msg, byTeacher) {
     await this.col('students').doc(code).collection('msgs').doc(msg.id).delete();
-    if (!byTeacher) return;
+    if (!byTeacher) { if (msg.imgId && msg.imgId.startsWith(code + '_')) { try { await this.col('msgImgs').doc(msg.imgId).delete(); } catch (e) {} } return; }
     if (msg.imgId) { try { await this.col('msgImgs').doc(msg.imgId).delete(); } catch (e) {} }
     const s = await this.col('students').doc(code).collection('msgs').orderBy('createdAt', 'desc').limit(1).get(), l = s.empty ? null : s.docs[0].data();
     await this.col('inbox').doc(code).set(l ? { lastAt: l.createdAt, lastText: msgSnip(l), lastFrom: l.from } : { lastAt: 0, lastText: '', lastFrom: '' }, { merge: true });
@@ -1459,7 +1459,7 @@ async function teacherStudents() {
   <div class="card"><b>إضافة طلاب</b><p class="muted" style="margin:4px 0">اكتب اسم كل طالب في سطر، وهيتعمل لكل واحد كود شخصي يدخل بيه.</p>
   <textarea id="names" rows="5" placeholder="أحمد محمد&#10;سارة علي"></textarea>
   <div class="row" style="margin-top:8px"><label class="grow" style="margin:0">شكل الكود<select id="cType"><option value="num">أرقام فقط</option><option value="mix">حروف وأرقام</option><option value="alpha">حروف فقط</option></select></label><label class="grow" style="margin:0">الحروف<select id="cCase"><option value="upper">كبيرة (ABC)</option><option value="lower">صغيرة (abc)</option><option value="mixed">كبيرة وصغيرة (Abc)</option></select></label><label style="margin:0">الطول<select id="cLen">${[4, 5, 6, 7, 8, 9, 10].map(n => `<option ${n === 6 ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
-  <label for="cPat">نمط الأرقام</label><select id="cPat"><option value="easy">سهل الحفظ (تكرار، مثل 482482)</option><option value="asc">تسلسل (مثل 357913)</option><option value="rand">عشوائي</option></select>
+  <label for="cPat">نمط الأرقام</label><select id="cPat"><option value="easy">سهل الحفظ (تكرار، مثل 482482)</option><option value="asc">تسلسل (مثل 357913) - أضعف أمانًا</option><option value="rand">عشوائي</option></select>
   <details class="hint"><summary>ℹ️ الحروف والنمط…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الحروف بتتاخد من اسم الطالب (مثلًا أحمد حسام ← AH). الأنماط السهلة أسهل في الحفظ لكن أسهل في التخمين، فمناسبة لمجموعة صغيرة بتثق فيها. لو اخترت حروف "كبيرة وصغيرة" الطالب لازم يكتب الكود بنفس الحروف.</p></details>
   ${groups.length ? `<label for="newGrp">المجموعة</label><select id="newGrp">${grpOptions(groups, '')}</select>` : ''}<div id="msg"></div><button class="btn block" id="addst">إضافة</button></div></div>`);
   $('#addst').onclick = async () => {
@@ -2728,7 +2728,7 @@ async function studentChat(ses) {
   const delS = chatDel(ses.code, 's', () => msgs, v => { msgs = v; }, draw);
   $('#main').onclick = e => { imgClick(e); delS(e); };
   if (!blocked0) wireComposer(async (text, img) => {
-    const m = { id: uid(), from: 's', text, createdAt: Date.now(), to: 't', ...(img ? { imgId: uid() } : {}) };
+    const m = { id: uid(), from: 's', text, createdAt: Date.now(), to: 't', ...(img ? { imgId: ses.code + '_' + uid() } : {}) };
     try { await S.store.sendMsgs([{ code: ses.code, name: ses.name }], m, img || null); } catch (er) { const f = await S.store.getStudent(ses.code).catch(() => null); throw new Error(f && f.chatOff ? 'الدكتور قفل التواصل حاليًا.' : er.message); }
     if (m.imgId) S.mic[m.imgId] = img;
     msgs.push({ ...m }); draw(); window.scrollTo(0, document.body.scrollHeight);
