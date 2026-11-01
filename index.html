@@ -182,6 +182,7 @@ body.sheet-open .pb2{padding-bottom:56vh}
 .cropbox .sel{position:absolute;border:2px solid #e11d48;background:rgba(225,29,72,.15);pointer-events:none}
 .cdel{background:none;border:0;cursor:pointer;font-size:.9rem;opacity:.55;padding:0 4px;margin-inline-end:4px}.cdel:hover{opacity:1}
 h2 .ic,h3 .ic{display:inline-block;vertical-align:-4px;margin:0 0 0 8px}
+.sub{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}#stSet>summary{cursor:pointer}
 </style>
 </head>
 <body>
@@ -763,7 +764,8 @@ async function notifEnable() {
   if (p !== 'granted') throw new Error('الإشعارات مرفوضة من المتصفح. فعّلها من إعدادات الموقع في المتصفح وجرب تاني.');
   ls.set('notif', '1');
 }
-const notifCard = () => `<div class="card"><b>🔔 الإشعارات</b><p class="muted" style="margin:4px 0 8px;font-size:.85rem">${notifOn() ? 'مفعّلة على الجهاز ده: هيجيلك تنبيه لما يكون فيه جديد، طول ما المتصفح أو التطبيق شغال (حتى لو في الخلفية).' : 'فعّلها عشان يجيلك تنبيه على الموبايل لما يكون فيه جديد. بتشتغل طول ما المتصفح أو التطبيق شغال في الخلفية. على آيفون لازم تثبّت الموقع على الشاشة الرئيسية الأول.'}</p>
+const notifCard = sub => `<div class="${sub ? 'sub' : 'card'}"><b>🔔 الإشعارات</b>
+  <details class="hint"><summary>ℹ️ إيه الإشعارات دي؟</summary><p class="muted" style="font-size:.85rem">${notifOn() ? 'مفعّلة على الجهاز ده: هيجيلك تنبيه لما يكون فيه جديد، طول ما المتصفح أو التطبيق شغال (حتى لو في الخلفية).' : 'فعّلها عشان يجيلك تنبيه على الموبايل لما يكون فيه جديد. بتشتغل طول ما المتصفح أو التطبيق شغال في الخلفية. على آيفون لازم تثبّت الموقع على الشاشة الرئيسية الأول.'}</p></details>
   <button class="btn sm ${notifOn() ? 'danger' : ''}" id="ntf">${notifOn() ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}</button><div id="ntm" class="muted" style="margin-top:6px;font-size:.85rem"></div></div>`;
 function bindNotif(redraw) {
   const b = $('#ntf'); if (!b) return;
@@ -913,7 +915,9 @@ async function offerSBio(code) {
   if (!yes) { ls.set('sbioNo', '1'); return; }
   try { await sbioEnable(code); } catch (e) {}
 }
-const sbioCard = () => `<div class="card"><b>🔐 الدخول بالبصمة</b><p class="muted" style="margin:4px 0 8px;font-size:.85rem">${sbioSaved() ? 'مفعّل على الجهاز ده: تدخل بالبصمة من غير ما تكتب الكود.' : 'فعّلها عشان تدخل بالبصمة (أو قفل الشاشة) من غير ما تكتب الكود. متفعّلهاش على جهاز مش بتاعك.'}</p><button class="btn sm ${sbioSaved() ? 'danger' : ''}" id="sbt">${sbioSaved() ? 'إلغاء البصمة على الجهاز ده' : 'تفعيل البصمة'}</button><div id="sbm" class="muted" style="margin-top:6px;font-size:.85rem"></div></div>`;
+const sbioCard = sub => `<div class="${sub ? 'sub' : 'card'}"><b>🔐 الدخول بالبصمة</b>
+  <details class="hint"><summary>ℹ️ إيه الدخول بالبصمة؟</summary><p class="muted" style="font-size:.85rem">${sbioSaved() ? 'مفعّل على الجهاز ده: تدخل بالبصمة من غير ما تكتب الكود.' : 'فعّلها عشان تدخل بالبصمة (أو قفل الشاشة) من غير ما تكتب الكود. متفعّلهاش على جهاز مش بتاعك.'}</p></details>
+  <button class="btn sm ${sbioSaved() ? 'danger' : ''}" id="sbt">${sbioSaved() ? 'إلغاء البصمة على الجهاز ده' : 'تفعيل البصمة'}</button><div id="sbm" class="muted" style="margin-top:6px;font-size:.85rem"></div></div>`;
 function bindSBio(code, redraw) {
   const b = $('#sbt'); if (!b) return;
   b.onclick = async () => {
@@ -1032,11 +1036,11 @@ async function studentExams(ses) {
   const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
   ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
   studentShell('exams', `<a class="hero" href="#s/results" style="display:block;text-decoration:none" aria-label="نتايجي"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></a>${sumStrip}
-  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div id="sbw">${sbioCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button> <button class="btn sm ghost" id="wnBtn">🎉 ما الجديد</button></div>`);
+  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<details class="card" id="stSet"><summary><b>⚙️ الإعدادات</b></summary><div id="ntw">${notifCard(true)}</div><div id="sbw">${sbioCard(true)}</div><div class="sub row"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button><button class="btn sm ghost" id="wnBtn">🎉 ما الجديد</button></div></details>`);
   $('#tourBtn').onclick = () => runTour(TOUR_STUDENT, studentTourKey(ses));
   $('#wnBtn').onclick = () => showWhatsNew('s', true);
-  const redrawB = () => { $('#sbw').innerHTML = sbioCard(); bindSBio(ses.code, redrawB); }; bindSBio(ses.code, redrawB);
-  const redrawN = () => { $('#ntw').innerHTML = notifCard(); bindNotif(redrawN); }; bindNotif(redrawN);
+  const redrawB = () => { $('#sbw').innerHTML = sbioCard(true); bindSBio(ses.code, redrawB); }; bindSBio(ses.code, redrawB);
+  const redrawN = () => { $('#ntw').innerHTML = notifCard(true); bindNotif(redrawN); }; bindNotif(redrawN);
   maybeStudentTour(ses);
   $('#main').onclick = async e => {
     const c = e.target.closest('[data-subj]');
@@ -2845,6 +2849,8 @@ function runTour(steps, key) {
   const done = () => { try { ls.set(key, '1'); ls.set('wn_seen', String(APP_VER)); if (ov.querySelector('#tnv').checked) ls.set('tour_off', '1'); else ls.del('tour_off'); } catch (e) {} ov.remove(); window.removeEventListener('resize', show); };
   function show() {
     const s = steps[i], el = s.sel && document.querySelector(s.sel);
+    const dt = el && el.closest('details'); if (dt && !dt.open) dt.open = true;
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' });
     ov.querySelector('.tt').textContent = s.t; ov.querySelector('.tx').textContent = s.x; ov.querySelector('#tn').textContent = (i + 1) + ' / ' + steps.length;
     ov.querySelector('[data-t=prev]').style.visibility = i ? 'visible' : 'hidden';
     ov.querySelector('[data-t=next]').textContent = i === steps.length - 1 ? 'ابدأ' : 'التالي';
@@ -2869,8 +2875,10 @@ function maybeStudentTour(ses) { setTimeout(() => { if (!document.querySelector(
 function maybeTeacherTour() { setTimeout(() => { if (!document.querySelector('.nav a[data-t=exams]')) return; if (!ls.get('tour_t') && ls.get('tour_off') !== '1') runTour(TOUR_TEACHER, 'tour_t'); else maybeWhatsNew('t', 'tour_t'); }, 700); }
 /* ========= ما الجديد (بيظهر مرة واحدة بعد كل تحديث) =========
    لما تضيف ميزة جديدة: ارفع APP_VER وضيف عنصر في أول WHATS_NEW (r: 's' للطالب، 't' للدكتور، '' للاتنين). */
-const APP_VER = 12;
+const APP_VER = 13;
 const WHATS_NEW = [
+  { v: 13, d: 'نوفمبر 2026 (4)', items: [
+    { r: 's', t: '⚙️ الإشعارات والبصمة وشرح المنصة وما الجديد اتجمعوا في قايمة "الإعدادات" مطوية آخر الصفحة.' }] },
   { v: 12, d: 'نوفمبر 2026 (3)', items: [
     { r: 's', t: '🔐 الدخول بالبصمة: فعّلها من آخر صفحة الامتحانات وادخل من غير ما تكتب الكود.' },
     { r: 's', t: '👆 اضغط على الكارت الأخضر (أهلاً + اسمك) عشان تروح لنتايجك.' }] },
