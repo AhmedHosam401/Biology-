@@ -181,6 +181,7 @@ body.sheet-open .pb2{padding-bottom:56vh}
 .cropbox canvas{max-width:100%;height:auto;display:block;border:1px solid var(--line)}
 .cropbox .sel{position:absolute;border:2px solid #e11d48;background:rgba(225,29,72,.15);pointer-events:none}
 .cdel{background:none;border:0;cursor:pointer;font-size:.9rem;opacity:.55;padding:0 4px;margin-inline-end:4px}.cdel:hover{opacity:1}
+h2 .ic,h3 .ic{display:inline-block;vertical-align:-4px;margin:0 0 0 8px}
 </style>
 </head>
 <body>
@@ -207,12 +208,30 @@ const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'ما
 const fmtDate = ms => { const d = new Date(ms), h = d.getHours(); return '\u2067' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear() + '، ' + (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h >= 12 ? 'م' : 'ص') + '\u2069'; };
 const fmtSec = s => s >= 60 ? Math.floor(s / 60) + ' د ' + (s % 60 ? (s % 60) + ' ث' : '') : s + ' ث';
 const STU_ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-/* توليد كود الطالب: type = mix | num | alpha ، case = upper | lower */
-function genStuCode(o = {}) {
-  const lo = o.case === 'lower', L = lo ? 'abcdefghjkmnpqrstuvwxyz' : 'ABCDEFGHJKMNPQRSTUVWXYZ', D = o.type === 'num' ? '0123456789' : '23456789';
-  const pool = o.type === 'num' ? D : o.type === 'alpha' ? L : L + D, n = Math.min(12, Math.max(4, +o.len || 6));
-  const buf = new Uint32Array(n); (crypto.getRandomValues ? crypto.getRandomValues(buf) : buf.forEach((_, i) => { buf[i] = Math.floor(Math.random() * 4e9); }));
-  return Array.from(buf, v => pool[v % pool.length]).join('');
+/* توليد كود الطالب. type: num (افتراضي) | mix | alpha ، case: upper | lower | mixed ، pat (للأرقام): easy تكرار | asc تسلسل | rand عشوائي.
+   الحروف مشتقة من اسم الطالب (تحويل للحروف اللاتينية) عشان يسهل حفظها. */
+const AR2EN = { 'ا': 'A', 'أ': 'A', 'إ': 'A', 'آ': 'A', 'ء': 'A', 'ع': 'A', 'ب': 'B', 'ت': 'T', 'ة': 'H', 'ث': 'S', 'ج': 'J', 'ح': 'H', 'خ': 'K', 'د': 'D', 'ذ': 'Z', 'ر': 'R', 'ز': 'Z', 'س': 'S', 'ش': 'S', 'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Z', 'غ': 'G', 'ف': 'F', 'ق': 'Q', 'ك': 'K', 'ل': 'L', 'م': 'M', 'ن': 'N', 'ه': 'H', 'و': 'W', 'ؤ': 'W', 'ي': 'Y', 'ى': 'Y', 'ئ': 'Y' };
+const nameLetters = w => Array.from(String(w || '')).map(ch => AR2EN[ch] || (/[A-Za-z]/.test(ch) ? ch.toUpperCase() : '')).join('');
+const rndInt = n => { const b = new Uint32Array(1); (crypto.getRandomValues ? crypto.getRandomValues(b) : (b[0] = Math.floor(Math.random() * 4e9))); return b[0] % n; };
+function genDigits(n, pat) {
+  if (pat === 'asc') { const st = rndInt(10), sp = 1 + rndInt(2); return Array.from({ length: n }, (_, i) => (st + i * sp) % 10).join(''); }
+  if (pat === 'rand') return Array.from({ length: n }, () => rndInt(10)).join('');
+  const k = Math.ceil(n / 2), blk = Array.from({ length: k }, (_, i) => i ? rndInt(10) : 1 + rndInt(9)).join('');
+  return (blk + blk).slice(0, n);
+}
+function genStuCode(o = {}, name = '') {
+  const type = o.type || 'num', n = Math.min(12, Math.max(4, +o.len || 6)), words = String(name).trim().split(/\s+/).map(nameLetters).filter(Boolean);
+  let letters = '', digits = '';
+  if (type === 'mix') {
+    const pl = n >= 8 ? 3 : 2;
+    letters = words.length > 1 ? words.slice(0, pl).map(w => w[0]).join('') : (words[0] || '').slice(0, pl);
+    while (letters.length < pl) letters += 'ABCDEFGHJKMNPQRSTUVWXYZ'[rndInt(23)];
+    digits = genDigits(n - pl, o.pat || 'easy');
+  } else if (type === 'alpha') {
+    const all = words.join('') || 'ABCDEFGHJK'; while (letters.length < n) letters += all; letters = letters.slice(0, n);
+  } else digits = genDigits(n, o.pat || 'easy');
+  const cs = o.case === 'lower' ? letters.toLowerCase() : o.case === 'mixed' ? letters[0] + letters.slice(1).toLowerCase() : letters;
+  return (cs + digits).slice(0, Math.max(n, 4));
 }
 const readDataUrl = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error('تعذر قراءة الملف')); r.readAsDataURL(f); });
 const loadingInner = '<div class="ldh"></div>';
@@ -501,7 +520,9 @@ const DemoStore = {
   async getStudent(code) { return this.db().students[code] || null; },
   async listStudents() { return Object.values(this.db().students).sort((a, b) => a.createdAt - b.createdAt); },
   async addStudents(arr) { const d = this.db(); arr.forEach(s => { d.students[s.code] = s; }); this.save(d); },
-  async deleteStudent(code) { const d = this.db(); delete d.students[code]; delete d.pub[code]; this.save(d); },
+  async deleteStudent(code) { const d = this.db(); delete d.students[code]; delete d.pub[code]; if (d.chat) delete d.chat[code]; if (d.inbox) delete d.inbox[code]; this.save(d); },
+  async deleteConversation(code) { const d = this.db(); if (d.chat) delete d.chat[code]; if (d.inbox) delete d.inbox[code]; this.save(d); },
+  async setChatOff(codes, off) { const d = this.db(); codes.forEach(c => { if (d.students[c]) d.students[c].chatOff = !!off; }); this.save(d); },
   async renameStudent(old, st) { const d = this.db(); delete d.students[old]; d.students[st.code] = st; if (d.pub[old]) { d.pub[st.code] = d.pub[old]; delete d.pub[old]; } this.save(d); },
   async updateMaterial(old, m, parts) { const d = this.db(); d.materials[m.id] = m; if (parts) d.blobs[m.id] = parts; this.save(d); },
   async getSettings() { return this.db().settings || {}; },
@@ -611,7 +632,14 @@ const FB = {
     }
     await this.col('materials').doc(m.id).set(m);
   },
+  async deleteConversation(code) {
+    const sub = await this.col('students').doc(code).collection('msgs').get();
+    for (let i = 0; i < sub.docs.length; i += 400) { const b = this.db.batch(); sub.docs.slice(i, i + 400).forEach(d => { b.delete(d.ref); const im = d.data().imgId; if (im) b.delete(this.col('msgImgs').doc(im)); }); await b.commit(); }
+    try { await this.col('inbox').doc(code).delete(); } catch (e) {}
+  },
+  async setChatOff(codes, off) { for (let i = 0; i < codes.length; i += 400) { const b = this.db.batch(); codes.slice(i, i + 400).forEach(c => b.set(this.col('students').doc(c), { chatOff: !!off }, { merge: true })); await b.commit(); } },
   async deleteStudent(code) {
+    try { await this.deleteConversation(code); } catch (e) {}
     const sub = await this.col('students').doc(code).collection('results').get();
     if (!sub.empty) { const b = this.db.batch(); sub.docs.forEach(d => b.delete(d.ref)); await b.commit(); }
     await this.col('students').doc(code).delete();
@@ -868,10 +896,36 @@ function router() {
 }
 
 /* ========= واجهة الطالب ========= */
+/* ===== الدخول بالبصمة للطالب: قفل محلي (WebAuthn) بيفك الكود المحفوظ على الجهاز ده بس ===== */
+const sbioSaved = () => { try { return JSON.parse(ls.get('sbio')) || null; } catch (e) { return null; } };
+async function sbioEnable(code) {
+  const cred = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'منصة د. أحمد الشرقاوي', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: code, displayName: 'طالب' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } });
+  ls.set('sbio', JSON.stringify({ id: b64(cred.rawId), c: code }));
+}
+async function sbioUnlock() {
+  const s = sbioSaved(); if (!s) throw new Error('البصمة مش مفعّلة');
+  await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: unb64(s.id) }], userVerification: 'required', rpId: location.hostname, timeout: 60000 } });
+  return s.c;
+}
+async function offerSBio(code) {
+  if (DEMO || sbioSaved() || ls.get('sbioNo') || !(await bioAvailable())) return;
+  const yes = await modal({ title: 'الدخول بالبصمة', text: 'تحب تدخل المرة الجاية بالبصمة (أو قفل الشاشة) من غير ما تكتب الكود؟ بيتحفظ على الجهاز ده بس، فمتفعّلهاش على جهاز مش بتاعك. وتقدر تلغيها بعدين.', ok: 'فعّل البصمة', cancel: 'مش دلوقتي' });
+  if (!yes) { ls.set('sbioNo', '1'); return; }
+  try { await sbioEnable(code); } catch (e) {}
+}
+const sbioCard = () => `<div class="card"><b>🔐 الدخول بالبصمة</b><p class="muted" style="margin:4px 0 8px;font-size:.85rem">${sbioSaved() ? 'مفعّل على الجهاز ده: تدخل بالبصمة من غير ما تكتب الكود.' : 'فعّلها عشان تدخل بالبصمة (أو قفل الشاشة) من غير ما تكتب الكود. متفعّلهاش على جهاز مش بتاعك.'}</p><button class="btn sm ${sbioSaved() ? 'danger' : ''}" id="sbt">${sbioSaved() ? 'إلغاء البصمة على الجهاز ده' : 'تفعيل البصمة'}</button><div id="sbm" class="muted" style="margin-top:6px;font-size:.85rem"></div></div>`;
+function bindSBio(code, redraw) {
+  const b = $('#sbt'); if (!b) return;
+  b.onclick = async () => {
+    if (sbioSaved()) { ls.del('sbio'); ls.del('sbioNo'); return redraw(); }
+    if (!(await bioAvailable())) { $('#sbm').textContent = 'الجهاز أو المتصفح ده مش بيدعم البصمة.'; return; }
+    try { await sbioEnable(code); ls.del('sbioNo'); redraw(); } catch (e) { $('#sbm').textContent = 'اتلغت البصمة أو فشلت.'; }
+  };
+}
 function studentLogin(note) {
   view(`${topbar()}<div class="wrap narrow"><div class="hero" style="margin-top:20px;text-align:center"><div class="biglogo">${LOGO}</div><h1>منصة د. أحمد الشرقاوي</h1><div>أحياء وجيولوجيا · الثانوية العامة · سجّل دخولك بالكود الشخصي</div></div>
   <div class="card"><label for="cd">الكود الشخصي</label><input type="text" id="cd" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" style="letter-spacing:3px;text-align:center;font-size:1.2rem">
-  <div id="msg">${note ? `<div class="msg bad">${esc(note)}</div>` : ''}</div><button class="btn block" id="go">دخول</button>
+  <div id="msg">${note ? `<div class="msg bad">${esc(note)}</div>` : ''}</div><button class="btn block" id="go">دخول</button>${sbioSaved() ? '<button class="btn block ghost" id="sbl" style="margin-top:8px">🔐 الدخول بالبصمة</button>' : ''}
   <p class="muted" style="margin-bottom:0">أول مرة؟ <a href="#s/register">سجّل حساب جديد</a>.${DEMO ? ' للتجربة: DEMO01' : ''}</p></div>
 </div>`);
   const login = async () => {
@@ -886,8 +940,13 @@ function studentLogin(note) {
         const pd = await S.store.getPending(code);
         throw new Error(pd ? 'طلب التسجيل بتاعك لسه مستني موافقة الدكتور. حاول تاني بعدين.' : 'الكود غلط');
       }
-      setSession({ code, name: st.name }); go('#s/exams');
+      setSession({ code, name: st.name }); await offerSBio(code); go('#s/exams');
     } catch (e) { setMsg(e.message); b.disabled = false; }
+  };
+  const sb = $('#sbl');
+  if (sb) sb.onclick = async () => {
+    try { const code = await sbioUnlock(), st = await S.store.getStudent(code); if (!st) { ls.del('sbio'); return setMsg('الكود المحفوظ مبقاش صالح. ادخل بالكود وفعّل البصمة من جديد.'); } setSession({ code, name: st.name }); go('#s/exams'); }
+    catch (er) { setMsg(er && er.name === 'NotAllowedError' ? 'اتلغت البصمة أو فشلت' : (er.message || 'تعذر الدخول بالبصمة')); }
   };
   $('#go').onclick = login; $('#cd').onkeydown = e => { if (e.key === 'Enter') login(); };
 }
@@ -972,10 +1031,11 @@ async function studentExams(ses) {
   const fin = pubs.filter(d => !d.pending && d.total), avgP = fin.length ? Math.round(fin.reduce((s2, d) => s2 + d.score / d.total * 100, 0) / fin.length) : null, last = pubs[0];
   const sumStrip = `<div class="stat"><div><b>${pending}</b>مطلوب منك</div><div><b>${last && last.total ? Math.round(last.score / last.total * 100) + '%' : '-'}</b>آخر نتيجة</div><div><b>${avgP === null ? '-' : avgP + '%'}</b>متوسطك</div></div>
   ${soon ? `<div class="msg warn" style="margin:6px 0">⏰ أقرب موعد قفل: <b>${esc(soon.title)}</b> · ${fmtDate(soon.closesAt)}</div>` : ''}${nextOpen ? `<div class="msg ok" style="margin:6px 0">📅 قريبًا: <b>${esc(nextOpen.title)}</b> بيفتح ${fmtDate(nextOpen.opensAt)}</div>` : ''}`;
-  studentShell('exams', `<div class="hero"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></div>${sumStrip}
-  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button> <button class="btn sm ghost" id="wnBtn">🎉 ما الجديد</button></div>`);
+  studentShell('exams', `<a class="hero" href="#s/results" style="display:block;text-decoration:none" aria-label="نتايجي"><div>أهلاً</div><h1>${esc(ses.name)}</h1><div>${pending ? `عندك ${pending} امتحان مفتوح` : 'مفيش امتحانات مطلوبة دلوقتي'}</div></a>${sumStrip}
+  <h2>الامتحانات المتاحة</h2>${subjChips(subj)}${cards.join('') || '<div class="card muted">مفيش امتحانات مفتوحة دلوقتي.</div>'}<div id="ntw">${notifCard()}</div><div id="sbw">${sbioCard()}</div><div style="text-align:center;margin:14px 0"><button class="btn sm ghost" id="tourBtn">❓ شرح المنصة</button> <button class="btn sm ghost" id="wnBtn">🎉 ما الجديد</button></div>`);
   $('#tourBtn').onclick = () => runTour(TOUR_STUDENT, studentTourKey(ses));
   $('#wnBtn').onclick = () => showWhatsNew('s', true);
+  const redrawB = () => { $('#sbw').innerHTML = sbioCard(); bindSBio(ses.code, redrawB); }; bindSBio(ses.code, redrawB);
   const redrawN = () => { $('#ntw').innerHTML = notifCard(); bindNotif(redrawN); }; bindNotif(redrawN);
   maybeStudentTour(ses);
   $('#main').onclick = async e => {
@@ -1355,7 +1415,7 @@ async function dashboard() {
   const [all, tv] = await Promise.all([S.store.listExams(), tStamps()]), subj = S.subjDash || '';
   const live = {}; tv.att.forEach(a => { const ex = all.find(x => x.id === a.examId); if (ex && !a.submitted && (a.startedAt || 0) > Date.now() - (ex.durationMin + 2) * 60000) live[a.examId] = (live[a.examId] || 0) + 1; });
   const exams = subj ? all.filter(e => subjOf(e) === subj) : all;
-  teacherShell('exams', `<div id="dash"><div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn ghost" href="#teacher/class">${ico('rank')} تقرير الفصل</a><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
+  teacherShell('exams', `<div id="dash"><div class="row"><h2 class="grow">امتحاناتي</h2><a class="btn" href="#teacher/new">+ امتحان جديد</a></div>
   ${subjChips(subj)}
   ${exams.length ? exams.map(e => `<div class="card"><div class="row"><div class="grow"><b>${esc(e.title)}</b>${tv.news[e.id] ? ` <span class="newb">${tv.news[e.id]} جديد</span>` : ''}${live[e.id] ? ` <span class="badge ok">🟢 ${live[e.id]} بيمتحن الآن</span>` : ''}<div class="muted">${subjLabel(subjOf(e))} · ${e.type === 'bubble' ? 'ورقة PDF + بابل شيت' : 'أسئلة'} · ${qCount(e)} سؤال · ${e.durationMin} دقيقة${e.groups && e.groups.length ? ' · ' + esc(e.groups.join('، ')) : ' · كل الطلاب'}</div></div>${e.closesAt ? `<span class="badge">يقفل ${fmtDate(e.closesAt)}</span>` : ''}${e.release === 'instant' ? '<span class="badge">نتيجة فورية</span>' : ''}${e.hasEssay ? '<span class="badge">مقالي</span>' : ''}${e.published ? '<span class="badge ok">النتايج منشورة</span>' : ''}</div>
   <div class="row" style="margin-top:10px"><label class="row" style="margin:0;font-weight:400"><input type="checkbox" data-act="active" data-id="${e.id}" ${e.active ? 'checked' : ''}> مفتوح للطلاب</label><span class="grow"></span>
@@ -1379,7 +1439,7 @@ async function teacherStudents() {
   const [all, pend, cfg] = await Promise.all([S.store.listStudents(), S.store.listPending(), S.store.getSettings()]), link = location.href.split('#')[0];
   const groups = cfg.groups || [], fg = S.fgrp || '__all';
   const list = fg === '__all' ? all : all.filter(s => (s.group || '') === (fg === '__none' ? '' : fg));
-  teacherShell('students', `<div class="row" style="margin:4px 0"><a class="btn sm ghost" href="#teacher/rank">${ico('rank')} الترتيب</a></div><div class="card"><b>رابط الطلاب</b><div class="row" style="margin-top:6px"><span class="code grow" style="font-size:.8rem;letter-spacing:0;word-break:break-all">${esc(link)}</span><button class="btn sm ghost" id="cp">نسخ</button></div></div>
+  teacherShell('students', `<div class="row" style="margin:4px 0"><a class="btn sm ghost" href="#teacher/rank">${ico('rank')} الترتيب</a><a class="btn sm ghost" href="#teacher/class">${ico('exams')} تقرير الفصل</a></div><div class="card"><b>رابط الطلاب</b><div class="row" style="margin-top:6px"><span class="code grow" style="font-size:.8rem;letter-spacing:0;word-break:break-all">${esc(link)}</span><button class="btn sm ghost" id="cp">نسخ</button></div></div>
   <div class="card"><label class="row" style="font-weight:400;margin:0"><input type="checkbox" id="regOpen" ${cfg.registrationOpen ? 'checked' : ''}> التسجيل الذاتي مفتوح للطلاب</label>
   <p class="muted" style="margin:4px 0 0;font-size:.85rem">افتحه وقت تسجيل الطلاب بس وقفله بعدها. الطالب بيسجل اسمه وكوده وبيستنى موافقتك.</p></div>
   ${pend.length ? `<div class="card"><div class="row"><b class="grow">طلبات التسجيل (${pend.length})</b><button class="btn sm" id="okall">قبول الكل</button></div>
@@ -1394,18 +1454,21 @@ async function teacherStudents() {
   <details class="hint"><summary>ℹ️ الأكواد سرية: ابعت لكل طالب…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الأكواد سرية: ابعت لكل طالب كوده بس. الطلاب اللي سجلوا بنفسهم كودهم ظاهر لك هنا برضه.</p></details>` : '<p class="muted">لسه مفيش طلاب.</p>'}
   <div class="card"><b>إضافة طلاب</b><p class="muted" style="margin:4px 0">اكتب اسم كل طالب في سطر، وهيتعمل لكل واحد كود شخصي يدخل بيه.</p>
   <textarea id="names" rows="5" placeholder="أحمد محمد&#10;سارة علي"></textarea>
-  <div class="row" style="margin-top:8px"><label class="grow" style="margin:0">شكل الكود<select id="cType"><option value="mix">حروف وأرقام</option><option value="num">أرقام فقط</option><option value="alpha">حروف فقط</option></select></label><label class="grow" style="margin:0">الحروف<select id="cCase"><option value="upper">كبيرة (ABC)</option><option value="lower">صغيرة (abc)</option></select></label><label style="margin:0">الطول<select id="cLen">${[4, 5, 6, 7, 8, 9, 10].map(n => `<option ${n === 6 ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+  <div class="row" style="margin-top:8px"><label class="grow" style="margin:0">شكل الكود<select id="cType"><option value="num">أرقام فقط</option><option value="mix">حروف وأرقام</option><option value="alpha">حروف فقط</option></select></label><label class="grow" style="margin:0">الحروف<select id="cCase"><option value="upper">كبيرة (ABC)</option><option value="lower">صغيرة (abc)</option><option value="mixed">كبيرة وصغيرة (Abc)</option></select></label><label style="margin:0">الطول<select id="cLen">${[4, 5, 6, 7, 8, 9, 10].map(n => `<option ${n === 6 ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+  <label for="cPat">نمط الأرقام</label><select id="cPat"><option value="easy">سهل الحفظ (تكرار، مثل 482482)</option><option value="asc">تسلسل (مثل 357913)</option><option value="rand">عشوائي</option></select>
+  <details class="hint"><summary>ℹ️ الحروف والنمط…</summary><p class="muted" style="font-size:.85rem;margin:8px 0 0">الحروف بتتاخد من اسم الطالب (مثلًا أحمد حسام ← AH). الأنماط السهلة أسهل في الحفظ لكن أسهل في التخمين، فمناسبة لمجموعة صغيرة بتثق فيها. لو اخترت حروف "كبيرة وصغيرة" الطالب لازم يكتب الكود بنفس الحروف.</p></details>
   ${groups.length ? `<label for="newGrp">المجموعة</label><select id="newGrp">${grpOptions(groups, '')}</select>` : ''}<div id="msg"></div><button class="btn block" id="addst">إضافة</button></div></div>`);
   $('#addst').onclick = async () => {
-    const copt = { type: $('#cType').value, case: $('#cCase').value, len: +$('#cLen').value }; ls.set('codeopt', JSON.stringify(copt));
+    const copt = { type: $('#cType').value, case: $('#cCase').value, len: +$('#cLen').value, pat: $('#cPat').value }; ls.set('codeopt2', JSON.stringify(copt));
     const names = splitLines($('#names').value), grp = $('#newGrp') ? $('#newGrp').value : '';
     if (!names.length) return setMsg('اكتب اسم واحد على الأقل');
     const used = new Set([...all.map(s => s.code), ...pend.map(p => p.code)]), now = Date.now(), arr = [];
-    names.forEach((n, i) => { let c; do { c = genStuCode(copt); } while (used.has(c)); used.add(c); arr.push({ code: c, name: n, group: grp, createdAt: now + i }); });
+    names.forEach((n, i) => { let c; let tries = 0; do { c = genStuCode(copt, n); } while (used.has(c) && ++tries < 200); if (used.has(c)) c = genStuCode({ ...copt, pat: 'rand' }, n); used.add(c); arr.push({ code: c, name: n, group: grp, createdAt: now + i }); });
     $('#addst').disabled = true;
     try { await S.store.addStudents(arr); teacherStudents(); } catch (e) { $('#addst').disabled = false; setMsg(e.message); }
   };
-  try { const o = JSON.parse(ls.get('codeopt')) || {}; if (o.type) $('#cType').value = o.type; if (o.case) $('#cCase').value = o.case; if (o.len) $('#cLen').value = o.len; } catch (e) {}
+  try { const o = JSON.parse(ls.get('codeopt2')) || {}; if (o.type) $('#cType').value = o.type; if (o.case) $('#cCase').value = o.case; if (o.len) $('#cLen').value = o.len; if (o.pat) $('#cPat').value = o.pat; } catch (e) {}
+  const cTy = () => { const t = $('#cType').value; $('#cCase').disabled = t === 'num'; $('#cPat').disabled = t === 'alpha'; }; $('#cType').onchange = cTy; cTy();
   $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = 'تم'; } catch (e) { prompt('انسخ الرابط:', link); } };
   const cpl = $('#cpl');
   if (cpl) cpl.onclick = async () => {
@@ -2654,14 +2717,15 @@ async function studentChat(ses) {
   studentShell('chat', loadingInner);
   let msgs = await S.store.listMsgs(ses.code), ib = await S.store.getInbox(ses.code).catch(() => null), known = (ib && ib.lastTAt) || 0;
   const prev = takeSeen(ses, 'chat', known);
-  studentShell('chat', `<h2>💬 التواصل مع الدكتور</h2><div id="thr"></div>${composerHtml}`);
+  const me = await S.store.getStudent(ses.code).catch(() => null), blocked0 = !!(me && me.chatOff);
+  studentShell('chat', `<h2>💬 التواصل مع الدكتور</h2><div id="thr"></div>${blocked0 ? '<div class="msg warn">الدكتور قفل التواصل حاليًا، تقدر تقرأ الرسايل بس.</div>' : composerHtml}`);
   const draw = () => { const t = $('#thr'); if (!t) return; t.innerHTML = chatBubbles(msgs, 's', prev); loadChatImgs(t); };
   draw(); window.scrollTo(0, document.body.scrollHeight);
   const delS = chatDel(ses.code, 's', () => msgs, v => { msgs = v; }, draw);
   $('#main').onclick = e => { imgClick(e); delS(e); };
-  wireComposer(async (text, img) => {
+  if (!blocked0) wireComposer(async (text, img) => {
     const m = { id: uid(), from: 's', text, createdAt: Date.now(), to: 't', ...(img ? { imgId: uid() } : {}) };
-    await S.store.sendMsgs([{ code: ses.code, name: ses.name }], m, img || null);
+    try { await S.store.sendMsgs([{ code: ses.code, name: ses.name }], m, img || null); } catch (er) { const f = await S.store.getStudent(ses.code).catch(() => null); throw new Error(f && f.chatOff ? 'الدكتور قفل التواصل حاليًا.' : er.message); }
     if (m.imgId) S.mic[m.imgId] = img;
     msgs.push({ ...m }); draw(); window.scrollTo(0, document.body.scrollHeight);
   });
@@ -2676,7 +2740,9 @@ async function teacherChat(code) {
   teacherShell('chat', loadingInner);
   const cfg = await S.store.getSettings().catch(() => ({}));
   if (code) return teacherThread(code);
-  const [inbox, studs] = await Promise.all([S.store.listInbox(), S.store.listStudents()]);
+  const [inbox0, studs] = await Promise.all([S.store.listInbox(), S.store.listStudents()]);
+  const inbox = inbox0.filter(x => studs.some(s => s.code === x.code));
+  inbox0.filter(x => !studs.some(s => s.code === x.code)).forEach(x => { S.store.deleteConversation(x.code).catch(() => {}); });
   inbox.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
   const groups = cfg.groups || [];
   teacherShell('chat', `<h2>💬 التواصل</h2>
@@ -2684,8 +2750,28 @@ async function teacherChat(code) {
   <label for="aud">إلى</label><select id="aud"><option value="one">طالب واحد</option>${groups.length ? '<option value="group">مجموعة</option>' : ''}<option value="all">كل الطلاب (${studs.length})</option></select>
   <div id="audSel" style="margin-top:8px"></div></div>
   <div id="cmpHost">${composerHtml}</div>
+  <details class="card" id="cbx" ${studs.some(s => s.chatOff) ? 'open' : ''}><summary><b>🚫 السماح بالتواصل</b></summary><p class="muted" style="margin:6px 0;font-size:.85rem">اختار طالب أو مجموعة أو الكل، وافتح أو اقفل قدرتهم على إرسال رسايل. هتفضل تقدر تبعتلهم.</p>
+  <select id="cbA"><option value="all">كل الطلاب</option>${groups.length ? '<option value="group">مجموعة</option>' : ''}<option value="one">طالب واحد</option></select><div id="cbS" style="margin-top:8px"></div>
+  <label class="row" style="font-weight:400;margin:10px 0 4px"><input type="checkbox" id="cbOn"> التواصل مفتوح للطلاب دول</label><div id="cbL"></div></details>
   <h3 style="margin:16px 0 6px">المحادثات</h3>
-  ${inbox.length ? inbox.map(x => `<a class="card click" href="#teacher/chat/${esc(x.code)}" style="display:block;color:inherit"><div class="row"><div class="grow"><b>${esc(x.name || x.code)}</b>${x.unreadT > 0 ? ` <span class="newb">${x.unreadT} جديد</span>` : ''}<div class="muted" style="font-size:.85rem">${x.lastFrom === 't' ? 'أنت: ' : ''}${esc(x.lastText || '')}</div></div><span class="muted" style="font-size:.75rem">${x.lastAt ? chatTime(x.lastAt) : ''}</span></div></a>`).join('') : '<div class="card muted">لسه مفيش محادثات.</div>'}`);
+  ${inbox.length ? `<div class="card"><div class="row"><select id="dcA" class="grow"><option value="all">كل المحادثات</option>${groups.map(g => `<option value="${esc(g)}">محادثات مجموعة ${esc(g)}</option>`).join('')}</select><button class="btn sm danger" id="dcB">حذف</button></div></div>` : ''}
+  ${inbox.length ? inbox.map(x => `<div class="card"><div class="row"><a class="grow" href="#teacher/chat/${esc(x.code)}" style="color:inherit"><b>${esc(x.name || x.code)}</b>${x.unreadT > 0 ? ` <span class="newb">${x.unreadT} جديد</span>` : ''}<div class="muted" style="font-size:.85rem">${x.lastFrom === 't' ? 'أنت: ' : ''}${esc(x.lastText || '')}</div><div class="muted" style="font-size:.75rem">${x.lastAt ? chatTime(x.lastAt) : ''}</div></a><button class="btn sm danger" data-dc="${esc(x.code)}" aria-label="حذف المحادثة">🗑</button></div></div>`).join('') : '<div class="card muted">لسه مفيش محادثات.</div>'}`);
+  $('.wrap').onclick = async e => {
+    const b = e.target.closest('button[data-dc]');
+    if (b) { if (!(await modal({ title: 'حذف المحادثة', text: 'هتتمسح المحادثة كلها مع الطالب ده (عندك وعنده). تكمل؟', ok: 'احذف' }))) return; try { await S.store.deleteConversation(b.dataset.dc); teacherChat(); } catch (er) { alert(er.message); } return; }
+    if (e.target.closest('#dcB')) {
+      const g = $('#dcA').value, codes = inbox.filter(x => g === 'all' || (studs.find(s => s.code === x.code) || {}).group === g).map(x => x.code);
+      if (!codes.length) return;
+      if (!(await modal({ title: 'حذف المحادثات', text: `هتتمسح ${codes.length} محادثة بالكامل (عندك وعند الطلاب). تكمل؟`, ok: 'احذف' }))) return;
+      try { for (const c of codes) await S.store.deleteConversation(c); teacherChat(); } catch (er) { alert(er.message); }
+    }
+  };
+  const cbT = () => { const a = $('#cbA').value, v = $('#cbT') ? $('#cbT').value : ''; return a === 'all' ? studs : a === 'group' ? studs.filter(s => (s.group || '') === v) : studs.filter(s => s.code === v); };
+  const cbDraw = () => { const t = cbT(); $('#cbOn').checked = t.length > 0 && t.every(s => !s.chatOff); $('#cbOn').disabled = !t.length; const off = studs.filter(s => s.chatOff); $('#cbL').innerHTML = off.length ? `<div class="muted" style="font-size:.85rem;margin-top:6px">ممنوعين من التواصل (${off.length}):</div>` + off.map(s => `<div class="row" style="margin-top:6px"><span class="grow">${esc(s.name)}</span><button class="btn sm ghost" data-cbo="${esc(s.code)}">سماح</button></div>`).join('') : ''; };
+  const cbSel = () => { const a = $('#cbA').value; $('#cbS').innerHTML = a === 'one' ? `<select id="cbT">${studs.map(s => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join('')}</select>` : a === 'group' ? `<select id="cbT">${groups.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('')}</select>` : ''; if ($('#cbT')) $('#cbT').onchange = cbDraw; cbDraw(); };
+  $('#cbA').onchange = cbSel; cbSel();
+  $('#cbOn').onchange = async e => { const t = cbT(), on = e.target.checked; try { await S.store.setChatOff(t.map(s => s.code), !on); t.forEach(s => { s.chatOff = !on; }); cbDraw(); } catch (er) { e.target.checked = !on; alert(er.message); } };
+  $('#cbL').onclick = async e => { const b = e.target.closest('[data-cbo]'); if (!b) return; try { await S.store.setChatOff([b.dataset.cbo], false); const s = studs.find(x => x.code === b.dataset.cbo); if (s) s.chatOff = false; cbDraw(); } catch (er) { alert(er.message); } };
   const sel = () => {
     const a = $('#aud').value;
     $('#audSel').innerHTML = a === 'one' ? `<select id="tgt">${studs.map(s => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join('')}</select>` : a === 'group' ? `<select id="tgt">${groups.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('')}</select>` : '<div class="muted">هتتبعت لكل الطلاب المسجلين.</div>';
@@ -2735,6 +2821,7 @@ const TOUR_STUDENT = [
   { sel: '.nav a[data-t=rank]', t: 'الترتيب', x: 'لوحة الشرف: أول 3 طلاب في كل مادة حسب مجموع الدرجات.' },
   { sel: '.nav a[data-t=results]', t: 'نتايجي', x: 'درجاتك وتفاصيل كل امتحان بعد ما الدكتور يعلن النتيجة، ومستواك في كل باب.' },
   { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ابعت رسالة أو صورة للدكتور، وهتلاقي رده هنا. تقدر تحذف رسايلك بزر 🗑. أي حاجة جديدة بتظهر عليها نقطة حمرا.' },
+  { sel: '#sbw', t: 'الدخول بالبصمة 🔐', x: 'فعّلها من هنا عشان تدخل بالبصمة أو قفل الشاشة من غير ما تكتب كودك (على جهازك الشخصي بس). والكارت الأخضر في أول الصفحة بيوديك لنتايجك.' },
   { sel: '#ntw', t: 'الإشعارات 🔔', x: 'فعّل الإشعارات من هنا عشان يجيلك تنبيه على الموبايل لما ينزل امتحان أو رسالة أو نتيجة جديدة.' },
   { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'مذكرات وروابط ومراجع الدكتور بتلاقيها هنا.' },
   { t: 'جاهز! 🎓', x: 'بالتوفيق. لو احتجت الشرح ده تاني اضغط "❓ شرح المنصة" في آخر صفحة الامتحانات.' }];
@@ -2742,9 +2829,8 @@ const TOUR_TEACHER = [
   { t: 'أهلاً يا دكتور 👋', x: 'جولة سريعة على أهم حاجات اللوحة. تقدر تتخطاها وتعيدها من الإعدادات.' },
   { sel: '.nav a[data-t=exams]', t: 'الامتحانات', x: 'اضغط "امتحان جديد": اكتب العنوان والمدة، واستورد الأسئلة من PDF أو نص، أو اختار من بنك الأسئلة. الخيارات الإضافية (الموعد، المجموعة، ظهور النتيجة) في قوائم مطوية. زر الحفظ ثابت تحت.' },
   { sel: '.nav a[data-t=exams]', t: 'النتائج والنشر', x: 'من كارت كل امتحان: "النتائج" فيها الدرجات ومتابعة الخروج والتصوير، وتصحيح المقالي، ونشر النتايج للطلاب، ووقت إضافي لطالب، وتصدير Excel.' },
-  { sel: '.nav a[data-t=students]', t: 'الطلاب', x: 'أضف طلاب (كود لكل طالب)، افتح التسجيل الذاتي، حدد المجموعات، وانسخ رابط الطلاب. وفيه زر "الترتيب" للتحكم في ظهوره للطلاب.' },
-  { sel: 'a[href="#teacher/class"]', t: 'تقرير الفصل 📊', x: 'مقارنة الامتحانات، أكتر الأسئلة غلطًا، الأبواب الأضعف، والطلاب المحتاجين متابعة.' },
-  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة). تقدر تحذف أي رسالة بزر 🗑.' },
+  { sel: '.nav a[data-t=students]', t: 'الطلاب', x: 'أضف طلاب (كود لكل طالب)، افتح التسجيل الذاتي، حدد المجموعات، وانسخ رابط الطلاب. وفيه زر "الترتيب" للتحكم في ظهوره للطلاب، وزر "تقرير الفصل" (مقارنة الامتحانات، أكتر الأسئلة غلطًا، الطلاب المحتاجين متابعة). الأكواد الجديدة أرقام سهلة الحفظ افتراضيًا.' },
+  { sel: '.nav a[data-t=chat]', t: 'التواصل', x: 'ارد على رسايل الطلاب، أو ابعت لطالب أو مجموعة أو كل الطلاب (نص أو صورة). تقدر تحذف أي رسالة أو محادثة بزر 🗑، وتمنع طالب أو مجموعة من الكتابة.' },
   { sel: '.nav a[data-t=files]', t: 'الملفات', x: 'شارك روابط وملفات (حتى 25 ميجا) مع الطلاب.' },
   { sel: '.nav a[data-t=settings]', t: 'الإعدادات', x: 'المجموعات وأبواب كل مادة، الإشعارات، الدخول بالبصمة، والنسخة الاحتياطية (يدوية أو تلقائية). احتفظ بالنسخ على Google Drive.' },
   { t: 'تمام ✅', x: 'النقط الحمرا والنبض على أي تبويب معناها فيه جديد (طالب سلّم، رسالة، طلب تسجيل). بالتوفيق!' }];
@@ -2783,10 +2869,19 @@ function maybeStudentTour(ses) { setTimeout(() => { if (!document.querySelector(
 function maybeTeacherTour() { setTimeout(() => { if (!document.querySelector('.nav a[data-t=exams]')) return; if (!ls.get('tour_t') && ls.get('tour_off') !== '1') runTour(TOUR_TEACHER, 'tour_t'); else maybeWhatsNew('t', 'tour_t'); }, 700); }
 /* ========= ما الجديد (بيظهر مرة واحدة بعد كل تحديث) =========
    لما تضيف ميزة جديدة: ارفع APP_VER وضيف عنصر في أول WHATS_NEW (r: 's' للطالب، 't' للدكتور، '' للاتنين). */
-const APP_VER = 10;
+const APP_VER = 12;
 const WHATS_NEW = [
+  { v: 12, d: 'نوفمبر 2026 (3)', items: [
+    { r: 's', t: '🔐 الدخول بالبصمة: فعّلها من آخر صفحة الامتحانات وادخل من غير ما تكتب الكود.' },
+    { r: 's', t: '👆 اضغط على الكارت الأخضر (أهلاً + اسمك) عشان تروح لنتايجك.' }] },
+  { v: 11, d: 'نوفمبر 2026 (2)', items: [
+    { r: 't', t: '🚫 تحكم في السماح بالتواصل: تمنع أو تسمح لطالب أو مجموعة أو الكل (من تبويب التواصل).' },
+    { r: 't', t: '🗑 حذف محادثة كاملة (لطالب أو لمجموعة أو للكل)، وحذف الطالب بيحذف محادثته معاه.' },
+    { r: 't', t: '🔢 أكواد الطلاب الجديدة: أرقام بنمط سهل الحفظ افتراضيًا، والحروف مشتقة من اسم الطالب، وخيار حروف كبيرة/صغيرة/مختلطة.' },
+    { r: 't', t: '📊 تقرير الفصل اتنقل لتبويب الطلاب جنب الترتيب.' },
+    { r: 's', t: '💬 لو الدكتور قفل التواصل هتقدر تقرا الرسايل بس.' }] },
   { v: 10, d: 'نوفمبر 2026', items: [
-    { r: 't', t: '📊 تقرير الفصل: مقارنة الامتحانات، أكتر الأسئلة غلطًا، الأبواب الأضعف، والطلاب المحتاجين متابعة (من صفحة الامتحانات).' },
+    { r: 't', t: '📊 تقرير الفصل: مقارنة الامتحانات، أكتر الأسئلة غلطًا، الأبواب الأضعف، والطلاب المحتاجين متابعة (من تبويب الطلاب).' },
     { r: 't', t: '💾 نسخة احتياطية تلقائية بتتنزل لوحدها كل فترة تحددها (من الإعدادات).' },
     { r: '', t: '🔔 إشعارات على الموبايل لما يكون فيه جديد (فعّلها من آخر صفحة الامتحانات للطالب، ومن الإعدادات للدكتور).' },
     { r: 't', t: '📎 رفع ملفات حتى 25 ميجا بدل 5.' },
